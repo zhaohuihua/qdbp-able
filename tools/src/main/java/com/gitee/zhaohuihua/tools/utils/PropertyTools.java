@@ -17,10 +17,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.gitee.zhaohuihua.core.beans.KeyString;
 import com.gitee.zhaohuihua.core.beans.KeyValue;
 import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
@@ -258,7 +256,7 @@ public abstract class PropertyTools {
         return entries;
     }
 
-    public static String getRealValue(Properties properties, String key, boolean warning) {
+    private static String getRealValue(Properties properties, String key, boolean warning) {
         Object value = properties.get(key);
         if (value == null) {
             if (warning) {
@@ -309,18 +307,40 @@ public abstract class PropertyTools {
         }
     }
 
+    public static Properties load(String path, String encoding, Class<?>... classpaths) {
+        return load(new String[] { path }, encoding, null, classpaths);
+    }
+
+    public static Properties load(String path, String encoding, Filter... filters) {
+        return load(new String[] { path }, encoding, filters, null);
+    }
+
+    public static Properties load(String path, Options options) {
+        return load(new String[] { path }, options);
+    }
+
+    public static Properties load(String[] paths, Options options) {
+        String encoding = options == null ? null : options.getEncoding();
+        Filter[] filters = options == null ? null : options.getFilters();
+        Class<?>[] classpaths = options == null ? null : options.getClasspaths();
+        return load(paths, encoding, filters, classpaths);
+    }
+
+    private static Properties load(String[] paths, String encoding, Filter[] filters, Class<?>[] classpaths) {
+        URL[] urls = findResource(paths, classpaths);
+        return load(urls, encoding, filters, classpaths);
+    }
+
+    public static Properties load(URL url, String encoding, Class<?>... classpaths) {
+        return load(new URL[] { url }, encoding, null, classpaths);
+    }
+
     public static Properties load(URL url, String encoding, Filter... filters) {
         return load(new URL[] { url }, encoding, filters, null);
     }
 
     public static Properties load(URL url, Options options) {
         return load(new URL[] { url }, options);
-    }
-
-    public static Properties load(String[] paths, Options options) {
-        Class<?>[] classpaths = options == null ? null : options.getClasspaths();
-        URL[] urls = toUrls(paths, classpaths);
-        return load(urls, options);
     }
 
     public static Properties load(URL[] urls, Options options) {
@@ -450,7 +470,7 @@ public abstract class PropertyTools {
         }
     }
 
-    private static URL[] toUrls(String[] paths, Class<?>[] classpaths) {
+    private static URL[] findResource(String[] paths, Class<?>[] classpaths) {
         URL[] urls = new URL[paths.length];
         for (int i = 0; i < paths.length; i++) {
             urls[i] = PathTools.findResource(paths[i], classpaths);
