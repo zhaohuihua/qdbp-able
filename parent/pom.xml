@@ -38,8 +38,8 @@
 	</properties>
 
 	<scm>
-        <connection>scm:git:https://gitee.com/zhaohuihua/zhh-base.git/parent/</connection>
-        <developerConnection>scm:git:https://gitee.com/zhaohuihua/zhh-base.git/parent/</developerConnection>
+        <connection>scm:git:https://gitee.com/zhaohuihua/zhh-base.git</connection>
+        <developerConnection>scm:git:https://gitee.com/zhaohuihua/zhh-base.git</developerConnection>
         <url>https://gitee.com/zhaohuihua/zhh-base.git</url>
         <tag>HEAD</tag>
     </scm>
