@@ -28,7 +28,7 @@ import com.gitee.zhaohuihua.tools.utils.StringTools;
 
 public class HttpExecutorTest extends HttpExecutor {
 
-    private static final URL PATH = PathTools.findResource("cttq.cfg", HttpExecutorTest.class);
+    private static final URL PATH = PathTools.findResource("settings/http/cttq.txt", HttpExecutorTest.class);
 
     public HttpExecutorTest() {
         super(new HostUrlConfig(PATH, "cttq.cim.host"), new JsonTools(), new CttqHttpHandler());
