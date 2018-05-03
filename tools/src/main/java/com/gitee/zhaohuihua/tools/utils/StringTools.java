@@ -183,8 +183,8 @@ public abstract class StringTools {
     /**
      * 拆分字符串, 以竖杠|为分隔符<br>
      * 每一个子字符串都已经trim()过了<br>
-     * "aa|bb|cc" --> [aa, bb, cc]<br>
-     * "aa|bb||cc" --> [aa, bb, , cc]
+     * "aa|bb|cc" --&gt; [aa, bb, cc]<br>
+     * "aa|bb||cc" --&gt; [aa, bb, , cc]
      *
      * @param string 原字符串
      * @return 拆分的字符串数组

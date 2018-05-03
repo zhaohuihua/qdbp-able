@@ -6,12 +6,12 @@ import com.gitee.zhaohuihua.tools.utils.VerifyTools;
  * BCD编码工具<br>
  * BCD码只能用来传输数字<br>
  * 典型的8421码(BigEndian)用法: <br>
- * toBytesOfBigEndian("123456") --> byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
- * toStringOfBigEndian(byte[(byte)0x12, (byte)0x34, (byte)0x56]) --> "123456"<br>
- * toLongOfBigEndian(byte[(byte)0x12, (byte)0x34, (byte)0x56]) --> 123456<br>
+ * toBytesOfBigEndian("123456") --&gt; byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
+ * toStringOfBigEndian(byte[(byte)0x12, (byte)0x34, (byte)0x56]) --&gt; "123456"<br>
+ * toLongOfBigEndian(byte[(byte)0x12, (byte)0x34, (byte)0x56]) --&gt; 123456<br>
  * <br>
- * BigEndian: 0x4200 --> 4200, 按高位优先的顺序存储字(最低位字节存储在最高地址)<br>
- * LittleEndian: 0x4200 --> 0042, 按低位优先的顺序存储字(最低位字节存储在最低地址)<br>
+ * BigEndian: 0x4200 --&gt; 4200, 按高位优先的顺序存储字(最低位字节存储在最高地址)<br>
+ * LittleEndian: 0x4200 --&gt; 0042, 按低位优先的顺序存储字(最低位字节存储在最低地址)<br>
  *
  * @author zhaohuihua
  * @version 151107
@@ -20,8 +20,8 @@ public abstract class BcdTools {
 
     /**
      * byte数组按BCD格式转换为数字<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --> 123456<br>
-     * byte[0, 0, (byte)0x08, (byte)0x34, (byte)0x56] --> 83456<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --&gt; 123456<br>
+     * byte[0, 0, (byte)0x08, (byte)0x34, (byte)0x56] --&gt; 83456<br>
      *
      * @param bytes
      * @return
@@ -39,8 +39,8 @@ public abstract class BcdTools {
 
     /**
      * byte数组按BCD格式转换为数字<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --> 123456<br>
-     * byte[0, 0, (byte)0x08, (byte)0x34, (byte)0x56] --> 83456<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --&gt; 123456<br>
+     * byte[0, 0, (byte)0x08, (byte)0x34, (byte)0x56] --&gt; 83456<br>
      *
      * @param bytes
      * @return
@@ -51,8 +51,8 @@ public abstract class BcdTools {
 
     /**
      * byte数组转换为BCD字符串(前置的0将被清除)<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --> "123456"<br>
-     * byte[0, 0, (byte)0x08, (byte)0x34, (byte)0x56] --> "083456"<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --&gt; "123456"<br>
+     * byte[0, 0, (byte)0x08, (byte)0x34, (byte)0x56] --&gt; "083456"<br>
      *
      * @param bytes
      * @return
@@ -63,10 +63,10 @@ public abstract class BcdTools {
 
     /**
      * byte数组转换为BCD格式字符串<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --> "123456"<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56] --&gt; "123456"<br>
      * byte[0, 0, (byte)0x08, (byte)0x34, (byte)0x56]<br>
-     * clearUselessZero=false --> "0000083456"<br>
-     * clearUselessZero=true --> "083456"
+     * clearUselessZero=false --&gt; "0000083456"<br>
+     * clearUselessZero=true --&gt; "083456"
      *
      * @param bytes
      * @param clearUselessZero 是否清除前置的0
@@ -93,7 +93,7 @@ public abstract class BcdTools {
 
     /**
      * 数字型字形串按BCD编码转换为byte数组<br>
-     * "123456" --> byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
+     * "123456" --&gt; byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
      *
      * @param bytes
      * @return
@@ -104,9 +104,9 @@ public abstract class BcdTools {
 
     /**
      * 数字型字形串按BCD编码转换为byte数组<br>
-     * ("123456", 0) --> byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
-     * ("123456", 5) --> byte[0, 0, (byte)0x12, (byte)0x34, (byte)0x56]<br>
-     * ("12345678", 3) --> byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
+     * ("123456", 0) --&gt; byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
+     * ("123456", 5) --&gt; byte[0, 0, (byte)0x12, (byte)0x34, (byte)0x56]<br>
+     * ("12345678", 3) --&gt; byte[(byte)0x12, (byte)0x34, (byte)0x56]<br>
      *
      * @param number 数字型字形串
      * @param length 填充为多少byte位, 不足该长度时低位补0, 超过该长度时忽略超长部分
@@ -137,8 +137,8 @@ public abstract class BcdTools {
 
     /**
      * byte数组按BCD格式转换为数字<br>
-     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --> 123456<br>
-     * byte[(byte)0x56, (byte)0x34, (byte)0x08, 0, 0] --> 83456<br>
+     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --&gt; 123456<br>
+     * byte[(byte)0x56, (byte)0x34, (byte)0x08, 0, 0] --&gt; 83456<br>
      *
      * @param bytes
      * @return
@@ -149,8 +149,8 @@ public abstract class BcdTools {
 
     /**
      * byte数组按BCD格式转换为数字<br>
-     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --> 123456<br>
-     * byte[(byte)0x56, (byte)0x34, (byte)0x08, 0, 0] --> 83456<br>
+     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --&gt; 123456<br>
+     * byte[(byte)0x56, (byte)0x34, (byte)0x08, 0, 0] --&gt; 83456<br>
      *
      * @param bytes
      * @return
@@ -161,8 +161,8 @@ public abstract class BcdTools {
 
     /**
      * byte数组转换为BCD字符串(前置的0将被清除)<br>
-     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --> "123456"<br>
-     * byte[(byte)0x56, (byte)0x34, (byte)0x08, 0, 0] --> "083456"<br>
+     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --&gt; "123456"<br>
+     * byte[(byte)0x56, (byte)0x34, (byte)0x08, 0, 0] --&gt; "083456"<br>
      *
      * @param bytes
      * @return
@@ -173,10 +173,10 @@ public abstract class BcdTools {
 
     /**
      * byte数组转换为BCD格式字符串<br>
-     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --> "123456"<br>
+     * byte[(byte)0x56, (byte)0x34, (byte)0x12] --&gt; "123456"<br>
      * byte[(byte)0x56, (byte)0x34, (byte)0x08, 0, 0]<br>
-     * clearUselessZero=false --> "0000083456"<br>
-     * clearUselessZero=true --> "083456"<br>
+     * clearUselessZero=false --&gt; "0000083456"<br>
+     * clearUselessZero=true --&gt; "083456"<br>
      *
      * @param bytes
      * @param clearUselessZero 是否清除前置的0
@@ -191,7 +191,7 @@ public abstract class BcdTools {
 
     /**
      * 数字型字形串按BCD编码转换为byte数组<br>
-     * "123456" --> byte[(byte)0x56, (byte)0x34, (byte)0x12]<br>
+     * "123456" --&gt; byte[(byte)0x56, (byte)0x34, (byte)0x12]<br>
      *
      * @param bytes
      * @return
@@ -202,9 +202,9 @@ public abstract class BcdTools {
 
     /**
      * 数字型字形串按BCD编码转换为byte数组<br>
-     * ("123456", 0) --> byte[(byte)0x56, (byte)0x34, (byte)0x12]<br>
-     * ("123456", 5) --> byte[(byte)0x56, (byte)0x34, (byte)0x12, 0, 0]<br>
-     * ("12345678", 3) --> byte[(byte)0x56, (byte)0x34, (byte)0x12]<br>
+     * ("123456", 0) --&gt; byte[(byte)0x56, (byte)0x34, (byte)0x12]<br>
+     * ("123456", 5) --&gt; byte[(byte)0x56, (byte)0x34, (byte)0x12, 0, 0]<br>
+     * ("12345678", 3) --&gt; byte[(byte)0x56, (byte)0x34, (byte)0x12]<br>
      *
      * @param number 数字型字形串
      * @param length 填充为多少byte位, 不足该长度时高位补0, 超过该长度时忽略超长部分

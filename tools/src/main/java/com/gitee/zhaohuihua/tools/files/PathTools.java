@@ -39,9 +39,9 @@ public abstract class PathTools {
 
     /**
      * 获取文件扩展名<br>
-     * /image/abc.def.png --> .png<br>
-     * /image/abcdef/png --> null<br>
-     * /image/abc.def/png --> null<br>
+     * /image/abc.def.png --&gt; .png<br>
+     * /image/abcdef/png --&gt; null<br>
+     * /image/abc.def/png --&gt; null<br>
      *
      * @param fileName
      * @return
@@ -71,9 +71,9 @@ public abstract class PathTools {
 
     /**
      * 清除文件扩展名<br>
-     * /image/abc.def.png --> /image/abc.def<br>
-     * /image/abcdef/png --> /image/abcdef/png<br>
-     * /image/abc.def/png --> /image/abc.def/png<br>
+     * /image/abc.def.png --&gt; /image/abc.def<br>
+     * /image/abcdef/png --&gt; /image/abcdef/png<br>
+     * /image/abc.def/png --&gt; /image/abc.def/png<br>
      *
      * @param path
      * @return
@@ -93,9 +93,9 @@ public abstract class PathTools {
 
     /**
      * 替换文件扩展名<br>
-     * /image/abc.def.png, .jpg --> /image/abc.def.jpg<br>
-     * /image/abcdef/xxx, .jpg --> /image/abcdef/xxx.jpg<br>
-     * /image/abc.def/xxx, .jpg --> /image/abc.def/xxx.jpg<br>
+     * /image/abc.def.png, .jpg --&gt; /image/abc.def.jpg<br>
+     * /image/abcdef/xxx, .jpg --&gt; /image/abcdef/xxx.jpg<br>
+     * /image/abc.def/xxx, .jpg --&gt; /image/abc.def/xxx.jpg<br>
      *
      * @param path
      * @return

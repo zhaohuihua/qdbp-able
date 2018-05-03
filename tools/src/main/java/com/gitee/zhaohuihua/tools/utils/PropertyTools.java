@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -25,7 +26,18 @@ import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
 import com.gitee.zhaohuihua.tools.files.PathTools;
 
 /**
- * 配置文件工具类
+ * 配置文件工具类<br>
+ * <b>getXxx(properties, key, ...)方法</b><br>
+ * 支持引用其他配置项<br>
+ * key.a = {config:key.b}<br>
+ * <b>load(...)方法</b><br>
+ * 可以通过&lt;&lt;include&gt;&gt;标签导入其他配置文件<br>
+ * &lt;&lt;include&gt;&gt; = rules.txt<br>
+ * &lt;&lt;include.rules&gt;&gt; = rules.txt<br>
+ * &lt;&lt;include.sql&gt;&gt; = ../sql/sql.txt<br>
+ * 有顺序要求的, 可带上序号<br>
+ * &lt;&lt;include.1&gt;&gt; = rules.txt<br>
+ * &lt;&lt;include.2&gt;&gt; = ../sql/sql.txt<br>
  *
  * @author zhaohuihua
  * @version 180424
@@ -49,6 +61,8 @@ public abstract class PropertyTools {
 
     /**
      * 获取String类型的配置项值(已经trim过了)<br>
+     * 支持引用其他配置项<br>
+     * key.a = {config:key.b}<br>
      * 如果值不存在, 将输出警告日志
      *
      * @param key KEY
@@ -59,7 +73,9 @@ public abstract class PropertyTools {
     }
 
     /**
-     * 获取String类型的配置项值(已经trim过了)
+     * 获取String类型的配置项值(已经trim过了)<br>
+     * 支持引用其他配置项<br>
+     * key.a = {config:key.b}<br>
      *
      * @param key KEY
      * @param warning 值不存在时,是否输出警告日志
@@ -307,18 +323,37 @@ public abstract class PropertyTools {
         }
     }
 
+    /**
+     * 加载path指定的配置文件
+     * 
+     * @param path 配置文件路径
+     * @param encoding 文件编码
+     * @param classpaths 查找文件的classpath
+     * @return 配置文件对象
+     */
     public static Properties load(String path, String encoding, Class<?>... classpaths) {
         return load(new String[] { path }, encoding, null, classpaths);
     }
 
-    public static Properties load(String path, String encoding, Filter... filters) {
-        return load(new String[] { path }, encoding, filters, null);
-    }
-
+    /**
+     * 加载path指定的配置文件
+     * 
+     * @param path 配置文件路径
+     * @param options 配置文件选项
+     * @return 配置文件对象
+     */
     public static Properties load(String path, Options options) {
         return load(new String[] { path }, options);
     }
 
+    /**
+     * 加载paths指定的多个配置文件<br>
+     * 多个配置文件按顺序加载, 有相同key的后加载的覆盖先加载的
+     * 
+     * @param paths 配置文件路径
+     * @param options 配置文件选项
+     * @return 配置文件对象
+     */
     public static Properties load(String[] paths, Options options) {
         String encoding = options == null ? null : options.getEncoding();
         Filter[] filters = options == null ? null : options.getFilters();
@@ -331,18 +366,37 @@ public abstract class PropertyTools {
         return load(urls, encoding, filters, classpaths);
     }
 
+    /**
+     * 加载url指定的配置文件
+     * 
+     * @param url 配置文件路径
+     * @param encoding 文件编码
+     * @param classpaths 查找文件的classpath, 用于配置文件的include标签
+     * @return 配置文件对象
+     */
     public static Properties load(URL url, String encoding, Class<?>... classpaths) {
         return load(new URL[] { url }, encoding, null, classpaths);
     }
 
-    public static Properties load(URL url, String encoding, Filter... filters) {
-        return load(new URL[] { url }, encoding, filters, null);
-    }
-
+    /**
+     * 加载url指定的配置文件
+     * 
+     * @param url 配置文件路径
+     * @param options 配置文件选项
+     * @return 配置文件对象
+     */
     public static Properties load(URL url, Options options) {
         return load(new URL[] { url }, options);
     }
 
+    /**
+     * 加载urls指定的多个配置文件<br>
+     * 多个配置文件按顺序加载, 有相同key的后加载的覆盖先加载的
+     * 
+     * @param urls 配置文件路径
+     * @param options 配置文件选项
+     * @return 配置文件对象
+     */
     public static Properties load(URL[] urls, Options options) {
         String encoding = options == null ? null : options.getEncoding();
         Filter[] filters = options == null ? null : options.getFilters();
@@ -361,7 +415,7 @@ public abstract class PropertyTools {
         for (Map.Entry<Object, Object> entry : temp.entrySet()) {
             if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
                 String key = (String) entry.getKey();
-                String value = PropertyTools.getRealValue(temp, key, true);
+                String value = PropertyTools.getString(temp, key, true);
                 if (filters == null || filters.length == 0) {
                     properties.put(key, value);
                 } else {
@@ -478,50 +532,64 @@ public abstract class PropertyTools {
         return urls;
     }
 
+    /** 配置文件内容过滤器 **/
     public static interface Filter {
 
+        /** 过滤操作, 返回null表示丢弃 **/
         KeyString filter(KeyString entry);
     }
 
+    /** 配置文件加载选项 **/
     public static class Options {
 
         private String encoding;
-
         private List<Filter> filters;
         private List<Class<?>> classpaths;
 
+        /** 获取编码格式 **/
         public String getEncoding() {
             return encoding;
         }
 
+        /** 设置编码格式 **/
         public void setEncoding(String encoding) {
             this.encoding = encoding;
         }
 
+        /** 获取过滤器 **/
         public Filter[] getFilters() {
             return filters == null ? null : filters.toArray(new Filter[0]);
         }
 
+        /** 设置过滤器 **/
         public void setFilters(Filter... filters) {
+            Objects.requireNonNull(filters, "filters");
             this.filters = Arrays.asList(filters);
         }
 
+        /** 增加过滤器 **/
         public void addFilter(Filter... filters) {
+            Objects.requireNonNull(filters, "filters");
             if (this.filters == null) {
                 this.filters = new ArrayList<>();
             }
             this.filters.addAll(Arrays.asList(filters));
         }
 
+        /** 获取查找文件位置的classpath **/
         public Class<?>[] getClasspaths() {
             return classpaths == null ? null : classpaths.toArray(new Class<?>[0]);
         }
 
+        /** 设置查找文件位置的classpath **/
         public void setClasspaths(Class<?>... classpaths) {
+            Objects.requireNonNull(classpaths, "classpaths");
             this.classpaths = Arrays.asList(classpaths);
         }
 
+        /** 增加查找文件位置的classpath **/
         public void addClasspath(Class<?>... classpaths) {
+            Objects.requireNonNull(classpaths, "classpaths");
             if (this.classpaths == null) {
                 this.classpaths = new ArrayList<>();
             }

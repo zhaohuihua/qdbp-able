@@ -13,13 +13,13 @@ import com.gitee.zhaohuihua.tools.utils.PropertyTools.Options;
  * 根据文件扩展名决定加载方式, 支持:txt|xml|properties, 其他都按properties处理<br>
  * 支持引用其他配置项<br>
  * key.a = {config:key.b}<br>
- * 可以通过<<include>>标签导入其他配置文件<br>
- * <<include>> = rules.txt<br>
- * <<include.rules>> = rules.txt<br>
- * <<include.sql>> = ../sql/sql.txt<br>
+ * 可以通过&lt;&lt;include&gt;&gt;标签导入其他配置文件<br>
+ * &lt;&lt;include&gt;&gt; = rules.txt<br>
+ * &lt;&lt;include.rules&gt;&gt; = rules.txt<br>
+ * &lt;&lt;include.sql&gt;&gt; = ../sql/sql.txt<br>
  * 有顺序要求的, 可带上序号<br>
- * <<include.1>> = rules.txt<br>
- * <<include.2>> = ../sql/sql.txt<br>
+ * &lt;&lt;include.1&gt;&gt; = rules.txt<br>
+ * &lt;&lt;include.2&gt;&gt; = ../sql/sql.txt<br>
  *
  * @author zhaohuihua
  * @version 140724

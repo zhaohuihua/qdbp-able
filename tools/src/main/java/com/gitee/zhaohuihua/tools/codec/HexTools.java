@@ -12,12 +12,12 @@ public abstract class HexTools {
 
     /**
      * 字符串转换为byte数组<br>
-     * "ABCDEF" --> byte[(byte)0xAB, (byte)0xCD, (byte)0xEF]<br>
-     * "AB CD EF" --> byte[(byte)0xAB, (byte)0xCD, (byte)0xEF]<br>
-     * "123456EF" --> byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF]<br>
-     * "12 34 56 EF" --> byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF]<br>
-     * "0506070F" --> byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF]<br>
-     * "05 06 07 0F" --> byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF]<br>
+     * "ABCDEF" --&gt; byte[(byte)0xAB, (byte)0xCD, (byte)0xEF]<br>
+     * "AB CD EF" --&gt; byte[(byte)0xAB, (byte)0xCD, (byte)0xEF]<br>
+     * "123456EF" --&gt; byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF]<br>
+     * "12 34 56 EF" --&gt; byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF]<br>
+     * "0506070F" --&gt; byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF]<br>
+     * "05 06 07 0F" --&gt; byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF]<br>
      *
      * @param hex
      * @return
@@ -46,9 +46,9 @@ public abstract class HexTools {
 
     /**
      * byte[] 转换为字符串<br>
-     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --> "ABCDEF"<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --> "123456EF"<br>
-     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --> "0506070F"
+     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --&gt; "ABCDEF"<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; "123456EF"<br>
+     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; "0506070F"
      *
      * @param bytes
      * @return
@@ -59,9 +59,9 @@ public abstract class HexTools {
 
     /**
      * byte数组转换为日志字符串<br>
-     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --> "AB CD EF"<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --> "12 34 56 EF"<br>
-     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --> "05 06 07 0F"
+     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --&gt; "AB CD EF"<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; "12 34 56 EF"<br>
+     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; "05 06 07 0F"
      *
      * @param bytes
      * @return
@@ -97,8 +97,8 @@ public abstract class HexTools {
 
     /**
      * byte数字转换为16进制字符串<br>
-     * 0x08 --> "08"<br>
-     * 0xAB --> "AB"<br>
+     * 0x08 --&gt; "08"<br>
+     * 0xAB --&gt; "AB"<br>
      *
      * @param number
      * @return
@@ -112,8 +112,8 @@ public abstract class HexTools {
 
     /**
      * short数字转换为16进制字符串<br>
-     * 0x0008 --> "0008"<br>
-     * 0xABCD --> "ABCD"<br>
+     * 0x0008 --&gt; "0008"<br>
+     * 0xABCD --&gt; "ABCD"<br>
      *
      * @param number
      * @return
@@ -129,8 +129,8 @@ public abstract class HexTools {
 
     /**
      * int数字转换为16进制字符串<br>
-     * 0x00000008 --> "00000008"<br>
-     * 0xABCDEFEF --> "ABCDEFEF"<br>
+     * 0x00000008 --&gt; "00000008"<br>
+     * 0xABCDEFEF --&gt; "ABCDEFEF"<br>
      *
      * @param number
      * @return
@@ -146,8 +146,8 @@ public abstract class HexTools {
 
     /**
      * 数字转换为16进制字符串<br>
-     * 8 --> "08"<br>
-     * 300 = 0x012C --> "012C"<br>
+     * 8 --&gt; "08"<br>
+     * 300 = 0x012C --&gt; "012C"<br>
      *
      * @param number
      * @return
@@ -167,9 +167,9 @@ public abstract class HexTools {
 
     /**
      * byte数组转换为 数字<br>
-     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --> 0xABCDEF<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --> 0x123456EF<br>
-     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --> 0x0506070F
+     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --&gt; 0xABCDEF<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; 0x123456EF<br>
+     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; 0x0506070F
      *
      * @param bytes
      * @return
@@ -185,9 +185,9 @@ public abstract class HexTools {
 
     /**
      * byte数组转换为 数字<br>
-     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --> 0xABCDEF<br>
-     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --> 0x123456EF<br>
-     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --> 0x0506070F
+     * byte[(byte)0xAB, (byte)0xCD, (byte)0xEF] --&gt; 0xABCDEF<br>
+     * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; 0x123456EF<br>
+     * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; 0x0506070F
      *
      * @param bytes
      * @return
