@@ -7,6 +7,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 基础字段容器
+ *
+ * @author zhaohuihua
+ * @version 180503
+ */
 abstract class BaseFields implements Fields, Serializable {
 
     /** 版本序列号 **/

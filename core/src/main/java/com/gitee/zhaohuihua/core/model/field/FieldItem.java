@@ -2,12 +2,20 @@ package com.gitee.zhaohuihua.core.model.field;
 
 import java.io.Serializable;
 
+/**
+ * 字段项
+ *
+ * @author zhaohuihua
+ * @version 180503
+ */
 public class FieldItem implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
+    /** 字段名 **/
     private String name;
+    /** 字段描述 **/
     private String text;
 
     public FieldItem() {
@@ -18,18 +26,22 @@ public class FieldItem implements Serializable {
         this.text = text;
     }
 
+    /** 字段名 **/
     public String getName() {
         return name;
     }
 
+    /** 字段名 **/
     public void setName(String name) {
         this.name = name;
     }
 
+    /** 字段描述 **/
     public String getText() {
         return text;
     }
 
+    /** 字段描述 **/
     public void setText(String text) {
         this.text = text;
     }

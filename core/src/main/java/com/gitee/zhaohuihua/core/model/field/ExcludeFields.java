@@ -1,5 +1,11 @@
 package com.gitee.zhaohuihua.core.model.field;
 
+/**
+ * 排除型字段子集
+ *
+ * @author zhaohuihua
+ * @version 180503
+ */
 class ExcludeFields extends FilterFields {
 
     /** 版本序列号 **/
