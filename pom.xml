@@ -23,8 +23,8 @@
 	</licenses>
 
 	<modules>
-		<module>../tools</module>
-		<module>../core</module>
+		<module>tools</module>
+		<module>core</module>
 	</modules>
 
 	<properties>
