@@ -4,7 +4,7 @@
 
 	<groupId>com.gitee.zhaohuihua</groupId>
 	<artifactId>zhh-parent</artifactId>
-	<version>1.6.1-SNAPSHOT</version>
+	<version>1.6.1</version>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
 	<url>https://gitee.com/zhaohuihua/</url>
@@ -35,7 +35,6 @@
 
 		<spring.version>4.3.16.RELEASE</spring.version>
 		<shiro.version>1.4.0</shiro.version>
-		<zhh.base.version>1.5.1-SNAPSHOT</zhh.base.version>
 	</properties>
 
 	<scm>
@@ -157,12 +156,12 @@
 			<dependency>
 				<groupId>com.gitee.zhaohuihua</groupId>
 				<artifactId>zhh-core</artifactId>
-				<version>${zhh.base.version}</version>
+				<version>1.6.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.gitee.zhaohuihua</groupId>
 				<artifactId>zhh-tools</artifactId>
-				<version>${zhh.base.version}</version>
+				<version>1.6.1</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.alibaba</groupId>
