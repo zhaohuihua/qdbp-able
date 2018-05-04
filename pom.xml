@@ -113,13 +113,67 @@
 		<dependencies>
 			<dependency>
 				<groupId>com.gitee.zhaohuihua</groupId>
-				<artifactId>zhh-tools</artifactId>
+				<artifactId>zhh-core</artifactId>
 				<version>${zhh.base.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.gitee.zhaohuihua</groupId>
-				<artifactId>zhh-core</artifactId>
+				<artifactId>zhh-tools</artifactId>
 				<version>${zhh.base.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.alibaba</groupId>
+						<artifactId>fastjson</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.coobird</groupId>
+						<artifactId>thumbnailator</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.google.zxing</groupId>
+						<artifactId>javase</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.google.zxing</groupId>
+						<artifactId>core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpclient</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpmime</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi-ooxml</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jcl-over-slf4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>log4j-over-slf4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
