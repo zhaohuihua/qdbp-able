@@ -4,7 +4,7 @@
 
 	<groupId>com.gitee.zhaohuihua</groupId>
 	<artifactId>zhh-parent</artifactId>
-	<version>1.6.0</version>
+	<version>1.6.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
 	<url>https://gitee.com/zhaohuihua/</url>
