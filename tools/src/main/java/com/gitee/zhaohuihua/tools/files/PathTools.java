@@ -1,8 +1,12 @@
 package com.gitee.zhaohuihua.tools.files;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -15,7 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
-
 import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
 import com.gitee.zhaohuihua.tools.utils.VerifyTools;
 
@@ -121,6 +124,25 @@ public abstract class PathTools {
         }
     }
 
+    private static ClassLoader getDefaultClassLoader() {
+        ClassLoader cl = null;
+        try {
+            cl = Thread.currentThread().getContextClassLoader();
+        } catch (Throwable ex) {
+            // Cannot access thread context ClassLoader - falling back...
+        }
+        if (cl == null) {
+            // No thread context class loader -> use class loader of this class.
+            // getClassLoader() returning null indicates the bootstrap ClassLoader
+            try {
+                cl = ClassLoader.getSystemClassLoader();
+            } catch (Throwable ex) {
+                // Cannot access system ClassLoader - oh well, maybe the caller can live with null...
+            }
+        }
+        return cl;
+    }
+
     /**
      * 解析资源路径<br>
      * 未指定前缀的绝对路径一律解析为file<br>
@@ -211,26 +233,32 @@ public abstract class PathTools {
 
         Set<String> locations = new LinkedHashSet<>();
         ClassLoader cl = getDefaultClassLoader();
-        String temp = concat(".", path); // 通过ClassLoader获取, 如果路径是/开头的, 会获取失败
-        URL url = cl != null ? cl.getResource(temp) : ClassLoader.getSystemResource(temp);
-        if (url == null) {
-            URL root = cl != null ? cl.getResource("") : ClassLoader.getSystemResource("");
-            locations.add(toUriPath(resolve(root, temp)));
-            for (Class<?> clazz : VerifyTools.nvl(classes, new Class<?>[0])) {
-                url = clazz.getResource(path);
-                if (url != null) {
-                    break;
-                } else {
-                    locations.add(getClassResourceRealPath(clazz, path));
-                }
+        String temp = path;
+        if (path.startsWith("/") || path.startsWith("\\")) {
+            temp = "." + path; // 通过ClassLoader获取, 如果路径是/开头的, 会获取失败
+        }
+        URL resource = cl != null ? cl.getResource(temp) : ClassLoader.getSystemResource(temp);
+        if (resource != null) {
+            return resource;
+        }
+
+        URL root = cl != null ? cl.getResource("") : ClassLoader.getSystemResource("");
+        locations.add(toUriPath(resolve(root, temp)));
+        for (Class<?> clazz : VerifyTools.nvl(classes, new Class<?>[0])) {
+            // URL url = clazz.getResource(temp); // jar包不在classpath下时会获取失败
+            String classResourcePath = getClassResourceRealPath(clazz, temp);
+            URL url = toUrlInstance(classResourcePath);
+            try {
+                checkConnect(url);
+                return url;
+            } catch (ResourceNotFoundException e) {
+                locations.add(toUriPath(url));
+                continue;
             }
         }
-        if (url != null) {
-            return url;
-        } else {
-            String desc = "Resource location [" + path + "]";
-            throw new ResourceNotFoundException(desc + " does not found. Found in " + locations);
-        }
+
+        String desc = "Resource location [" + path + "]";
+        throw new ResourceNotFoundException(desc + " does not found. Found in " + locations);
     }
 
     // 检查资源是否存在
@@ -442,7 +470,6 @@ public abstract class PathTools {
 
             // com.xxx.abc.Test.class, mmm/nnn.txt --> com/xxx/abc/mmm/nnn.txt
             String temp = resolveClassPath(clazz, path);
-            temp = concat(".", temp); // 通过ClassLoader获取, 如果路径是/开头的, 会获取失败
             URL newurl = findClasspathResource(temp, clazz);
             return newurl;
         } else if (prefix.equals(CLASSPATH_URL_PREFIX)) {
@@ -461,52 +488,59 @@ public abstract class PathTools {
 
     }
 
-    // 计算路径相对于class的实际路径
+    /** 计算路径相对于class的实际路径 **/
+    // clazz.getClassLoader().getResource("");
+    // -- ClassLoader空路径取到的文件夹, 是当前环境classpath, 而不是clazz的classpath
+    // clazz.getResource("");
+    // -- 在jar(zip)体系中:文件是文件,文件夹是文件夹,很多开源的jar包并没有把文件夹打进去, 会返回null的
+    // -- 解决办法就是用clazz.getResource(clazz.getSimpleName() + ".class")来clazz所在的路径
+    // -- see https://blog.csdn.net/sunyujia/article/details/2957481
+    // 假定:
+    // -- clazz = com.package.SimpleName, path = settings/xxx.txt
+    // A -- clazz位于D:/path/file.jar
+    // B -- clazz位于D:/path/classpath/
     private static String getClassResourceRealPath(Class<?> clazz, String path) {
-        // clazz.getClassLoader().getResource(""); // 空路径取到的文件夹, 是当前classpath, 而不是clazz的classpath
-        String current = toUriPath(clazz.getResource("")); // clazz的文件夹
-        // 替换掉clazz的类路径的部分, 回到根文件夹
-        String folder = current.replace(resolveClassPath(clazz, ""), "");
+        // 当前类的文件名
+        // -- SimpleName.class
+        String simpleName = clazz.getSimpleName() + ".class";
+        // 当前class的路径
+        // A -- jar:file:/D:/path/file.jar!/com/package/SimpleName.class
+        // B -- file:/D:/path/classpath/com/package/SimpleName.class
+        String fullPath = clazz.getResource(simpleName).toString();
+        // 当前类的全名
+        // -- com.package.SimpleName.class
+        String fullName = clazz.getName() + ".class";
+        // 去掉clazz的类路径的部分, 回到根文件夹
+        // A -- jar:file:/D:/path/file.jar!/
+        // B -- file:/D:/path/classpath/
+        String folder = fullPath.substring(0, fullPath.length() - fullName.length());
         // 再加上资源文件相对于类文件的路径
-        return concat(true, folder, path);
+        // A -- jar:file:/D:/path/file.jar!/settings/xxx.txt
+        // B -- file:/D:/path/classpath/settings/xxx.txt
+        return concat(folder, formatPath(path));
     }
 
-    private static ClassLoader getDefaultClassLoader() {
-        ClassLoader cl = null;
-        try {
-            cl = Thread.currentThread().getContextClassLoader();
-        } catch (Throwable ex) {
-            // Cannot access thread context ClassLoader - falling back...
-        }
-        if (cl == null) {
-            // No thread context class loader -> use class loader of this class.
-            // getClassLoader() returning null indicates the bootstrap ClassLoader
-            try {
-                cl = ClassLoader.getSystemClassLoader();
-            } catch (Throwable ex) {
-                // Cannot access system ClassLoader - oh well, maybe the caller can live with null...
-            }
-        }
-        return cl;
-    }
-
-    /** url.toString()对于中文/空格等显示的转义后的%开头的字符, 需要将url显示出来的时候都应该调这个方法 **/
+    /** url.toString()对于空格会显示为%20, 需要将url转换为文件路径或将url显示出来的时候都应该调这个方法 **/
+    // 中文没有问题, 只是空格需要转换
+    // URL url = new File("D:/abc def/中文.txt").toURI().toURL();
+    // url.toString() --> url.toURI().toString() --> file:/D:/abc%20def/中文.txt
+    // url.toURI().getPath() --> /D:/abc def/中文.txt
     public static String toUriPath(URL url) {
-        try {
-            // url.getPath(), 文件路径中有空格的话会出问题, 被替换为%20
-            // url.toURI(), 支持文件路径中有空格的情况
-            if ("file".equalsIgnoreCase(url.getProtocol())) {
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
+            try {
+                // url.toString(), url.getPath(), 文件路径中有空格会显示为%20
+                // url.toURI().getPath(), 支持文件路径中有空格的情况
                 String p = url.toURI().getPath();
                 if ((p.length() > 2) && (p.charAt(2) == ':')) {
                     // "/c:/foo/" --> "c:/foo/"
                     p = p.substring(1);
                 }
                 return p;
-            } else {
-                return url.toURI().toString();
+            } catch (URISyntaxException e) {
+                return url.toString();
             }
-        } catch (URISyntaxException e) {
-            return url.toString();
+        } else {
+            return url.toString(); // url.toURI().toString();
         }
     }
 
@@ -755,6 +789,105 @@ public abstract class PathTools {
         }
         // nnn.txt
         return false;
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @return 文件内容
+     * @throws IOException 失败
+     */
+    public static byte[] download(String url) throws IOException {
+        return download(new URL(url));
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @return 文件内容
+     * @throws IOException 失败
+     */
+    public static byte[] download(URL url) throws IOException {
+        try (InputStream input = url.openStream(); ByteArrayOutputStream output = new ByteArrayOutputStream();) {
+            // Files.copy不支持HTTP协议
+            // Files.copy(Paths.get(URI.create(url)), output);
+            FileTools.copy(input, output);
+            return output.toByteArray();
+        }
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @return 文件内容
+     * @throws IOException 失败
+     */
+    public static String downloadString(String url) throws IOException {
+        return downloadString(url, "UTF-8");
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @param charset 字符编码格式
+     * @return 文件内容
+     * @throws IOException 失败
+     */
+    public static String downloadString(String url, String charset) throws IOException {
+        return new String(download(url), charset);
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @return 文件内容
+     * @throws IOException 失败
+     */
+    public static String downloadString(URL url) throws IOException {
+        return downloadString(url, "UTF-8");
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @param charset 字符编码格式
+     * @return 文件内容
+     * @throws IOException 失败
+     */
+    public static String downloadString(URL url, String charset) throws IOException {
+        return new String(download(url), charset);
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @param saveAs 保存的文件路径
+     * @throws IOException 失败
+     */
+    public static void downloadSave(String url, String saveAs) throws IOException {
+        downloadSave(new URL(url), saveAs);
+    }
+
+    /**
+     * 通过网络下载文件
+     *
+     * @param url URL
+     * @param saveAs 保存的文件路径
+     * @throws IOException 失败
+     */
+    public static void downloadSave(URL url, String saveAs) throws IOException {
+        try (InputStream input = url.openStream(); OutputStream output = new FileOutputStream(new File(saveAs))) {
+            // Files.copy不支持HTTP协议
+            // Files.copy(Paths.get(URI.create(url)), output);
+            FileTools.copy(input, output);
+        }
     }
 
     /** 资源信息类 **/

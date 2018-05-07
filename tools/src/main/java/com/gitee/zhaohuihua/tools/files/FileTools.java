@@ -1,23 +1,18 @@
 package com.gitee.zhaohuihua.tools.files;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
 
 /**
@@ -30,62 +25,6 @@ public abstract class FileTools {
 
     /** 日志对象 **/
     private static final Logger log = LoggerFactory.getLogger(FileTools.class);
-
-    /**
-     * 通过网络下载文件
-     *
-     * @param url URL
-     * @return 文件内容
-     * @throws IOException 失败
-     */
-    public static byte[] download(String url) throws IOException {
-        try (InputStream input = new URL(url).openStream();
-                ByteArrayOutputStream output = new ByteArrayOutputStream();) {
-            // Files.copy不支持HTTP协议
-            // Files.copy(Paths.get(URI.create(url)), output);
-            copy(input, output);
-            return output.toByteArray();
-        }
-    }
-
-    /**
-     * 通过网络下载文件
-     *
-     * @param url URL
-     * @return 文件内容
-     * @throws IOException 失败
-     */
-    public static String downloadString(String url) throws IOException {
-        return downloadString(url, "UTF-8");
-    }
-
-    /**
-     * 通过网络下载文件
-     *
-     * @param url URL
-     * @param charset 字符编码格式
-     * @return 文件内容
-     * @throws IOException 失败
-     */
-    public static String downloadString(String url, String charset) throws IOException {
-        return new String(download(url), charset);
-    }
-
-    /**
-     * 通过网络下载文件
-     *
-     * @param url URL
-     * @param saveAs 保存的文件路径
-     * @throws IOException 失败
-     */
-    public static void downloadSave(String url, String saveAs) throws IOException {
-        try (InputStream input = new URL(url).openStream();
-                OutputStream output = new FileOutputStream(new File(saveAs))) {
-            // Files.copy不支持HTTP协议
-            // Files.copy(Paths.get(URI.create(url)), output);
-            copy(input, output);
-        }
-    }
 
     public static void copy(InputStream input, OutputStream output) throws IOException {
         int length;

@@ -51,7 +51,7 @@ public class PageList<T> implements Iterable<T>, Serializable {
         return this.list.remove(item);
     }
 
-    public boolean removeAll(Collection<T> items) {
+    public boolean removeAll(Collection<?> items) {
         return this.list.removeAll(items);
     }
 
@@ -59,7 +59,7 @@ public class PageList<T> implements Iterable<T>, Serializable {
         return this.list.contains(item);
     }
 
-    public boolean retainAll(Collection<T> items) {
+    public boolean retainAll(Collection<?> items) {
         return this.list.retainAll(items);
     }
 
@@ -89,13 +89,17 @@ public class PageList<T> implements Iterable<T>, Serializable {
         }
     }
 
+    public T set(int index, T element) {
+        return this.list.set(index, element);
+    }
+
     /** 获取列表 **/
     public Collection<T> getList() {
         return list;
     }
 
     /** 设置列表 **/
-    public void setList(Collection<T> list) {
+    public <C extends T> void setList(Collection<C> list) {
         if (list == null) {
             this.list = new ArrayList<>();
         } else {
@@ -123,7 +127,7 @@ public class PageList<T> implements Iterable<T>, Serializable {
     }
 
     /** Collection转PageList **/
-    public static <T> PageList<T> of(Collection<T> list) {
+    public static <T, C extends T> PageList<T> of(Collection<C> list) {
         if (list == null) {
             return null;
         } else {

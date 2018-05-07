@@ -7,17 +7,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.zhaohuihua.core.beans.KeyString;
+import ognl.Ognl;
+import ognl.OgnlException;
 
 /**
  * 格式转换工个
@@ -124,29 +127,182 @@ public abstract class ConvertTools {
         }
 
         value = value.trim();
-        if (StringTools.isDigit(value)) {
-            return Long.valueOf(value);
-        }
 
-        if (value.contains("*")) {
+        if (!value.contains("*")) {
+            return Long.parseLong(value);
+        } else {
             Pattern ptn = Pattern.compile("\\*");
             String[] values = ptn.split(value);
             long number = 1;
-            boolean success = true;
             for (String string : values) {
                 string = string.trim();
-                if (VerifyTools.isNotBlank(string) && StringTools.isDigit(string)) {
-                    number *= Long.valueOf(string);
-                } else {
-                    success = false;
+                try {
+                    number *= Long.parseLong(string);
+                } catch (NumberFormatException e) {
+                    throw new NumberFormatException(value);
                 }
             }
-            if (success) {
-                return number;
-            }
+            return number;
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static int parseIntegerExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
         }
 
-        throw new NumberFormatException(value);
+        expression = expression.trim();
+
+        try {
+            return Integer.parseInt(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).intValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static long parseLongExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
+        }
+
+        expression = expression.trim();
+
+        try {
+            return Long.parseLong(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).longValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static float parseFloatExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
+        }
+
+        expression = expression.trim();
+
+        try {
+            return Float.parseFloat(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).floatValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static double parseDoubleExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
+        }
+
+        expression = expression.trim();
+
+        try {
+            return Double.parseDouble(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).doubleValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析Boolean表达式
+     * 
+     * @param expression 表达式, 支持运算符
+     * @return 解析结果
+     * @throws IllegalArgumentException 表达式格式错误
+     */
+    public static boolean parseBooleanExpression(String expression) throws IllegalArgumentException {
+        if (expression == null) {
+            throw new IllegalArgumentException("null");
+        }
+
+        expression = expression.trim();
+
+        if (StringTools.isPositive(expression, false)) {
+            return true;
+        } else if (StringTools.isNegative(expression, false)) {
+            return false;
+        } else {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new IllegalArgumentException(expression);
+            }
+            if (result instanceof Boolean) {
+                return (Boolean) result;
+            } else if (result instanceof Number) {
+                return ((Number) result).doubleValue() != 0;
+            } else {
+                throw new IllegalArgumentException(expression);
+            }
+        }
     }
 
     /**
@@ -251,40 +407,99 @@ public abstract class ConvertTools {
         return string;
     }
 
+    // KB/MB/GB/TB/PB/EB/ZB/YB
+    private static long kibibyte = 1024;
+    private static long mebibyte = kibibyte * kibibyte;
+    private static long gibibyte = mebibyte * kibibyte;
+    private static long tebibyte = gibibyte * kibibyte;
+    private static long pebibyte = tebibyte * kibibyte;
+    private static long exbibyte = pebibyte * kibibyte;
+    private static long zebibyte = exbibyte * kibibyte;
+    private static long yobibyte = zebibyte * kibibyte;
+    private static Map<String, Long> BYTE_UNITS = new HashMap<>();
+    static { // 单位对应的倍数
+        BYTE_UNITS.put("B", 1L);
+        BYTE_UNITS.put("KB", kibibyte);
+        BYTE_UNITS.put("MB", mebibyte);
+        BYTE_UNITS.put("GB", gibibyte);
+        BYTE_UNITS.put("TB", tebibyte);
+        BYTE_UNITS.put("PB", pebibyte);
+        BYTE_UNITS.put("EB", exbibyte);
+        BYTE_UNITS.put("ZB", zebibyte);
+        BYTE_UNITS.put("YB", yobibyte);
+        BYTE_UNITS.put("KiB".toUpperCase(), kibibyte);
+        BYTE_UNITS.put("MiB".toUpperCase(), mebibyte);
+        BYTE_UNITS.put("GiB".toUpperCase(), gibibyte);
+        BYTE_UNITS.put("TiB".toUpperCase(), tebibyte);
+        BYTE_UNITS.put("PiB".toUpperCase(), pebibyte);
+        BYTE_UNITS.put("EiB".toUpperCase(), exbibyte);
+        BYTE_UNITS.put("ZiB".toUpperCase(), zebibyte);
+        BYTE_UNITS.put("YiB".toUpperCase(), yobibyte);
+    }
+
     /**
      * 转换为Byte描述字符串
      *
      * @param size B
-     * @return B/KB/MB/GB/TB/PB
+     * @return B/KB/MB/GB/TB/PB/EB/ZB/YB
      */
-    public static String toByteString(double size) {
-        double kibibyte = 1024.0;
-        double mebibyte = kibibyte * kibibyte;
-        double gibibyte = mebibyte * kibibyte;
-        double tebibyte = gibibyte * kibibyte;
-        double pebibyte = tebibyte * kibibyte;
-        double exbibyte = pebibyte * kibibyte;
-        double zebibyte = exbibyte * kibibyte;
-        double yobibyte = zebibyte * kibibyte;
+    public static String toByteString(long size) {
         DecimalFormat df = new DecimalFormat("0.##");
         if (size < kibibyte) {
             return df.format(size) + "B";
         } else if (size < mebibyte) {
-            return df.format(size / kibibyte) + "KB";
+            return df.format(1.0 * size / kibibyte) + "KB";
         } else if (size < gibibyte) {
-            return df.format(size / mebibyte) + "MB";
+            return df.format(1.0 * size / mebibyte) + "MB";
         } else if (size < tebibyte) {
-            return df.format(size / gibibyte) + "GB";
+            return df.format(1.0 * size / gibibyte) + "GB";
         } else if (size < pebibyte) {
-            return df.format(size / tebibyte) + "TB";
+            return df.format(1.0 * size / tebibyte) + "TB";
         } else if (size < exbibyte) {
-            return df.format(size / pebibyte) + "PB";
+            return df.format(1.0 * size / pebibyte) + "PB";
         } else if (size < zebibyte) {
-            return df.format(size / exbibyte) + "EB";
+            return df.format(1.0 * size / exbibyte) + "EB";
         } else if (size < yobibyte) {
-            return df.format(size / zebibyte) + "ZB";
+            return df.format(1.0 * size / zebibyte) + "ZB";
         } else {
-            return df.format(size / yobibyte) + "YB";
+            return df.format(1.0 * size / yobibyte) + "YB";
+        }
+    }
+
+    /**
+     * 将Byte描述字符串转换字节数
+     *
+     * @param string B/KB/MB/GB/TB/PB/EB/ZB/YB
+     * @return number of bytes
+     */
+    public static long parseByteString(String string) {
+        Objects.requireNonNull(string, "ByteString");
+        // 截取数字和单位
+        String number = string.trim();
+        String unit = null;
+        char[] chars = number.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            int p = chars.length - 1 - i;
+            if (Character.isDigit(chars[p])) {
+                if (i > 0) {
+                    number = string.substring(0, p);
+                    unit = string.substring(p + 1);
+                }
+                break;
+            }
+        }
+        if (VerifyTools.isBlank(number)) {
+            throw new NumberFormatException(string);
+        }
+        // 计算数值
+        if (unit == null) {
+            return Long.parseLong(number);
+        } else {
+            Long rate = BYTE_UNITS.get(unit.toUpperCase());
+            if (rate == null) {
+                throw new NumberFormatException(string);
+            }
+            return Long.parseLong(number) * rate;
         }
     }
 
@@ -356,8 +571,8 @@ public abstract class ConvertTools {
 
     /**
      * 将字符串转换为KeyString对象<br>
-     * valueOf("{'key':1,'value':'冷水'}")<br>
-     * 或: valueOf("{'1':'冷水'}")<br>
+     * toKeyString("{'key':1,'value':'冷水'}")<br>
+     * 或: toKeyString("{'1':'冷水'}")<br>
      *
      * @param text 字符串
      * @return KeyString对象

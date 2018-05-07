@@ -29,7 +29,7 @@ import com.gitee.zhaohuihua.tools.files.PathTools;
  * 配置文件工具类<br>
  * <b>getXxx(properties, key, ...)方法</b><br>
  * 支持引用其他配置项<br>
- * key.a = {config:key.b}<br>
+ * key.a = {property:key.b}<br>
  * <b>load(...)方法</b><br>
  * 可以通过&lt;&lt;include&gt;&gt;标签导入其他配置文件<br>
  * &lt;&lt;include&gt;&gt; = rules.txt<br>
@@ -50,7 +50,7 @@ public abstract class PropertyTools {
     /** 导入其他配置文件 **/
     private static final Pattern INCLUDE = Pattern.compile("^<<(include(\\.\\w+)*)>>$");
     /** 关联配置项的正则表达式(配置项指向另一个配置项) **/
-    private static final Pattern REFERENCED = Pattern.compile("\\{properties\\:(.*?)\\}");
+    private static final Pattern REFERENCED = Pattern.compile("\\{(?:property|config)\\:(.*?)\\}");
 
     /** 默认的文件编码格式 **/
     private static String CHARSET = "UTF-8";
@@ -62,7 +62,7 @@ public abstract class PropertyTools {
     /**
      * 获取String类型的配置项值(已经trim过了)<br>
      * 支持引用其他配置项<br>
-     * key.a = {config:key.b}<br>
+     * key.a = {property:key.b}<br>
      * 如果值不存在, 将输出警告日志
      *
      * @param key KEY
@@ -75,7 +75,7 @@ public abstract class PropertyTools {
     /**
      * 获取String类型的配置项值(已经trim过了)<br>
      * 支持引用其他配置项<br>
-     * key.a = {config:key.b}<br>
+     * key.a = {property:key.b}<br>
      *
      * @param key KEY
      * @param warning 值不存在时,是否输出警告日志
@@ -431,7 +431,7 @@ public abstract class PropertyTools {
         return properties;
     }
 
-    private static void load(Properties config, URL url, String encoding, Class<?>[] classpaths) {
+    private static void load(Properties properties, URL url, String encoding, Class<?>[] classpaths) {
         Properties temp = doLoad(url, encoding);
 
         List<KeyString> includes = new ArrayList<>();
@@ -449,14 +449,14 @@ public abstract class PropertyTools {
             String value = item.getValue();
             try {
                 URL subpath = PathTools.findRelativeResource(url, value, classpaths);
-                load(config, subpath, encoding, classpaths);
+                load(properties, subpath, encoding, classpaths);
             } catch (ResourceNotFoundException e) {
                 String path = PathTools.toUriPath(url);
                 e.prependMessage("Include file not found. Referenced by [" + path + "]" + key + ". ");
                 throw e;
             }
         }
-        config.putAll(temp);
+        properties.putAll(temp);
     }
 
     /** 加载配置文件, 根据文件扩展名决定加载方式, 支持:txt|xml|properties, 其他都按properties处理 **/
@@ -471,31 +471,31 @@ public abstract class PropertyTools {
                     // 加载TXT文件, 不作转义处理, 以便正确读取正则表达式
                     doLoadFromTxt(isr, properties);
                 } catch (IOException e) {
-                    throw new IllegalArgumentException("load properties config error: " + path, e);
+                    throw new IllegalArgumentException("load text properties error: " + path, e);
                 }
             } else if (extension.endsWith(XML)) {
                 try {
                     // 加载XML文件
                     properties.loadFromXML(input);
                 } catch (IOException e) {
-                    throw new IllegalArgumentException("load xml config error: " + path, e);
+                    throw new IllegalArgumentException("load xml properties error: " + path, e);
                 }
             } else {
                 try (InputStreamReader isr = new InputStreamReader(input, charset)) {
                     // 加载属性文件
                     properties.load(isr);
                 } catch (IOException e) {
-                    throw new IllegalArgumentException("load properties config error: " + path, e);
+                    throw new IllegalArgumentException("load properties error: " + path, e);
                 }
             }
             return properties;
         } catch (IOException e) {
-            throw new IllegalArgumentException("load properties config error: " + path, e);
+            throw new IllegalArgumentException("load properties error: " + path, e);
         }
     }
 
     /** 加载TXT文件, 按原文读取,带斜杠的字符不作转义处理 **/
-    private static void doLoadFromTxt(Reader reader, Properties config) throws IOException {
+    private static void doLoadFromTxt(Reader reader, Properties properties) throws IOException {
 
         try (BufferedReader br = new BufferedReader(reader);) {
             String line = null;
@@ -519,7 +519,7 @@ public abstract class PropertyTools {
                     continue; // 没有KEY也没有VALUE
                 }
 
-                config.setProperty(key, value);
+                properties.setProperty(key, value);
             }
         }
     }

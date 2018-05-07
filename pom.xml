@@ -168,6 +168,10 @@
 						<artifactId>fastjson</artifactId>
 					</exclusion>
 					<exclusion>
+						<groupId>ognl</groupId>
+						<artifactId>ognl</artifactId>
+					</exclusion>
+					<exclusion>
 						<groupId>net.coobird</groupId>
 						<artifactId>thumbnailator</artifactId>
 					</exclusion>
