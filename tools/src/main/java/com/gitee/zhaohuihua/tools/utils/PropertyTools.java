@@ -45,7 +45,7 @@ import com.gitee.zhaohuihua.tools.files.PathTools;
 public abstract class PropertyTools {
 
     /** 日志对象 **/
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
+    private static final Logger log = LoggerFactory.getLogger(PropertyTools.class);
 
     /** 导入其他配置文件 **/
     private static final Pattern INCLUDE = Pattern.compile("^<<(include(\\.\\w+)*)>>$");
@@ -176,7 +176,7 @@ public abstract class PropertyTools {
         try {
             return ConvertTools.toLong(value);
         } catch (NumberFormatException e) {
-            log.warn("Config '{}' format error, '{}' can't convert to integer.", key, value);
+            log.warn("Property '{}' format error, '{}' can't convert to integer.", key, value);
             return null;
         }
     }
@@ -276,13 +276,13 @@ public abstract class PropertyTools {
         Object value = properties.get(key);
         if (value == null) {
             if (warning) {
-                log.warn("Config '{}' not found.", key);
+                log.warn("Property '{}' not found.", key);
             }
             return null;
         }
         if (!(value instanceof String)) {
             if (warning) {
-                log.warn("Config '{}' value type is {}.", key, value.getClass().getSimpleName());
+                log.warn("Property '{}' value type is {}.", key, value.getClass().getSimpleName());
             }
             return null;
         }
@@ -306,11 +306,11 @@ public abstract class PropertyTools {
                     if (subvalue instanceof String) {
                         buffer.append(getReferencedValue(properties, subkey, (String) subvalue, keys));
                     } else {
-                        log.warn("Config '{}' referenced object.", subkey);
+                        log.warn("Property '{}' referenced object.", subkey);
                     }
                 } else {
                     // 这里已经明确指向的配置项必须存在, 不需要判断warning
-                    log.warn("Config '{}' not found.", subkey);
+                    log.warn("Property '{}' not found.", subkey);
                 }
             }
             index = matcher.end();

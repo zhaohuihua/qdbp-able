@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public abstract class ConvertTools {
      * @param <C> List内容的类型
      * @return 转换后的数组, 如果list=null则返回null
      */
-    public static <T, C extends T> T[] toArray(List<C> list, Class<T> clazz) {
+    public static <T, C extends T> T[] toArray(Collection<C> list, Class<T> clazz) {
         if (list == null) return null;
 
         int size = list.size();
@@ -57,7 +58,7 @@ public abstract class ConvertTools {
      * @param <C> List内容的类型
      * @return 转换后的数组, 如果list=null则返回T[0]
      */
-    public static <T, C extends T> T[] toArrayIfNullToEmpty(List<C> list, Class<T> clazz) {
+    public static <T, C extends T> T[] toArrayIfNullToEmpty(Collection<C> list, Class<T> clazz) {
         int size = list == null ? 0 : list.size();
         @SuppressWarnings("unchecked")
         T[] copy = clazz == Object[].class ? (T[]) new Object[size] : (T[]) Array.newInstance(clazz, size);
@@ -510,11 +511,32 @@ public abstract class ConvertTools {
      * @param seprator 分隔符, 可为空
      * @return 合并后的字符串
      */
-    public static String joinToString(List<?> list, String seprator) {
+    public static String joinToString(Collection<?> list, String seprator) {
 
         StringBuilder buffer = new StringBuilder();
         if (VerifyTools.isNotBlank(list)) {
             for (Object tmp : list) {
+                if (seprator != null && buffer.length() > 0) {
+                    buffer.append(seprator);
+                }
+                buffer.append(tmp);
+            }
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param array 数组
+     * @param seprator 分隔符, 可为空
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Object[] array, String seprator) {
+
+        StringBuilder buffer = new StringBuilder();
+        if (VerifyTools.isNotBlank(array)) {
+            for (Object tmp : array) {
                 if (seprator != null && buffer.length() > 0) {
                     buffer.append(seprator);
                 }
