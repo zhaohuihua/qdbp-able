@@ -54,7 +54,7 @@ public class ExcelTest {
 
     public static void main(String[] args) {
 
-        URL path = PathTools.findClassResource(ExcelTest.class, "test.cfg");
+        URL path = PathTools.findClassResource(ExcelTest.class, "test.txt");
         URL xlsx = PathTools.findClassResource(ExcelTest.class, "员工信息导入.xlsx");
         System.out.println(path);
         XMetadata metadata = new XMetadata(new Config(path));

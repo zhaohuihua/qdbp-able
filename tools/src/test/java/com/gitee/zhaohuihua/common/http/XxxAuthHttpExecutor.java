@@ -43,7 +43,7 @@ xxx.auth.user.balance  = POST user-center/user/balance.json
  * </pre>
  * 
  * @author zhaohuihua
- * @version V1.0 2017年7月15日
+ * @version 170715
  */
 public class XxxAuthHttpExecutor extends HttpExecutor {
 
@@ -143,7 +143,7 @@ class UserQueryParams {
  * 这是怎么使用HttpExecutor的DEMO
  *
  * @author zhaohuihua
- * @version V1.0 2017年7月15日
+ * @version 170715
  */
 class UserAuthService {
 

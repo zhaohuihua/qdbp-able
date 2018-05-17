@@ -39,7 +39,7 @@ public class CodeTools {
 
     /** 获取上级编号 **/
     public String parent(String code) {
-        return parent(code, length);
+        return parent(code, start, length);
     }
 
     /** 获取前缀编号 **/
@@ -52,6 +52,7 @@ public class CodeTools {
      * 如split("500100220033", 4, true) --&gt; [5001, 50010022, 500100220033]<br>
      * 如果长度不能整除, 多余的部分都给第一级<br>
      * 如split("8500100220033", 4, true) --&gt; [85001, 850010022, 8500100220033]<br>
+     * 如果code长度未达到最小长度, 返回空数组, split("85001", 4, 4, true) --&gt; []<br>
      * 
      * @param code 编号
      * @param length 每一段的长度
@@ -69,6 +70,7 @@ public class CodeTools {
      * 如果长度不能整除, 多余的部分都给第一级<br>
      * 如split("8500100220033", 4, true) --&gt; [85001, 850010022, 8500100220033]<br>
      * 如split("8500100220033", 4, 4, true) --&gt; [850010022, 8500100220033]<br>
+     * 如果code长度未达到最小长度, 返回空数组, split("85001", 4, 4, true) --&gt; []<br>
      * 
      * @param code 编号
      * @param start 开始位置
@@ -78,7 +80,7 @@ public class CodeTools {
      */
     public static List<String> split(String code, int start, int length, boolean self) {
         List<String> list = new ArrayList<>();
-        if (code.length() <= start) {
+        if (code == null || code.length() < start + length) {
             return list;
         }
 
@@ -103,6 +105,24 @@ public class CodeTools {
     }
 
     /**
+     * 获取上级编号<br>
+     * 如parent("500100220033", 4, 4) --&gt; 50010022<br>
+     * 如果长度不能整除, 多余的部分都给第一级<br>
+     * 如parent("8500100220033", 4, 4) --&gt; 850010022<br>
+     * 如果code长度未达到最小长度, 返回空, parent("85001", 4, 4) --&gt; null<br>
+     * 
+     * @param code 编号
+     * @param length 每一段的长度
+     * @return 上级编号
+     */
+    public static String parent(String code, int start, int length) {
+        if (code == null || code.length() < start + length * 2) { // 只有一级
+            return null;
+        }
+        return code.substring(0, code.length() - length);
+    }
+
+    /**
      * 获取顶级编号<br>
      * 如top("500100220033", 4) --&gt; 5001<br>
      * 如果长度不能整除, 多余的部分都给第一级<br>
@@ -114,23 +134,6 @@ public class CodeTools {
      */
     public static String top(String code, int length) {
         return top(code, 0, length);
-    }
-
-    /**
-     * 获取上级编号<br>
-     * 如parent("500100220033", 4) --&gt; 50010022<br>
-     * 如果长度不能整除, 多余的部分都给第一级<br>
-     * 如parent("8500100220033", 4) --&gt; 850010022<br>
-     * 
-     * @param code 编号
-     * @param length 每一段的长度
-     * @return 上级编号
-     */
-    public static String parent(String code, int length) {
-        if (code.length() < length * 2) { // 只有一级
-            return null;
-        }
-        return code.substring(0, code.length() - length);
     }
 
     /**
@@ -147,11 +150,14 @@ public class CodeTools {
      * @return 顶级编号
      */
     public static String top(String code, int start, int length) {
-        if (code.length() < length * 2) { // 只有一级
+        if (code == null || code.length() < start + length) {
+            return null;
+        } else if (code.length() < start + length * 2) { // 只有一级
             return code;
+        } else {
+            int m = code.length() % length; // 除不尽的都分给第一级
+            return code.substring(0, start + m + length);
         }
-        int m = code.length() % length; // 除不尽的都分给第一级
-        return code.substring(0, start + m + length);
     }
 
     /**
@@ -167,12 +173,13 @@ public class CodeTools {
      * @return 前缀编号
      */
     public static String prefix(String code, int start, int length) {
-        if (start == 0) {
+        if (start == 0 || code == null || code.length() < start) {
             return null;
-        } else if (code.length() <= start) {
+        } else if (code.length() == start) {
             return code;
+        } else {
+            int m = code.length() % length; // 除不尽的都分给第一级
+            return code.substring(0, m + start);
         }
-        int m = code.length() % length; // 除不尽的都分给第一级
-        return code.substring(0, m + start);
     }
 }

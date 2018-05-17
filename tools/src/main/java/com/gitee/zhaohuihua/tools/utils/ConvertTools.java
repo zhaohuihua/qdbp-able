@@ -508,6 +508,16 @@ public abstract class ConvertTools {
      * 将数组合并为字符串
      *
      * @param list 数组
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Collection<?> list) {
+        return joinToString(list, ",");
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param list 数组
      * @param seprator 分隔符, 可为空
      * @return 合并后的字符串
      */
@@ -523,6 +533,16 @@ public abstract class ConvertTools {
             }
         }
         return buffer.toString();
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param array 数组
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Object[] array) {
+        return joinToString(array, ",");
     }
 
     /**
