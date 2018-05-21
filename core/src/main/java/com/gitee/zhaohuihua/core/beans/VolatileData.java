@@ -1,7 +1,5 @@
 package com.gitee.zhaohuihua.core.beans;
 
-import java.util.Date;
-
 /**
  * 带有过期时间的数据
  *
