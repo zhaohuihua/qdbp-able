@@ -83,6 +83,7 @@ public class ServiceException extends EditableRuntimeException implements IResul
      * 
      * @param message 错误描述
      */
+    @Override
     public void setMessage(String message) {
         this.message = message;
     }

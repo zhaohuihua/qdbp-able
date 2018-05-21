@@ -33,7 +33,7 @@ public class VolatileData<T> {
     // 设置过期时间(相对时间)
     public VolatileData<T> expire(Long expire) {
         if (expire != null) {
-            this.expireTime = new Date().getTime() + expire;
+            this.expireTime = System.currentTimeMillis() + expire;
         }
         return this;
     }
@@ -45,6 +45,6 @@ public class VolatileData<T> {
     }
 
     public boolean expired() {
-        return this.expireTime == null ? false : this.expireTime < new Date().getTime();
+        return this.expireTime == null ? false : this.expireTime < System.currentTimeMillis();
     }
 }

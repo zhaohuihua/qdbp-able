@@ -6,7 +6,7 @@ package com.gitee.zhaohuihua.core.exception;
  * @author zhaohuihua
  * @version 170624
  */
-public abstract class EditableException extends Exception {
+public class EditableException extends Exception {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -55,6 +55,7 @@ public abstract class EditableException extends Exception {
      * 
      * @return 异常消息
      */
+    @Override
     public String getMessage() {
         return this.message;
     }
@@ -74,7 +75,9 @@ public abstract class EditableException extends Exception {
      * @param message 异常消息
      */
     public void prependMessage(String message) {
-        if (message == null || message.length() == 0) return;
+        if (message == null || message.length() == 0) {
+            return;
+        }
 
         if (this.message == null) {
             this.message = message;
@@ -89,7 +92,9 @@ public abstract class EditableException extends Exception {
      * @param message 异常消息
      */
     public void appendMessage(String message) {
-        if (message == null || message.length() == 0) return;
+        if (message == null || message.length() == 0) {
+            return;
+        }
 
         if (this.message == null) {
             this.message = message;

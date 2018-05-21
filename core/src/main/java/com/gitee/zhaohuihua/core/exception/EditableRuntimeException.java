@@ -55,6 +55,7 @@ public abstract class EditableRuntimeException extends RuntimeException {
      * 
      * @return 异常消息
      */
+    @Override
     public String getMessage() {
         return this.message;
     }

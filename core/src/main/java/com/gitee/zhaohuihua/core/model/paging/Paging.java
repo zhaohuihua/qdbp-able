@@ -230,22 +230,27 @@ public class Paging implements Serializable {
             super(page, rows, skip, paging, needCount);
         }
 
+        @Override
         public void setSkip(Integer skip) {
             throw new UnsupportedOperationException("read only");
         }
 
+        @Override
         public void setRows(Integer rows) {
             throw new UnsupportedOperationException("read only");
         }
 
+        @Override
         public void setPage(Integer page) {
             throw new UnsupportedOperationException("read only");
         }
 
+        @Override
         public void setNeedCount(boolean needCount) {
             throw new UnsupportedOperationException("read only");
         }
 
+        @Override
         public void setPaging(boolean paging) {
             throw new UnsupportedOperationException("read only");
         }
