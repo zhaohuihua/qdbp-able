@@ -67,7 +67,8 @@ public class InMemoryCache extends BaseCache {
     /** {@inheritDoc} **/
     @Override
     public boolean exist(String key, String subkey) {
-        return container.containsKey(key);
+        SimpleItem item = getSimpleItem(key, subkey);
+        return item != null;
     }
 
     /** {@inheritDoc} **/
@@ -91,7 +92,7 @@ public class InMemoryCache extends BaseCache {
     /** {@inheritDoc} **/
     @Override
     public void del(String key, String subkey) {
-        container.remove(key);
+        container.remove(concat(key, subkey));
     }
 
     /** {@inheritDoc} **/

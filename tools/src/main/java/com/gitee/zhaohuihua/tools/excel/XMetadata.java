@@ -23,8 +23,8 @@ import com.gitee.zhaohuihua.tools.utils.VerifyTools;
  * rule.map.areaType = { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }<br>
  * rule.date.createTime = yyyy/MM/dd<br>
  *
- * @author jk 2015-11-25
- * @author zhaohuihua 2016-03-02
+ * @author zhaohuihua
+ * @version 160302
  */
 public class XMetadata implements Serializable {
 

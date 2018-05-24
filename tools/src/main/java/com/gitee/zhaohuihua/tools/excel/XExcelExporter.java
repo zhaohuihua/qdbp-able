@@ -22,8 +22,8 @@ import com.gitee.zhaohuihua.tools.excel.utils.ExcelHelper;
 /**
  * Excel导出
  * 
- * @author jk 2015-11-25
- * @author zhaohuihua 2016-03-07
+ * @author zhaohuihua
+ * @version 160302
  */
 public class XExcelExporter {
 

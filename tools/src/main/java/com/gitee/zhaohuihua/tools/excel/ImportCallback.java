@@ -50,16 +50,6 @@ public abstract class ImportCallback implements IBatchResult, ConvertRule, Seria
         return failed;
     }
 
-    /**
-     * 增加记录总数
-     * 
-     * @deprecated {@link #addTotal(int)}
-     */
-    @Deprecated
-    protected void addTotal() {
-        addTotal(1);
-    }
-
     /** 增加记录总数 **/
     public void addTotal(int number) {
         total += number;
@@ -76,36 +66,12 @@ public abstract class ImportCallback implements IBatchResult, ConvertRule, Seria
         return total;
     }
 
-    /**
-     * 初始化处理逻辑
-     * 
-     * @param metadata 配置数据
-     * @throws ServiceException
-     * @deprecated {@link #init(Workbook, XMetadata)}
-     */
-    @Deprecated
-    public void init(XMetadata metadata) throws ServiceException {
-    }
-
     /** 初始化处理逻辑 **/
     public void init(Workbook workbook, XMetadata metadata) throws ServiceException {
-        init(metadata);
-    }
-
-    /**
-     * 收尾处理逻辑
-     *
-     * @param metadata 配置数据
-     * @throws ServiceException
-     * @deprecated {@link #finish(Workbook, XMetadata)}
-     */
-    @Deprecated
-    public void finish(XMetadata metadata) throws ServiceException {
     }
 
     /** 收尾处理逻辑 **/
     public void finish(Workbook workbook, XMetadata metadata) throws ServiceException {
-        finish(metadata);
     }
 
     /** 开始解析Sheet之前的处理逻辑, 返回false跳过该Sheet **/
