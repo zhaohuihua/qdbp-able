@@ -3,8 +3,8 @@ package com.gitee.zhaohuihua.tools.utils;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -25,6 +25,9 @@ public abstract class StringTools {
 
     /** 邮箱正则表达式 **/
     private static final Pattern EMAIL = Pattern.compile("([-\\.\\w]+)(@)([-\\.\\w]+\\.\\w+)");
+
+    /** 英文字符 **/
+    private static final Pattern ASCII = Pattern.compile("[\\x00-\\xff]+");
 
     /** 网址正则表达式 **/
     private static final Pattern URL = Pattern.compile("^https?://.*");
@@ -556,6 +559,65 @@ public abstract class StringTools {
 
     public static boolean isNotExists(boolean ignoreCase, String string, String... strings) {
         return !isExists(ignoreCase, string, strings);
+    }
+
+    /**
+     * 隐藏手机号码邮箱或名字
+     *
+     * @param text 手机号码邮箱或名字
+     * @return 隐藏后的字符串, 如: 139****1382, zh****ua@126.com, <br>
+     *         黄山-〇山, 昆仑山-〇〇山, 黄山毛峰-〇〇毛峰
+     */
+    public static String hidden(String text) {
+        if (text == null || text.length() == 0) {
+            return text;
+        }
+
+        String ahide = "****";
+        String uhide = "\u3007"; // 〇
+
+        Matcher phone = PHONE.matcher(text);
+        if (phone.matches()) {
+            return phone.group(1) + ahide + phone.group(3);
+        }
+
+        Matcher email = EMAIL.matcher(text);
+        if (email.matches()) {
+            String prefix = email.group(1);
+            String at = email.group(2);
+            String suffix = email.group(3);
+            return hiddenAscii(prefix, ahide) + at + suffix;
+        }
+
+        Matcher ascii = ASCII.matcher(text);
+        if (ascii.matches()) {
+            return hiddenAscii(text, ahide);
+        } else {
+            if (text.length() == 1) {
+                return uhide + text;
+            }
+            if (text.length() == 2) {
+                return uhide + text.substring(text.length() - 1);
+            } else if (text.length() == 3) {
+                return uhide + uhide + text.substring(text.length() - 1);
+            } else if (text.length() == 4) {
+                return uhide + uhide + text.substring(text.length() - 2);
+            } else if (text.length() == 5) {
+                return uhide + uhide + text.substring(text.length() - 3);
+            } else {
+                return uhide + uhide + text.substring(text.length() - 4);
+            }
+        }
+    }
+
+    private static String hiddenAscii(String string, String hide) {
+        if (string.length() >= 4) {
+            return string.substring(0, 2) + hide + string.substring(string.length() - 2);
+        } else if (string.length() >= 2) {
+            return string.substring(0, 1) + hide + string.substring(1);
+        } else {
+            return string + hide + string;
+        }
     }
 
     /**
