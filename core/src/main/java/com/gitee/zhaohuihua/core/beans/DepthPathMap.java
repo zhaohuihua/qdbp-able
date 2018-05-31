@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 /**
@@ -78,4 +80,32 @@ public class DepthPathMap {
         return map;
     }
 
+    public DepthPathMap copy() {
+        DepthPathMap n = new DepthPathMap();
+        n.map.putAll(this.map);
+        return n;
+    }
+
+    /**
+     * 从资源文件中读取所有指定前缀的配置内容
+     * 
+     * @param setting 资源文件
+     * @param prefix 前缀
+     * @return
+     */
+    public static DepthPathMap load(Properties setting, String prefix) {
+
+        if (!prefix.endsWith(".")) {
+            prefix = prefix + ".";
+        }
+
+        DepthPathMap dpm = new DepthPathMap();
+        for (Entry<Object, Object> e : setting.entrySet()) {
+            String key = e.getKey().toString();
+            if (key.startsWith(prefix)) {
+                dpm.put(key.substring(prefix.length()), e.getValue());
+            }
+        }
+        return dpm;
+    }
 }
