@@ -155,27 +155,7 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static int parseIntegerExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Integer.parseInt(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
-            }
-            if (result instanceof Number) {
-                return ((Number) result).intValue();
-            } else {
-                throw new NumberFormatException(expression);
-            }
-        }
+        return ExpressionTools.parseIntegerExpression(expression);
     }
 
     /**
@@ -186,27 +166,7 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static long parseLongExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Long.parseLong(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
-            }
-            if (result instanceof Number) {
-                return ((Number) result).longValue();
-            } else {
-                throw new NumberFormatException(expression);
-            }
-        }
+        return ExpressionTools.parseLongExpression(expression);
     }
 
     /**
@@ -217,27 +177,7 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static float parseFloatExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Float.parseFloat(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
-            }
-            if (result instanceof Number) {
-                return ((Number) result).floatValue();
-            } else {
-                throw new NumberFormatException(expression);
-            }
-        }
+        return ExpressionTools.parseFloatExpression(expression);
     }
 
     /**
@@ -248,27 +188,7 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static double parseDoubleExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Double.parseDouble(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
-            }
-            if (result instanceof Number) {
-                return ((Number) result).doubleValue();
-            } else {
-                throw new NumberFormatException(expression);
-            }
-        }
+        return ExpressionTools.parseDoubleExpression(expression);
     }
 
     /**
@@ -279,31 +199,7 @@ public abstract class ConvertTools {
      * @throws IllegalArgumentException 表达式格式错误
      */
     public static boolean parseBooleanExpression(String expression) throws IllegalArgumentException {
-        if (expression == null) {
-            throw new IllegalArgumentException("null");
-        }
-
-        expression = expression.trim();
-
-        if (StringTools.isPositive(expression, false)) {
-            return true;
-        } else if (StringTools.isNegative(expression, false)) {
-            return false;
-        } else {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                throw new IllegalArgumentException(expression);
-            }
-            if (result instanceof Boolean) {
-                return (Boolean) result;
-            } else if (result instanceof Number) {
-                return ((Number) result).doubleValue() != 0;
-            } else {
-                throw new IllegalArgumentException(expression);
-            }
-        }
+        return ExpressionTools.parseBooleanExpression(expression);
     }
 
     /**
@@ -674,6 +570,174 @@ public abstract class ConvertTools {
                 return new KeyString(key, string);
             }
             throw new IllegalArgumentException("json is empty.");
+        }
+    }
+}
+
+/**
+ * Ognl相关方法单独放在一个类中, 否则调用ConvertTools不涉及Ognl的方法也需要引用ognl.jar
+ *
+ * @author zhaohuihua
+ * @version 180611
+ */
+class ExpressionTools {
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static int parseIntegerExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
+        }
+
+        expression = expression.trim();
+
+        try {
+            return Integer.parseInt(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).intValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static long parseLongExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
+        }
+
+        expression = expression.trim();
+
+        try {
+            return Long.parseLong(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).longValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static float parseFloatExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
+        }
+
+        expression = expression.trim();
+
+        try {
+            return Float.parseFloat(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).floatValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @return 解析结果
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static double parseDoubleExpression(String expression) throws NumberFormatException {
+        if (expression == null) {
+            throw new NumberFormatException("null");
+        }
+
+        expression = expression.trim();
+
+        try {
+            return Double.parseDouble(expression);
+        } catch (NumberFormatException nfe) {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new NumberFormatException(expression);
+            }
+            if (result instanceof Number) {
+                return ((Number) result).doubleValue();
+            } else {
+                throw new NumberFormatException(expression);
+            }
+        }
+    }
+
+    /**
+     * 解析Boolean表达式
+     * 
+     * @param expression 表达式, 支持运算符
+     * @return 解析结果
+     * @throws IllegalArgumentException 表达式格式错误
+     */
+    public static boolean parseBooleanExpression(String expression) throws IllegalArgumentException {
+        if (expression == null) {
+            throw new IllegalArgumentException("null");
+        }
+
+        expression = expression.trim();
+
+        if (StringTools.isPositive(expression, false)) {
+            return true;
+        } else if (StringTools.isNegative(expression, false)) {
+            return false;
+        } else {
+            Object result;
+            try {
+                result = Ognl.getValue(expression, null);
+            } catch (OgnlException e) {
+                throw new IllegalArgumentException(expression);
+            }
+            if (result instanceof Boolean) {
+                return (Boolean) result;
+            } else if (result instanceof Number) {
+                return ((Number) result).doubleValue() != 0;
+            } else {
+                throw new IllegalArgumentException(expression);
+            }
         }
     }
 }
