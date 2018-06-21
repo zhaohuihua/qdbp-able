@@ -1,13 +1,12 @@
 package com.gitee.zhaohuihua.core.beans;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import com.gitee.zhaohuihua.core.utils.VerifyTools;
 
 /**
  * 用来做数据隔离的数据权限属性
@@ -79,9 +78,9 @@ public class AcceptAttrs<T> implements Serializable {
     public boolean accept(Object value) {
         if (all) {
             return true;
-        } else if (isBlank(value)) {
+        } else if (VerifyTools.isBlank(value)) {
             return false;
-        } else if (equals(defaultValue, value)) {
+        } else if (VerifyTools.equals(defaultValue, value)) {
             return true;
         } else {
             if (starts && value instanceof CharSequence) {
@@ -119,41 +118,10 @@ public class AcceptAttrs<T> implements Serializable {
     /** 增加允许值 **/
     public void addAcceptValues(List<T> values) {
         for (T value : values) {
-            if (!isBlank(value)) {
+            if (!VerifyTools.isBlank(value)) {
                 this.acceptValues.add(value);
             }
         }
     }
 
-    private static boolean isBlank(Object object) {
-        if (object == null) {
-            return true;
-        }
-
-        if (object instanceof CharSequence) {
-            CharSequence string = (CharSequence) object;
-            return string.length() == 0;
-        } else if (object.getClass().isArray()) {
-            return Array.getLength(object) == 0;
-        } else if (object instanceof Collection) {
-            return ((Collection<?>) object).isEmpty();
-        } else if (object instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) object;
-            return map.isEmpty();
-        } else if (object instanceof Iterable) {
-            return !((Iterable<?>) object).iterator().hasNext();
-        } else {
-            return false;
-        }
-    }
-
-    private static boolean equals(Object o, Object n) {
-        if (o == null && n == null) {
-            return true;
-        } else if (o == null && n != null || o != null && n == null) {
-            return false;
-        } else {
-            return o.equals(n);
-        }
-    }
 }

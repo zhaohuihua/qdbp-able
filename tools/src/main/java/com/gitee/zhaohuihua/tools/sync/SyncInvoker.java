@@ -2,7 +2,6 @@ package com.gitee.zhaohuihua.tools.sync;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import com.gitee.zhaohuihua.tools.utils.ReflectTools;
 
 /**

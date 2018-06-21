@@ -3,8 +3,7 @@ package com.gitee.zhaohuihua.tools.codec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.gitee.zhaohuihua.tools.utils.StringTools;
+import com.gitee.zhaohuihua.core.utils.StringTools;
 
 /**
  * Bit工具类

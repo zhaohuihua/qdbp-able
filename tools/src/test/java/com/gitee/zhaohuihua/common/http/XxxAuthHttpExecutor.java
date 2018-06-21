@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.zhaohuihua.core.exception.ServiceException;
@@ -17,9 +16,9 @@ import com.gitee.zhaohuihua.tools.files.PathTools;
 import com.gitee.zhaohuihua.tools.http.ConfigHttpHandler;
 import com.gitee.zhaohuihua.tools.http.HostUrlConfig;
 import com.gitee.zhaohuihua.tools.http.HttpExecutor;
+import com.gitee.zhaohuihua.tools.http.HttpTools.HttpJsonImpl;
 import com.gitee.zhaohuihua.tools.http.HttpUrl;
 import com.gitee.zhaohuihua.tools.http.RemoteServiceException;
-import com.gitee.zhaohuihua.tools.http.HttpTools.JsonTools;
 import com.gitee.zhaohuihua.tools.utils.RandomTools;
 
 /**
@@ -56,7 +55,7 @@ public class XxxAuthHttpExecutor extends HttpExecutor {
         // new HttpTools() -- form 方式提交请求参数
         // new JsonTools() -- json 方式提交请求参数
         // super(new HostUrlConfig(PATH, "xxx.auth.host"), new HttpTools(), new XxxAuthHandler());
-        super(new HostUrlConfig(PATH, "xxx.auth.host"), new JsonTools(), new XxxAuthHandler());
+        super(new HostUrlConfig(PATH, "xxx.auth.host"), new HttpJsonImpl(), new XxxAuthHandler());
     }
 
     // 如果host url prefix是通过数据库配置的, 则可以调这个构造函数, 但最好建一个单例缓存
@@ -72,7 +71,7 @@ public class XxxAuthHttpExecutor extends HttpExecutor {
 
         // return { account:string, tm:long, ts:int, digest:string, body:data  }
         @Override
-        public Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, Object> data) {
+        public <P> Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, P> data) {
 
             Map<String, Object> map = new HashMap<>();
 

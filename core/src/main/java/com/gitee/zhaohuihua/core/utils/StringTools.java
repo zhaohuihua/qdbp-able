@@ -1,13 +1,10 @@
-package com.gitee.zhaohuihua.tools.utils;
+package com.gitee.zhaohuihua.core.utils;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.alibaba.fastjson.serializer.JSONSerializer;
-import com.alibaba.fastjson.serializer.SerializeWriter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
  * 字符串工具
@@ -617,42 +614,6 @@ public abstract class StringTools {
             return string.substring(0, 1) + hide + string.substring(1);
         } else {
             return string + hide + string;
-        }
-    }
-
-    /**
-     * 将对象转换为日志文本<br>
-     * 如 toLogs(params, operator) 返回 \n\t{paramsJson} \n\t{operatorJson}<br>
-     * 
-     * @param objects
-     * @return
-     */
-    public static String toLogs(Object... objects) {
-        StringBuilder buffer = new StringBuilder();
-        for (Object object : objects) {
-            buffer.append("\n\t");
-            if (object == null) {
-                buffer.append("null");
-            } else if (object instanceof String) {
-                buffer.append(object);
-            } else {
-                buffer.append(object.getClass().getSimpleName()).append(": ");
-                buffer.append(toJsonString(object));
-            }
-        }
-        return buffer.toString();
-    }
-
-    public static String toJsonString(Object object) {
-        if (object == null) {
-            return "null";
-        }
-        try (SerializeWriter out = new SerializeWriter()) {
-            JSONSerializer serializer = new JSONSerializer(out);
-            serializer.config(SerializerFeature.QuoteFieldNames, false);
-            serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
-            serializer.write(object);
-            return out.toString();
         }
     }
 }

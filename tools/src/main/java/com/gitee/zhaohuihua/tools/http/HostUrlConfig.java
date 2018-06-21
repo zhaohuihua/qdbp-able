@@ -2,10 +2,9 @@ package com.gitee.zhaohuihua.tools.http;
 
 import java.io.Serializable;
 import java.net.URL;
-
+import com.gitee.zhaohuihua.core.utils.StringTools;
 import com.gitee.zhaohuihua.tools.files.PathTools;
 import com.gitee.zhaohuihua.tools.utils.Config;
-import com.gitee.zhaohuihua.tools.utils.StringTools;
 
 /**
  * URL配置项工具类

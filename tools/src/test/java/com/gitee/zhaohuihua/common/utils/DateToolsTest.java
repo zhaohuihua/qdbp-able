@@ -4,8 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import com.gitee.zhaohuihua.tools.utils.DateTools;
+import com.gitee.zhaohuihua.core.utils.DateTools;
 
 public class DateToolsTest {
 

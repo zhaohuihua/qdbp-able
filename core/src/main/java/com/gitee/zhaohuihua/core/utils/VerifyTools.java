@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.utils;
+package com.gitee.zhaohuihua.core.utils;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -32,7 +32,6 @@ public abstract class VerifyTools {
     /**
      * 判断字符串是不是数字
      *
-     * @author zhaohuihua
      * @param str 字符串
      * @return 是不是数字, 如果字符串等于null或空字符串, 返回false
      */
@@ -43,6 +42,13 @@ public abstract class VerifyTools {
         return DIGIT.matcher(str).matches();
     }
 
+    /**
+     * 判断对象是否为空<br>
+     * 零长度的字符串, length=0的数组, 空的Collection, 空的Map, 空的Iterable都将被判定为空
+     * 
+     * @param object 目标对象
+     * @return true or false
+     */
     public static boolean isBlank(Object object) {
         if (object == null) {
             return true;
@@ -65,6 +71,12 @@ public abstract class VerifyTools {
         }
     }
 
+    /**
+     * 判断对象是否为非空
+     * 
+     * @param object 目标对象
+     * @return true or false
+     */
     public static boolean isNotBlank(Object object) {
         return !isBlank(object);
     }
@@ -92,8 +104,8 @@ public abstract class VerifyTools {
     /**
      * 全都为空就返回true
      *
-     * @param objects
-     * @return
+     * @param objects 目标对象
+     * @return 是否全都为空
      */
     public static boolean isAllBlank(Object... objects) {
         if (objects == null || objects.length == 0) {
@@ -112,13 +124,20 @@ public abstract class VerifyTools {
     /**
      * 全都不为空就返回true
      *
-     * @param objects
-     * @return
+     * @param objects 目标对象
+     * @return 是否全都不为空
      */
     public static boolean isNoneBlank(Object... objects) {
         return !isAnyBlank(objects);
     }
-    
+
+    /**
+     * 判断对象是否存在于列表中
+     * 
+     * @param object 目标对象
+     * @param objects 列表
+     * @return 是否存在
+     */
     @SafeVarargs
     public static <T> boolean isExists(T object, T... objects) {
         if (objects == null || objects.length == 0) {
@@ -136,6 +155,13 @@ public abstract class VerifyTools {
         return false;
     }
 
+    /**
+     * 判断对象是否不存在于列表中
+     * 
+     * @param object 目标对象
+     * @param objects 列表
+     * @return 是否不存在
+     */
     @SafeVarargs
     public static <T> boolean isNotExists(T object, T... objects) {
         return !isExists(object, objects);
@@ -144,10 +170,9 @@ public abstract class VerifyTools {
     /**
      * 判断两个对象是不是相等
      *
-     * @author zhaohuihua
-     * @param o
-     * @param n
-     * @return
+     * @param o 第一个对象
+     * @param n 第二个对象
+     * @return 是否相等
      */
     public static boolean equals(Object o, Object n) {
         if (o == null && n == null) {
@@ -162,10 +187,9 @@ public abstract class VerifyTools {
     /**
      * 判断两个对象是不是不相等
      *
-     * @author zhaohuihua
-     * @param o
-     * @param n
-     * @return
+     * @param o 第一个对象
+     * @param n 第二个对象
+     * @return 是否不相等
      */
     public static boolean notEquals(Object o, Object n) {
         return !equals(o, n);
@@ -174,7 +198,6 @@ public abstract class VerifyTools {
     /**
      * 判断对象是否改变, 对象不为空且与原值不符则已改变
      *
-     * @author zhaohuihua
      * @param value 判断的对象
      * @param older 原值
      * @return 是否改变

@@ -1,9 +1,8 @@
 package com.gitee.zhaohuihua.tools.excel.model;
 
 import java.io.Serializable;
-
-import com.gitee.zhaohuihua.core.result.IResultMessage;
 import com.gitee.zhaohuihua.core.result.IBatchResult.Failed;
+import com.gitee.zhaohuihua.core.result.IResultMessage;
 
 /**
  * 失败信息

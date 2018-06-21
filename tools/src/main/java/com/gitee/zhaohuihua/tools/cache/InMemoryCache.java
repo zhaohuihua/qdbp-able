@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.zhaohuihua.core.beans.VolatileData;
@@ -19,7 +18,7 @@ import com.gitee.zhaohuihua.core.beans.VolatileData;
  * @author zhaohuihua
  * @version 170527
  */
-public class InMemoryCache extends BaseCache {
+public class InMemoryCache extends BaseCacheService {
 
     /** 静态实例 **/
     public static final InMemoryCache me = new InMemoryCache();
@@ -31,37 +30,41 @@ public class InMemoryCache extends BaseCache {
         this.container = new ConcurrentHashMap<>();
     }
 
+    @Override
+    public <T> void set(String key, String subkey, T value) {
+        this.set(key, subkey, value, (Long) null);
+    }
+
     /** {@inheritDoc} **/
     @Override
-    protected void set(String key, String subkey, Object value, Long expire) {
+    public <T> void set(String key, String subkey, T value, Long expire) {
         if (value == null) {
             del(key, subkey);
         } else {
-            container.put(concat(key, subkey), new SimpleItem(value));
+            String text = this.serializeValue(value);
+            container.put(concat(key, subkey), new SimpleItem(text));
             if (expire != null) {
-                expire(concat(key, subkey), expire);
+                expire(key, subkey, expire);
             }
         }
     }
 
     /** {@inheritDoc} **/
     @Override
-    protected <T> T get(String key, String subkey, Class<T> clazz) {
+    public <T> T get(String key, String subkey, Class<T> clazz) {
         SimpleItem item = getSimpleItem(key, subkey);
         if (item == null) return null;
 
-        return TypeUtils.castToJavaBean(item.getValue(), clazz);
+        return this.deserializeValue(item.getValue(), clazz);
     }
 
     /** {@inheritDoc} **/
     @Override
-    protected <T> List<T> list(String key, String subkey, Class<T> clazz) {
+    public <T> List<T> list(String key, String subkey, Class<T> clazz) {
         SimpleItem item = getSimpleItem(key, subkey);
         if (item == null) return null;
 
-        Object value = item.getValue();
-        String k = concat(key, subkey);
-        return castToList(k, value, clazz);
+        return this.deserializeList(item.getValue(), clazz);
     }
 
     /** {@inheritDoc} **/
@@ -377,9 +380,9 @@ public class InMemoryCache extends BaseCache {
     }
 
     /** 简单缓存类 **/
-    protected static class SimpleItem extends VolatileData<Object> {
+    protected static class SimpleItem extends VolatileData<String> {
 
-        public SimpleItem(Object value) {
+        public SimpleItem(String value) {
             super(value);
         }
     }

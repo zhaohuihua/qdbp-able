@@ -1,7 +1,6 @@
 package com.gitee.zhaohuihua.tools.http;
 
 import java.util.Map;
-
 import com.gitee.zhaohuihua.core.result.ResponseMessage;
 
 /**
@@ -18,7 +17,7 @@ public interface IHttpHandler {
      * @param params 业务参数
      * @return 业务参数+基础参数
      */
-    Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, Object> params);
+    <P> Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, P> params);
 
     /**
      * 解析结果

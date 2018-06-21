@@ -1,7 +1,7 @@
 package com.gitee.zhaohuihua.tools.http;
 
+import java.util.HashMap;
 import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.zhaohuihua.core.result.ResponseMessage;
@@ -16,8 +16,10 @@ public class BaseHttpHandler implements IHttpHandler {
      * @param params 业务参数
      * @return 业务参数+基础参数
      */
-    public Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, Object> params) {
-        return params;
+    public <T> Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, T> params) {
+        Map<String, Object> map = new HashMap<>();
+        map.putAll(params);
+        return map;
     }
 
     /**

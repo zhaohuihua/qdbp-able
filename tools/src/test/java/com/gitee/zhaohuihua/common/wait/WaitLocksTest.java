@@ -1,7 +1,6 @@
 package com.gitee.zhaohuihua.common.wait;
 
 import java.util.concurrent.TimeoutException;
-
 import com.gitee.zhaohuihua.tools.utils.RandomTools;
 import com.gitee.zhaohuihua.tools.wait.WaitLock;
 import com.gitee.zhaohuihua.tools.wait.WaitLocks;

@@ -1,6 +1,6 @@
 package com.gitee.zhaohuihua.tools.codec;
 
-import com.gitee.zhaohuihua.tools.utils.VerifyTools;
+import com.gitee.zhaohuihua.core.utils.VerifyTools;
 
 /**
  * 十六进制工具

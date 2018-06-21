@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -31,28 +30,27 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.alibaba.fastjson.JSON;
 import com.gitee.zhaohuihua.core.beans.KeyString;
 import com.gitee.zhaohuihua.core.exception.ServiceException;
 import com.gitee.zhaohuihua.core.result.ResponseMessage;
 import com.gitee.zhaohuihua.core.result.ResultCode;
-import com.gitee.zhaohuihua.tools.utils.VerifyTools;
+import com.gitee.zhaohuihua.core.utils.VerifyTools;
 
 /**
  * HTTP请求工具类
  *
  * @author zhaohuihua
  */
-public class HttpTools {
+public abstract class HttpTools {
 
     private static final Logger log = LoggerFactory.getLogger(HttpTools.class);
 
     private static final ContentType contentType = ContentType.create("text/plain", Consts.UTF_8);
 
-    public static final HttpTools me = new HttpTools();
+    public static final HttpTools form = new HttpFormImpl();
 
-    public static final HttpTools json = new JsonTools();
+    public static final HttpTools json = new HttpJsonImpl();
 
     private IHttpHandler httpHandler;
 
@@ -62,41 +60,6 @@ public class HttpTools {
 
     public void setHttpHandler(IHttpHandler httpHandler) {
         this.httpHandler = httpHandler;
-    }
-
-    /**
-     * 以application/json的方式提交请求参数
-     *
-     * @author zhaohuihua
-     * @version 160224
-     */
-    public static class JsonTools extends HttpTools {
-
-        @Override
-        public String get(String url, Map<String, Object> params) throws HttpException {
-            throw new RuntimeException("GET request method is not supported!");
-        }
-
-        @Override
-        public String upload(String url, Map<String, Object> params) throws HttpException {
-            throw new RuntimeException("UPLOAD request method is not supported!");
-        }
-
-        /**
-         * 设置POST参数
-         *
-         * @param method
-         * @param params
-         */
-        @Override
-        protected void setPostParams(HttpPost method, Map<String, Object> params, List<KeyString> logs) {
-            String json = JSON.toJSONString(params);
-            if (logs != null) {
-                logs.add(new KeyString(null, json));
-            }
-            StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
-            method.setEntity(entity);
-        }
     }
 
     /**
@@ -118,7 +81,7 @@ public class HttpTools {
      * @return 响应结果
      * @throws HttpException
      */
-    public ResponseMessage execute(HttpUrl hurl, Map<String, Object> params) throws HttpException {
+    public <P> ResponseMessage execute(HttpUrl hurl, Map<String, P> params) throws HttpException {
 
         Map<String, Object> map = fillBaseParams(hurl, params);
         String string;
@@ -166,7 +129,7 @@ public class HttpTools {
      * @return 响应结果对象
      * @throws HttpException
      */
-    public <T> T query(HttpUrl hurl, Map<String, Object> params, Class<T> type) throws HttpException {
+    public <T, P> T query(HttpUrl hurl, Map<String, P> params, Class<T> type) throws HttpException {
         ResponseMessage result = this.execute(hurl, params);
 
         String string = (String) result.getBody();
@@ -203,7 +166,7 @@ public class HttpTools {
      * @return 对象列表
      * @throws HttpException
      */
-    public <T> List<T> list(HttpUrl hurl, Map<String, Object> params, Class<T> type) throws HttpException {
+    public <T, P> List<T> list(HttpUrl hurl, Map<String, Object> params, Class<T> type) throws HttpException {
         ResponseMessage result = this.execute(hurl, params);
 
         String string = (String) result.getBody();
@@ -230,7 +193,7 @@ public class HttpTools {
      * @param params 业务参数
      * @return 业务参数+基础参数
      */
-    protected Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, Object> params) {
+    protected <P> Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, P> params) {
         return httpHandler.fillBaseParams(hurl, params);
     }
 
@@ -247,6 +210,18 @@ public class HttpTools {
     }
 
     /**
+     * 发送POST请求<br>
+     * 注意, 这里的请求参数和响应报文都没有经过HttpHandler处理!
+     *
+     * @param url 请求地址
+     * @return 响应字符串
+     * @throws ServiceException
+     */
+    public String post(String url) throws HttpException {
+        return post(url, null);
+    }
+
+    /**
      * 发送GET请求<br>
      * 注意, 这里的请求参数和响应报文都没有经过HttpHandler处理!
      *
@@ -255,7 +230,7 @@ public class HttpTools {
      * @return 响应字符串
      * @throws ServiceException
      */
-    protected String get(String url, Map<String, Object> params) throws HttpException {
+    public <P> String get(String url, Map<String, P> params) throws HttpException {
 
         URI uri;
         try {
@@ -302,23 +277,11 @@ public class HttpTools {
      * 注意, 这里的请求参数和响应报文都没有经过HttpHandler处理!
      *
      * @param url 请求地址
-     * @return 响应字符串
-     * @throws ServiceException
-     */
-    public String post(String url) throws HttpException {
-        return post(url, null);
-    }
-
-    /**
-     * 发送POST请求<br>
-     * 注意, 这里的请求参数和响应报文都没有经过HttpHandler处理!
-     *
-     * @param url 请求地址
      * @param params 请求参数
      * @return 响应字符串
      * @throws ServiceException
      */
-    public String post(String url, Map<String, Object> params) throws HttpException {
+    public <P> String post(String url, Map<String, P> params) throws HttpException {
 
         // 创建HttpClientBuilder
         HttpClientBuilder builder = HttpClientBuilder.create();
@@ -356,38 +319,6 @@ public class HttpTools {
     }
 
     /**
-     * 文件上传
-     *
-     * @param hurl 请求地址和请求方法
-     * @param params 请求参数
-     * @return 响应结果
-     * @throws HttpException
-     */
-    public ResponseMessage upload(HttpUrl hurl, Map<String, Object> params) throws HttpException {
-
-        if (hurl.getMethod() != HttpMethod.POST) {
-            throw new IllegalArgumentException("File upload request method must be POST. " + hurl);
-        }
-
-        Map<String, Object> map = fillBaseParams(hurl, params);
-        String string = upload(hurl.getUrl(), map);
-
-        if (VerifyTools.isBlank(string)) {
-            ResultCode rc = ResultCode.REMOTE_SERVICE_ERROR;
-            throw new RemoteServiceException(rc.getCode(), rc.getMessage());
-        }
-
-        ResponseMessage result;
-        try {
-            result = parseResult(hurl, string);
-        } catch (Exception e) {
-            throw new ResultParseException("Http request success, but JSON.parseObject error. " + hurl, e);
-        }
-
-        return result;
-    }
-
-    /**
      * 文件上传<br>
      * 注意, 这里的请求参数和响应报文都没有经过HttpHandler处理!
      *
@@ -397,7 +328,7 @@ public class HttpTools {
      * @return 响应字符串
      * @throws ServiceException
      */
-    public String upload(String url, Map<String, Object> params) throws HttpException {
+    public <P> String upload(String url, Map<String, P> params) throws HttpException {
         // 创建HttpClientBuilder
         HttpClientBuilder builder = HttpClientBuilder.create();
         // HttpClient
@@ -434,36 +365,44 @@ public class HttpTools {
     }
 
     /**
+     * 文件上传
+     *
+     * @param hurl 请求地址和请求方法
+     * @param params 请求参数
+     * @return 响应结果
+     * @throws HttpException
+     */
+    public <P> ResponseMessage upload(HttpUrl hurl, Map<String, P> params) throws HttpException {
+
+        if (hurl.getMethod() != HttpMethod.POST) {
+            throw new IllegalArgumentException("File upload request method must be POST. " + hurl);
+        }
+
+        Map<String, Object> map = fillBaseParams(hurl, params);
+        String string = upload(hurl.getUrl(), map);
+
+        if (VerifyTools.isBlank(string)) {
+            ResultCode rc = ResultCode.REMOTE_SERVICE_ERROR;
+            throw new RemoteServiceException(rc.getCode(), rc.getMessage());
+        }
+
+        ResponseMessage result;
+        try {
+            result = parseResult(hurl, string);
+        } catch (Exception e) {
+            throw new ResultParseException("Http request success, but JSON.parseObject error. " + hurl, e);
+        }
+
+        return result;
+    }
+
+    /**
      * 设置GET参数
      *
      * @param builder
      * @param params
      */
-    protected void setGetParams(URIBuilder builder, Map<String, Object> params) {
-
-        builder.setCharset(Consts.UTF_8);
-        Set<Entry<String, Object>> sets = params.entrySet();
-        for (Entry<String, Object> entry : sets) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (key == null || value == null) {
-                continue;
-            }
-            if (value instanceof Object[]) {
-                Object[] objects = (Object[]) value;
-                for (Object object : objects) {
-                    builder.addParameter(key, toString(key, object, null));
-                }
-            } else if (value instanceof Iterable) {
-                Iterable<?> iterator = (Iterable<?>) value;
-                for (Object object : iterator) {
-                    builder.addParameter(key, toString(key, object, null));
-                }
-            } else {
-                builder.addParameter(key, toString(key, value, null));
-            }
-        }
-    }
+    protected abstract <P> void setGetParams(URIBuilder builder, Map<String, P> params);
 
     /**
      * 设置POST参数
@@ -471,32 +410,7 @@ public class HttpTools {
      * @param method
      * @param params
      */
-    protected void setPostParams(HttpPost method, Map<String, Object> params, List<KeyString> logs) {
-        Set<Entry<String, Object>> sets = params.entrySet();
-        List<NameValuePair> pairs = new ArrayList<>();
-        for (Entry<String, Object> entry : sets) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (key == null || value == null) {
-                continue;
-            }
-            if (value instanceof Object[]) {
-                Object[] objects = (Object[]) value;
-                for (Object object : objects) {
-                    pairs.add(new BasicNameValuePair(key, toString(key, object, logs)));
-                }
-            } else if (value instanceof Iterable) {
-                Iterable<?> iterator = (Iterable<?>) value;
-                for (Object object : iterator) {
-                    pairs.add(new BasicNameValuePair(key, toString(key, object, logs)));
-                }
-            } else {
-                pairs.add(new BasicNameValuePair(key, toString(key, value, logs)));
-            }
-        }
-        HttpEntity entity = new UrlEncodedFormEntity(pairs, Consts.UTF_8);
-        method.setEntity(entity);
-    }
+    protected abstract <P> void setPostParams(HttpPost method, Map<String, P> params, List<KeyString> logs);
 
     /**
      * 设置文件上传参数<br>
@@ -505,34 +419,9 @@ public class HttpTools {
      * @param method
      * @param params
      */
-    protected <T> void setUploadParams(HttpPost method, Map<String, T> params, List<KeyString> logs) {
-        Set<Entry<String, T>> sets = params.entrySet();
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        for (Entry<String, T> entry : sets) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (key == null || value == null) {
-                continue;
-            }
-            if (value instanceof Iterable) {
-                Iterable<?> iterator = (Iterable<?>) value;
-                for (Object object : iterator) {
-                    addParam(builder, key, object, logs);
-                }
-            } else if (value instanceof Object[]) {
-                Object[] values = (Object[]) value;
-                for (Object object : values) {
-                    addParam(builder, key, object, logs);
-                }
-            } else {
-                addParam(builder, key, value, logs);
-            }
-        }
-        method.setEntity(builder.build());
-    }
+    protected abstract <P> void setUploadParams(HttpPost method, Map<String, P> params, List<KeyString> logs);
 
-    private String toString(String key, Object value, List<KeyString> logs) {
+    protected String toString(String key, Object value, List<KeyString> logs) {
         String string;
         if (value instanceof File) {
             string = ((File) value).getAbsolutePath();
@@ -547,7 +436,7 @@ public class HttpTools {
         return string;
     }
 
-    private void addParam(MultipartEntityBuilder builder, String key, Object value, List<KeyString> logs) {
+    protected void addParam(MultipartEntityBuilder builder, String key, Object value, List<KeyString> logs) {
         String string;
         if (value instanceof InputStream) {
             builder.addBinaryBody(key, (InputStream) value);
@@ -567,7 +456,7 @@ public class HttpTools {
         }
     }
 
-    private String toParamString(List<KeyString> logs) {
+    protected String toParamString(List<KeyString> logs) {
         if (VerifyTools.isBlank(logs)) {
             return null;
         }
@@ -584,5 +473,148 @@ public class HttpTools {
             buffer.append(i.getKey()).append("=").append(i.getValue());
         }
         return buffer.toString();
+    }
+
+    /**
+     * 以application/json的方式提交请求参数
+     *
+     * @author zhaohuihua
+     * @version 160224
+     */
+    public static class HttpJsonImpl extends HttpTools {
+
+        public <P> String get(String url, Map<String, P> params) throws HttpException {
+            throw new RuntimeException("GET request method is not supported!");
+        }
+
+        public <P> String upload(String url, Map<String, P> params) throws HttpException {
+            throw new RuntimeException("UPLOAD request method is not supported!");
+        }
+
+        protected <P> void setGetParams(URIBuilder builder, Map<String, P> params) {
+            throw new RuntimeException("GET request method is not supported!");
+        }
+
+        protected <P> void setUploadParams(HttpPost method, Map<String, P> params, List<KeyString> logs) {
+            throw new RuntimeException("UPLOAD request method is not supported!");
+        }
+
+        @Override
+        protected <P> void setPostParams(HttpPost method, Map<String, P> params, List<KeyString> logs) {
+            String json = JSON.toJSONString(params);
+            if (logs != null) {
+                logs.add(new KeyString(null, json));
+            }
+            StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
+            method.setEntity(entity);
+        }
+    }
+
+    /**
+     * 以application/x-www-form-urlencoded的方式提交请求参数
+     *
+     * @author zhaohuihua
+     * @version 160224
+     */
+    public static class HttpFormImpl extends HttpTools {
+
+        /**
+         * 设置GET参数
+         *
+         * @param builder
+         * @param params
+         */
+        protected <P> void setGetParams(URIBuilder builder, Map<String, P> params) {
+
+            builder.setCharset(Consts.UTF_8);
+            Set<Entry<String, P>> sets = params.entrySet();
+            for (Entry<String, P> entry : sets) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (key == null || value == null) {
+                    continue;
+                }
+                if (value instanceof Object[]) {
+                    Object[] objects = (Object[]) value;
+                    for (Object object : objects) {
+                        builder.addParameter(key, toString(key, object, null));
+                    }
+                } else if (value instanceof Iterable) {
+                    Iterable<?> iterator = (Iterable<?>) value;
+                    for (Object object : iterator) {
+                        builder.addParameter(key, toString(key, object, null));
+                    }
+                } else {
+                    builder.addParameter(key, toString(key, value, null));
+                }
+            }
+        }
+
+        /**
+         * 设置POST参数
+         *
+         * @param method
+         * @param params
+         */
+        protected <P> void setPostParams(HttpPost method, Map<String, P> params, List<KeyString> logs) {
+            Set<Entry<String, P>> sets = params.entrySet();
+            List<NameValuePair> pairs = new ArrayList<>();
+            for (Entry<String, P> entry : sets) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (key == null || value == null) {
+                    continue;
+                }
+                if (value instanceof Object[]) {
+                    Object[] objects = (Object[]) value;
+                    for (Object object : objects) {
+                        pairs.add(new BasicNameValuePair(key, toString(key, object, logs)));
+                    }
+                } else if (value instanceof Iterable) {
+                    Iterable<?> iterator = (Iterable<?>) value;
+                    for (Object object : iterator) {
+                        pairs.add(new BasicNameValuePair(key, toString(key, object, logs)));
+                    }
+                } else {
+                    pairs.add(new BasicNameValuePair(key, toString(key, value, logs)));
+                }
+            }
+            HttpEntity entity = new UrlEncodedFormEntity(pairs, Consts.UTF_8);
+            method.setEntity(entity);
+        }
+
+        /**
+         * 设置文件上传参数<br>
+         * 这种方式提交的参数, Filter无法获取到, 只有通过Controller才能获取到, 因为是以二进制流的方式提交的
+         *
+         * @param method
+         * @param params
+         */
+        protected <P> void setUploadParams(HttpPost method, Map<String, P> params, List<KeyString> logs) {
+            Set<Entry<String, P>> sets = params.entrySet();
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            for (Entry<String, P> entry : sets) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (key == null || value == null) {
+                    continue;
+                }
+                if (value instanceof Iterable) {
+                    Iterable<?> iterator = (Iterable<?>) value;
+                    for (Object object : iterator) {
+                        addParam(builder, key, object, logs);
+                    }
+                } else if (value instanceof Object[]) {
+                    Object[] values = (Object[]) value;
+                    for (Object object : values) {
+                        addParam(builder, key, object, logs);
+                    }
+                } else {
+                    addParam(builder, key, value, logs);
+                }
+            }
+            method.setEntity(builder.build());
+        }
     }
 }

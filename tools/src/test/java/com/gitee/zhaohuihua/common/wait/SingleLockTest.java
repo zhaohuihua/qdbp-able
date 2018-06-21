@@ -2,7 +2,6 @@ package com.gitee.zhaohuihua.common.wait;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.gitee.zhaohuihua.tools.wait.SingleLock;
 
 /**

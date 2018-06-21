@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
-import com.gitee.zhaohuihua.tools.utils.VerifyTools;
+import com.gitee.zhaohuihua.core.utils.VerifyTools;
 
 /**
  * 资源工具类<br>

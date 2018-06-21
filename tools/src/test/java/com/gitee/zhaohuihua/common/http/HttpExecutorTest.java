@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.zhaohuihua.core.result.ResponseMessage;
@@ -17,21 +16,21 @@ import com.gitee.zhaohuihua.tools.codec.HexTools;
 import com.gitee.zhaohuihua.tools.files.PathTools;
 import com.gitee.zhaohuihua.tools.http.ConfigHttpHandler;
 import com.gitee.zhaohuihua.tools.http.HostUrlConfig;
+import com.gitee.zhaohuihua.tools.http.HostUrlConfig.KeyedHttpUrl;
 import com.gitee.zhaohuihua.tools.http.HttpException;
 import com.gitee.zhaohuihua.tools.http.HttpExecutor;
+import com.gitee.zhaohuihua.tools.http.HttpTools.HttpJsonImpl;
 import com.gitee.zhaohuihua.tools.http.HttpUrl;
 import com.gitee.zhaohuihua.tools.http.RemoteServiceException;
-import com.gitee.zhaohuihua.tools.http.HostUrlConfig.KeyedHttpUrl;
-import com.gitee.zhaohuihua.tools.http.HttpTools.JsonTools;
+import com.gitee.zhaohuihua.tools.utils.JsonTools;
 import com.gitee.zhaohuihua.tools.utils.RandomTools;
-import com.gitee.zhaohuihua.tools.utils.StringTools;
 
 public class HttpExecutorTest extends HttpExecutor {
 
     private static final URL PATH = PathTools.findResource("settings/http/cttq.txt", HttpExecutorTest.class);
 
     public HttpExecutorTest() {
-        super(new HostUrlConfig(PATH, "cttq.cim.host"), new JsonTools(), new CttqHttpHandler());
+        super(new HostUrlConfig(PATH, "cttq.cim.host"), new HttpJsonImpl(), new CttqHttpHandler());
     }
 
     public static void main(String[] args) {
@@ -44,7 +43,7 @@ public class HttpExecutorTest extends HttpExecutor {
         data.put("accountType", 2);
         try {
             ResponseMessage rsp = test.execute("cim.login.url", data);
-            System.out.println(StringTools.toJsonString(rsp));
+            System.out.println(JsonTools.toJsonString(rsp));
         } catch (HttpException e) {
             e.printStackTrace();
         }
@@ -53,7 +52,7 @@ public class HttpExecutorTest extends HttpExecutor {
     private static class CttqHttpHandler extends ConfigHttpHandler {
 
         @Override
-        public Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, Object> data) {
+        public <T> Map<String, Object> fillBaseParams(HttpUrl hurl, Map<String, T> data) {
             Map<String, Object> map = new HashMap<>();
 
             String account = config.getString("cim.interface.account");
