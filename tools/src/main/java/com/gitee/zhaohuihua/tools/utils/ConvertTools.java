@@ -113,9 +113,30 @@ public abstract class ConvertTools {
      *
      * @param value 源字符串, 支持乘法
      * @return 数字
+     * @throws NumberFormatException 数字格式错误
      */
-    public static int toInteger(String value) {
-        return (int) toLong(value);
+    public static int toInteger(String value) throws NumberFormatException {
+        if (VerifyTools.isBlank(value)) {
+            throw new NumberFormatException("null");
+        }
+        Long number = toLong(value, 0L);
+        if (number == null) {
+            throw new NumberFormatException(value);
+        } else {
+            return number.intValue();
+        }
+    }
+
+    /**
+     * 转换为数字
+     *
+     * @param value 源字符串, 支持乘法
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 数字
+     */
+    public static Integer toInteger(String value, Integer defaults) {
+        Long number = toLong(value, 0L);
+        return number == null ? null : number.intValue();
     }
 
     /**
@@ -123,16 +144,40 @@ public abstract class ConvertTools {
      *
      * @param value 源字符串, 支持乘法
      * @return 数字
+     * @throws NumberFormatException 数字格式错误
      */
     public static long toLong(String value) throws NumberFormatException {
         if (VerifyTools.isBlank(value)) {
-            return 0;
+            throw new NumberFormatException("null");
+        }
+        Long number = toLong(value, 0L);
+        if (number == null) {
+            throw new NumberFormatException(value);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 转换为数字
+     *
+     * @param value 源字符串, 支持乘法
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 数字
+     */
+    public static Long toLong(String value, Long defaults) {
+        if (VerifyTools.isBlank(value)) {
+            return defaults;
         }
 
         value = value.trim();
 
         if (!value.contains("*")) {
-            return Long.parseLong(value);
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                return defaults;
+            }
         } else {
             Pattern ptn = Pattern.compile("\\*");
             String[] values = ptn.split(value);
@@ -142,10 +187,138 @@ public abstract class ConvertTools {
                 try {
                     number *= Long.parseLong(string);
                 } catch (NumberFormatException e) {
-                    throw new NumberFormatException(value);
+                    return defaults;
                 }
             }
             return number;
+        }
+    }
+
+    /**
+     * 转换为数字
+     *
+     * @param value 源字符串, 支持乘法
+     * @return 数字
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static float toFloat(String value) throws NumberFormatException {
+        if (VerifyTools.isBlank(value)) {
+            throw new NumberFormatException("null");
+        }
+        Double number = toDouble(value, 0D);
+        if (number == null) {
+            throw new NumberFormatException(value);
+        } else {
+            return number.floatValue();
+        }
+    }
+
+    /**
+     * 转换为数字
+     *
+     * @param value 源字符串, 支持乘法
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 数字
+     */
+    public static Float toFloat(String value, Float defaults) {
+        Long number = toLong(value, 0L);
+        return number == null ? null : number.floatValue();
+    }
+
+    /**
+     * 转换为数字
+     *
+     * @param value 源字符串, 支持乘法
+     * @return 数字
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static double toDouble(String value) throws NumberFormatException {
+        if (VerifyTools.isBlank(value)) {
+            throw new NumberFormatException("null");
+        }
+        Double number = toDouble(value, 0D);
+        if (number == null) {
+            throw new NumberFormatException(value);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 转换为数字
+     *
+     * @param value 源字符串, 支持乘法
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 数字
+     */
+    public static Double toDouble(String value, Double defaults) throws NumberFormatException {
+        if (VerifyTools.isBlank(value)) {
+            return defaults;
+        }
+
+        value = value.trim();
+
+        if (!value.contains("*")) {
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                return defaults;
+            }
+        } else {
+            Pattern ptn = Pattern.compile("\\*");
+            String[] values = ptn.split(value);
+            double number = 1.0;
+            for (String string : values) {
+                string = string.trim();
+                try {
+                    number *= Double.parseDouble(string);
+                } catch (NumberFormatException e) {
+                    return defaults;
+                }
+            }
+            return number;
+        }
+    }
+
+    /**
+     * 转换为Boolean
+     * 
+     * @param value 源字符串
+     * @return 解析结果
+     * @throws IllegalArgumentException 格式错误
+     */
+    public static boolean toBoolean(String value) throws IllegalArgumentException {
+        if (VerifyTools.isBlank(value)) {
+            throw new IllegalArgumentException("null");
+        }
+        Boolean number = toBoolean(value, null);
+        if (number == null) {
+            throw new IllegalArgumentException(value);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 转换为Boolean
+     * 
+     * @param value 源字符串
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 解析结果
+     */
+    public static Boolean toBoolean(String value, Boolean defaults) {
+        if (VerifyTools.isBlank(value)) {
+            return defaults;
+        }
+
+        value = value.trim();
+
+        if (StringTools.isPositive(value, false)) {
+            return true;
+        } else if (StringTools.isNegative(value, false)) {
+            return false;
+        } else {
+            return defaults;
         }
     }
 
@@ -157,7 +330,26 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static int parseIntegerExpression(String expression) throws NumberFormatException {
-        return ExpressionTools.parseIntegerExpression(expression);
+        if (VerifyTools.isBlank(expression)) {
+            throw new NumberFormatException("null");
+        }
+        Integer number = ExpressionTools.parseIntegerExpression(expression, null);
+        if (number == null) {
+            throw new NumberFormatException(expression);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 解析结果
+     */
+    public static Integer parseIntegerExpression(String expression, Integer defaults) {
+        return ExpressionTools.parseIntegerExpression(expression, defaults);
     }
 
     /**
@@ -168,7 +360,26 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static long parseLongExpression(String expression) throws NumberFormatException {
-        return ExpressionTools.parseLongExpression(expression);
+        if (VerifyTools.isBlank(expression)) {
+            throw new NumberFormatException("null");
+        }
+        Long number = ExpressionTools.parseLongExpression(expression, null);
+        if (number == null) {
+            throw new NumberFormatException(expression);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 解析结果
+     */
+    public static Long parseLongExpression(String expression, Long defaults) {
+        return ExpressionTools.parseLongExpression(expression, defaults);
     }
 
     /**
@@ -179,7 +390,26 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static float parseFloatExpression(String expression) throws NumberFormatException {
-        return ExpressionTools.parseFloatExpression(expression);
+        if (VerifyTools.isBlank(expression)) {
+            throw new NumberFormatException("null");
+        }
+        Float number = ExpressionTools.parseFloatExpression(expression, null);
+        if (number == null) {
+            throw new NumberFormatException(expression);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 解析结果
+     */
+    public static Float parseFloatExpression(String expression, Float defaults) {
+        return ExpressionTools.parseFloatExpression(expression, defaults);
     }
 
     /**
@@ -190,7 +420,26 @@ public abstract class ConvertTools {
      * @throws NumberFormatException 数字格式错误
      */
     public static double parseDoubleExpression(String expression) throws NumberFormatException {
-        return ExpressionTools.parseDoubleExpression(expression);
+        if (VerifyTools.isBlank(expression)) {
+            throw new NumberFormatException("null");
+        }
+        Double number = ExpressionTools.parseDoubleExpression(expression, null);
+        if (number == null) {
+            throw new NumberFormatException(expression);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 解析数字表达式
+     * 
+     * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 解析结果
+     */
+    public static Double parseDoubleExpression(String expression, Double defaults) {
+        return ExpressionTools.parseDoubleExpression(expression, defaults);
     }
 
     /**
@@ -201,7 +450,26 @@ public abstract class ConvertTools {
      * @throws IllegalArgumentException 表达式格式错误
      */
     public static boolean parseBooleanExpression(String expression) throws IllegalArgumentException {
-        return ExpressionTools.parseBooleanExpression(expression);
+        if (VerifyTools.isBlank(expression)) {
+            throw new IllegalArgumentException("null");
+        }
+        Boolean number = ExpressionTools.parseBooleanExpression(expression, null);
+        if (number == null) {
+            throw new IllegalArgumentException(expression);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 解析Boolean表达式
+     * 
+     * @param expression 表达式, 支持运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 解析结果
+     */
+    public static Boolean parseBooleanExpression(String expression, Boolean defaults) {
+        return ExpressionTools.parseBooleanExpression(expression, defaults);
     }
 
     /**
@@ -588,12 +856,12 @@ class ExpressionTools {
      * 解析数字表达式
      * 
      * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
      * @return 解析结果
-     * @throws NumberFormatException 数字格式错误
      */
-    public static int parseIntegerExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
+    public static Integer parseIntegerExpression(String expression, Integer defaults) {
+        if (VerifyTools.isBlank(expression)) {
+            return defaults;
         }
 
         expression = expression.trim();
@@ -605,12 +873,12 @@ class ExpressionTools {
             try {
                 result = Ognl.getValue(expression, null);
             } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
             if (result instanceof Number) {
                 return ((Number) result).intValue();
             } else {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
         }
     }
@@ -619,12 +887,12 @@ class ExpressionTools {
      * 解析数字表达式
      * 
      * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
      * @return 解析结果
-     * @throws NumberFormatException 数字格式错误
      */
-    public static long parseLongExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
+    public static Long parseLongExpression(String expression, Long defaults) {
+        if (VerifyTools.isBlank(expression)) {
+            return defaults;
         }
 
         expression = expression.trim();
@@ -636,12 +904,12 @@ class ExpressionTools {
             try {
                 result = Ognl.getValue(expression, null);
             } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
             if (result instanceof Number) {
                 return ((Number) result).longValue();
             } else {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
         }
     }
@@ -650,12 +918,12 @@ class ExpressionTools {
      * 解析数字表达式
      * 
      * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
      * @return 解析结果
-     * @throws NumberFormatException 数字格式错误
      */
-    public static float parseFloatExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
+    public static Float parseFloatExpression(String expression, Float defaults) {
+        if (VerifyTools.isBlank(expression)) {
+            return defaults;
         }
 
         expression = expression.trim();
@@ -667,12 +935,12 @@ class ExpressionTools {
             try {
                 result = Ognl.getValue(expression, null);
             } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
             if (result instanceof Number) {
                 return ((Number) result).floatValue();
             } else {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
         }
     }
@@ -681,12 +949,12 @@ class ExpressionTools {
      * 解析数字表达式
      * 
      * @param expression 数学表达式, 支持数学运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
      * @return 解析结果
-     * @throws NumberFormatException 数字格式错误
      */
-    public static double parseDoubleExpression(String expression) throws NumberFormatException {
-        if (expression == null) {
-            throw new NumberFormatException("null");
+    public static Double parseDoubleExpression(String expression, Double defaults) {
+        if (VerifyTools.isBlank(expression)) {
+            return defaults;
         }
 
         expression = expression.trim();
@@ -698,12 +966,12 @@ class ExpressionTools {
             try {
                 result = Ognl.getValue(expression, null);
             } catch (OgnlException e) {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
             if (result instanceof Number) {
                 return ((Number) result).doubleValue();
             } else {
-                throw new NumberFormatException(expression);
+                return defaults;
             }
         }
     }
@@ -712,12 +980,12 @@ class ExpressionTools {
      * 解析Boolean表达式
      * 
      * @param expression 表达式, 支持运算符
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
      * @return 解析结果
-     * @throws IllegalArgumentException 表达式格式错误
      */
-    public static boolean parseBooleanExpression(String expression) throws IllegalArgumentException {
-        if (expression == null) {
-            throw new IllegalArgumentException("null");
+    public static Boolean parseBooleanExpression(String expression, Boolean defaults) {
+        if (VerifyTools.isBlank(expression)) {
+            return defaults;
         }
 
         expression = expression.trim();
@@ -731,14 +999,14 @@ class ExpressionTools {
             try {
                 result = Ognl.getValue(expression, null);
             } catch (OgnlException e) {
-                throw new IllegalArgumentException(expression);
+                return defaults;
             }
             if (result instanceof Boolean) {
                 return (Boolean) result;
             } else if (result instanceof Number) {
                 return ((Number) result).doubleValue() != 0;
             } else {
-                throw new IllegalArgumentException(expression);
+                return defaults;
             }
         }
     }
