@@ -215,6 +215,10 @@
 						<artifactId>poi-ooxml</artifactId>
 					</exclusion>
 					<exclusion>
+						<groupId>org.lionsoul</groupId>
+						<artifactId>jcseg-core</artifactId>
+					</exclusion>
+					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-api</artifactId>
 					</exclusion>
@@ -392,6 +396,12 @@
 				<groupId>com.github.axet</groupId>
 				<artifactId>kaptcha</artifactId>
 				<version>0.0.9</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.lionsoul</groupId>
+				<artifactId>jcseg-core</artifactId>
+				<version>2.2.0</version>
 			</dependency>
 
 			<dependency>

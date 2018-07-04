@@ -334,8 +334,12 @@ public abstract class StringTools {
         return buffer.toString();
     }
 
-    public static String concat(char c, String prefix, String... paths) {
-        return concat(c, prefix, paths, 0, paths.length);
+    public static String concat(char c, String... paths) {
+        return concat(c, null, paths, 0, paths.length);
+    }
+
+    public static String concat(char c, String[] paths, int start, int end) {
+        return concat(c, null, paths, start, end);
     }
 
     public static String concat(char c, String prefix, String[] paths, int start, int end) {
@@ -349,9 +353,11 @@ public abstract class StringTools {
             if (VerifyTools.isBlank(path)) {
                 continue;
             }
-            if (!endsWithChar(buffer, c) && !startsWithChar(path, c)) {
+            if (buffer.length() == 0) {
+                buffer.append(path);
+            } else if (!endsWithChar(buffer, c) && !startsWithChar(path, c)) {
                 buffer.append(c).append(path);
-            } else if (endsWithChar(prefix, c) && endsWithChar(path, c)) {
+            } else if (endsWithChar(buffer, c) && endsWithChar(path, c)) {
                 buffer.append(path.substring(1));
             } else {
                 buffer.append(path);
@@ -361,11 +367,11 @@ public abstract class StringTools {
     }
 
     public static boolean endsWithChar(CharSequence string, char c) {
-        return c == string.charAt(string.length() - 1);
+        return string.length() > 0 && c == string.charAt(string.length() - 1);
     }
 
     public static boolean startsWithChar(CharSequence string, char c) {
-        return c == string.charAt(0);
+        return string.length() > 0 && c == string.charAt(0);
     }
 
     /**

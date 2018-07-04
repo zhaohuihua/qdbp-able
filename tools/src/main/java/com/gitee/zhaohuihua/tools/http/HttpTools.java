@@ -11,7 +11,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.http.Consts;
+import org.apache.http.Header;
+import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpMessage;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -26,7 +30,9 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.message.HeaderGroup;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +59,7 @@ public abstract class HttpTools {
     public static final HttpTools json = new HttpJsonImpl();
 
     private IHttpHandler httpHandler;
+    private HeaderGroup headers;
 
     public HttpTools() {
         this.httpHandler = new BaseHttpHandler();
@@ -249,7 +256,9 @@ public abstract class HttpTools {
         try (CloseableHttpClient client = builder.build();) {
             HttpGet get = new HttpGet(uri);
 
+            onBeforeExecute(get); // 发送请求前设置header参数等操作
             try (CloseableHttpResponse response = client.execute(get);) {
+                onAfterExecute(get, response); // 发送请求后的操作
                 HttpEntity entity = response.getEntity();
                 String string = EntityUtils.toString(entity, Consts.UTF_8);
 
@@ -293,7 +302,9 @@ public abstract class HttpTools {
                 setPostParams(post, params, logs);
             }
 
+            onBeforeExecute(post); // 发送请求前设置header参数等操作
             try (CloseableHttpResponse response = client.execute(post);) {
+                onAfterExecute(post, response); // 发送请求后的操作
                 HttpEntity entity = response.getEntity();
                 String string = EntityUtils.toString(entity);
 
@@ -339,7 +350,9 @@ public abstract class HttpTools {
                 setUploadParams(post, params, logs);
             }
 
+            onBeforeExecute(post); // 发送请求前设置header参数等操作
             try (CloseableHttpResponse response = client.execute(post);) {
+                onAfterExecute(post, response); // 发送请求后的操作
                 HttpEntity entity = response.getEntity();
                 String string = EntityUtils.toString(entity);
 
@@ -421,21 +434,6 @@ public abstract class HttpTools {
      */
     protected abstract <P> void setUploadParams(HttpPost method, Map<String, P> params, List<KeyString> logs);
 
-    protected String toString(String key, Object value, List<KeyString> logs) {
-        String string;
-        if (value instanceof File) {
-            string = ((File) value).getAbsolutePath();
-        } else if (value instanceof CharSequence) {
-            string = value.toString();
-        } else {
-            string = JSON.toJSONString(value);
-        }
-        if (logs != null) {
-            logs.add(new KeyString(key, string));
-        }
-        return string;
-    }
-
     protected void addParam(MultipartEntityBuilder builder, String key, Object value, List<KeyString> logs) {
         String string;
         if (value instanceof InputStream) {
@@ -473,6 +471,74 @@ public abstract class HttpTools {
             buffer.append(i.getKey()).append("=").append(i.getValue());
         }
         return buffer.toString();
+    }
+
+    protected String toLogString(String key, Object value, List<KeyString> logs) {
+        String string;
+        if (value instanceof File) {
+            string = ((File) value).getAbsolutePath();
+        } else if (value instanceof CharSequence) {
+            string = value.toString();
+        } else {
+            string = JSON.toJSONString(value);
+        }
+        if (logs != null) {
+            logs.add(new KeyString(key, string));
+        }
+        return string;
+    }
+
+    /** 发送请求前设置header参数等操作 **/
+    protected void onBeforeExecute(HttpMessage hm) {
+        Header[] allHeaders = getAllHeaders();
+        if (VerifyTools.isNotBlank(allHeaders)) {
+            hm.setHeaders(allHeaders);
+        }
+    }
+
+    /** 发送请求后的操作 **/
+    protected void onAfterExecute(HttpMessage hm, HttpResponse resp) {
+    }
+
+    /** 追加header参数 **/
+    protected void addHeader(String name, String value) {
+        if (VerifyTools.isAnyBlank(name, value)) {
+            return;
+        }
+        if (this.headers == null) {
+            this.headers = new HeaderGroup();
+        }
+        this.headers.addHeader(new BasicHeader(name, value));
+    }
+
+    /** 删除header参数 **/
+    protected void removeHeader(String name) {
+        if (VerifyTools.isBlank(name)) {
+            return;
+        }
+        if (this.headers == null) {
+            return;
+        }
+        for (HeaderIterator i = this.headers.iterator(); i.hasNext();) {
+            Header header = i.nextHeader();
+            if (name.equalsIgnoreCase(header.getName())) {
+                i.remove();
+            }
+        }
+    }
+
+    /** 遍历header参数 **/
+    protected HeaderIterator headerIterator() {
+        if (this.headers == null) {
+            return new HeaderGroup().iterator();
+        } else {
+            return this.headers.iterator();
+        }
+    }
+
+    /** 获取全部header参数 **/
+    protected Header[] getAllHeaders() {
+        return this.headers == null ? null : this.headers.getAllHeaders();
     }
 
     /**
@@ -537,15 +603,15 @@ public abstract class HttpTools {
                 if (value instanceof Object[]) {
                     Object[] objects = (Object[]) value;
                     for (Object object : objects) {
-                        builder.addParameter(key, toString(key, object, null));
+                        builder.addParameter(key, toLogString(key, object, null));
                     }
                 } else if (value instanceof Iterable) {
                     Iterable<?> iterator = (Iterable<?>) value;
                     for (Object object : iterator) {
-                        builder.addParameter(key, toString(key, object, null));
+                        builder.addParameter(key, toLogString(key, object, null));
                     }
                 } else {
-                    builder.addParameter(key, toString(key, value, null));
+                    builder.addParameter(key, toLogString(key, value, null));
                 }
             }
         }
@@ -568,15 +634,15 @@ public abstract class HttpTools {
                 if (value instanceof Object[]) {
                     Object[] objects = (Object[]) value;
                     for (Object object : objects) {
-                        pairs.add(new BasicNameValuePair(key, toString(key, object, logs)));
+                        pairs.add(new BasicNameValuePair(key, toLogString(key, object, logs)));
                     }
                 } else if (value instanceof Iterable) {
                     Iterable<?> iterator = (Iterable<?>) value;
                     for (Object object : iterator) {
-                        pairs.add(new BasicNameValuePair(key, toString(key, object, logs)));
+                        pairs.add(new BasicNameValuePair(key, toLogString(key, object, logs)));
                     }
                 } else {
-                    pairs.add(new BasicNameValuePair(key, toString(key, value, logs)));
+                    pairs.add(new BasicNameValuePair(key, toLogString(key, value, logs)));
                 }
             }
             HttpEntity entity = new UrlEncodedFormEntity(pairs, Consts.UTF_8);
