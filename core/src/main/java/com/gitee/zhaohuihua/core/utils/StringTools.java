@@ -424,27 +424,44 @@ public abstract class StringTools {
         return text == null ? null : REGEXP_TRIM_RIGHT.matcher(text).replaceAll("");
     }
 
-    public static String trim(String string, char c) {
-        return trim(string, c, true, true);
+    public static String remove(String text, char... chars) {
+        return remove(text, true, true, chars);
     }
 
-    public static String trim(String string, char c, boolean left, boolean right) {
-        char[] value = string.toCharArray();
+    public static String removeLeft(String text, char... chars) {
+        return remove(text, true, false, chars);
+    }
+
+    public static String removeRight(String text, char... chars) {
+        return remove(text, false, true, chars);
+    }
+
+    private static String remove(String text, boolean left, boolean right, char... chars) {
+        char[] value = text.toCharArray();
         int len = value.length;
         int st = 0;
         char[] val = value;
 
         if (left) {
-            while ((st < len) && (val[st] == c)) {
+            while ((st < len) && inArray(val[st], chars)) {
                 st++;
             }
         }
         if (right) {
-            while ((st < len) && (val[len - 1] == c)) {
+            while ((st < len) && inArray(val[len - 1], chars)) {
                 len--;
             }
         }
-        return ((st > 0) || (len < value.length)) ? string.substring(st, len) : string;
+        return ((st > 0) || (len < value.length)) ? text.substring(st, len) : text;
+    }
+
+    private static boolean inArray(char c, char[] array) {
+        for (int i = 0, len = array.length; i < len; i++) {
+            if (array[i] == c) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** 左侧补零 **/

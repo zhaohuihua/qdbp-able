@@ -12,9 +12,9 @@ import org.lionsoul.jcseg.tokenizer.core.SegmentFactory;
 
 // autoLoad参数影响分词结果
 // autoLoad = true的运行结果：
-// 罗志高/nr;兴奋/v;极了/u;因为/c;老吴/nr;送了/v;他/r;一台/m;笔记本/n;。/w
+// 罗志高/nr; 兴奋/v; 极了/u; 因为/c; 老吴/nr; 送了/v; 他/r; 一台/m; 笔记本/n; 。/w
 // autoLoad = false的运行结果：
-// 罗;志;高;兴奋;极了;因为;老;吴;送了;他;一台;笔记本;。/w
+// 罗; 志; 高; 兴奋; 极了; 因为; 老; 吴; 送了; 他; 一台; 笔记本; 。/w
 public class JcsegTest2 {
 
     public static void main(String[] args) throws JcsegException, IOException {
