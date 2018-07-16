@@ -14,6 +14,7 @@ import org.lionsoul.jcseg.tokenizer.core.IWord;
 import org.lionsoul.jcseg.tokenizer.core.JcsegException;
 import org.lionsoul.jcseg.tokenizer.core.JcsegTaskConfig;
 import org.lionsoul.jcseg.tokenizer.core.SegmentFactory;
+import com.gitee.zhaohuihua.core.utils.StringTools;
 import com.gitee.zhaohuihua.core.utils.VerifyTools;
 import com.gitee.zhaohuihua.tools.utils.ConvertTools;
 
@@ -57,6 +58,23 @@ public class KeywordHandler {
         for (String string : keywords) {
             if (VerifyTools.isNotBlank(string)) {
                 container.addAll(doSegmentate(string));
+            }
+        }
+    }
+
+    /** 增加已经分词的关键字 **/
+    public void addSegment(String... keywords) {
+        if (VerifyTools.isBlank(keywords)) {
+            return;
+        }
+        for (String string : keywords) {
+            if (VerifyTools.isNotBlank(string)) {
+                String[] segments = StringTools.split(string, '\t', ' ', '\r', '\n');
+                for (String segment : segments) {
+                    if (VerifyTools.isNotBlank(segment)) {
+                        container.add(segment);
+                    }
+                }
             }
         }
     }

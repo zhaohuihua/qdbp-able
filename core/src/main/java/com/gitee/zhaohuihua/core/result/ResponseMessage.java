@@ -87,8 +87,9 @@ public class ResponseMessage implements IResultMessage, Serializable {
     /** 设置返回内容 **/
     public void setBody(Object body) {
         if (body instanceof PageList) {
-            this.body = body;
-            this.addExtra("total", ((PageList<?>) body).getTotal());
+            PageList<?> temp = (PageList<?>) body;
+            this.body = temp.getList();
+            this.addExtra("total", temp.getTotal());
         } else if (body instanceof PartList) {
             this.body = body;
             this.addExtra("total", ((PartList<?>) body).getTotal());

@@ -1,7 +1,9 @@
 package com.gitee.zhaohuihua.core.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,9 +33,6 @@ public abstract class StringTools {
 
     /** 正则表达式转义字符 **/
     private static final Pattern REG_CHAR = Pattern.compile("([\\{\\}\\[\\]\\(\\)\\^\\$\\.\\*\\?\\-\\+\\\\])");
-
-    /** 字符串分隔符正则表达式 **/
-    private static final Pattern SEPARATOR = Pattern.compile("\\|");
 
     // \\uD800\\uDC00-\\uDBFF\\uDFFF\\uD800-\\uDFFF
     private static final Pattern UTF8MB4 = Pattern.compile("[\\uD800\\uDC00-\\uDBFF\\uDFFF]");
@@ -187,17 +186,76 @@ public abstract class StringTools {
      * "aa|bb||cc" --&gt; [aa, bb, , cc]
      *
      * @param string 原字符串
-     * @return 拆分的字符串数组
+     * @return 拆分后的字符串数组
      */
     public static String[] split(String string) {
+        return split(string, true, '|');
+    }
+
+    /**
+     * 按指定字符拆分字符串<br>
+     * 每一个子字符串都已经trim()过了<br>
+     * "aa|bb|cc" --&gt; [aa, bb, cc]<br>
+     * "aa|bb||cc" --&gt; [aa, bb, , cc]
+     *
+     * @param string 原字符串
+     * @param chars 分隔符
+     * @return 拆分后的字符串数组
+     */
+    public static String[] split(String string, char... chars) {
+        return split(string, true, chars);
+    }
+
+    /**
+     * 按指定字符拆分字符串<br>
+     * "aa|bb|cc" --&gt; [aa, bb, cc]<br>
+     * "aa|bb||cc" --&gt; [aa, bb, , cc]
+     *
+     * @param string 原字符串
+     * @param trim 每一个子字符串是否执行trim()
+     * @param chars 分隔符
+     * @return 拆分后的字符串数组
+     */
+    public static String[] split(String string, boolean trim, char... chars) {
         if (string == null) {
             return null;
         }
-        String[] array = SEPARATOR.split(string);
-        for (int i = 0; i < array.length; i++) {
-            array[i] = array[i].trim();
+        if (string.length() == 0) {
+            return new String[0];
         }
-        return array;
+        if (chars == null || chars.length == 0) {
+            return new String[] { string };
+        }
+        List<String> list = new ArrayList<>();
+        StringBuilder buffer = new StringBuilder();
+        char[] textChars = string.toCharArray();
+        boolean lastIsSplitChar = false;
+        for (int i = 0; i < textChars.length; i++) {
+            char c = textChars[i];
+            boolean isSplitChar = false;
+            for (int j = 0; j < chars.length; j++) {
+                if (c == chars[j]) {
+                    isSplitChar = true;
+                    break;
+                }
+            }
+            if (!isSplitChar) {
+                buffer.append(c);
+                lastIsSplitChar = false;
+            } else {
+                if (trim) {
+                    list.add(buffer.toString().trim());
+                } else {
+                    list.add(buffer.toString());
+                }
+                buffer.setLength(0);
+                lastIsSplitChar = true;
+            }
+        }
+        if (lastIsSplitChar) {
+            list.add("");
+        }
+        return list.toArray(new String[0]);
     }
 
     public static String remove(String string, int start, int end) {
