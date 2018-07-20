@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +13,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.http.Consts;
 import org.apache.http.Header;
-import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -30,13 +31,12 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.message.HeaderGroup;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.zhaohuihua.core.beans.KeyString;
 import com.gitee.zhaohuihua.core.exception.ServiceException;
 import com.gitee.zhaohuihua.core.result.ResponseMessage;
@@ -51,18 +51,20 @@ import com.gitee.zhaohuihua.core.utils.VerifyTools;
 public abstract class HttpTools {
 
     private static final Logger log = LoggerFactory.getLogger(HttpTools.class);
-
-    private static final ContentType contentType = ContentType.create("text/plain", Consts.UTF_8);
-
     public static final HttpTools form = new HttpFormImpl();
 
     public static final HttpTools json = new HttpJsonImpl();
 
-    private IHttpHandler httpHandler;
-    private HeaderGroup headers;
+    protected IHttpHandler httpHandler;
+    protected Charset charset = Consts.UTF_8;
+    protected ContentType contentType = ContentType.create("text/plain", charset);
 
     public HttpTools() {
         this.httpHandler = new BaseHttpHandler();
+    }
+
+    public HttpTools(IHttpHandler httpHandler) {
+        this.httpHandler = httpHandler;
     }
 
     public void setHttpHandler(IHttpHandler httpHandler) {
@@ -139,16 +141,16 @@ public abstract class HttpTools {
     public <T, P> T query(HttpUrl hurl, Map<String, P> params, Class<T> type) throws HttpException {
         ResponseMessage result = this.execute(hurl, params);
 
-        String string = (String) result.getBody();
+        Object body = result.getBody();
 
-        if (VerifyTools.isBlank(string)) {
+        if (VerifyTools.isBlank(body)) {
             return null;
         }
 
         try {
-            return JSON.parseObject(string, type);
+            return TypeUtils.castToJavaBean(body, type);
         } catch (Exception e) {
-            throw new ResultParseException("Http request success, but JSON.parseObject error. " + hurl, e);
+            throw new ResultParseException("Http request success, but TypeUtils.castToJavaBean error. " + hurl, e);
         }
     }
 
@@ -176,17 +178,47 @@ public abstract class HttpTools {
     public <T, P> List<T> list(HttpUrl hurl, Map<String, Object> params, Class<T> type) throws HttpException {
         ResponseMessage result = this.execute(hurl, params);
 
-        String string = (String) result.getBody();
+        Object body = result.getBody();
 
-        if (VerifyTools.isBlank(string)) {
+        if (VerifyTools.isBlank(body)) {
             return null;
         }
 
-        try {
-            return JSON.parseArray(string, type);
-        } catch (Exception e) {
-            throw new ResultParseException("Http request success, but JSON.parseArray error. " + hurl, e);
+        if (body instanceof String) {
+            try {
+                return JSON.parseArray((String) body, type);
+            } catch (Exception e) {
+                throw new ResultParseException("Http request success, but JSON.parseArray error. " + hurl, e);
+            }
         }
+
+        List<Object> objects = new ArrayList<>();
+        if (body.getClass().isArray()) {
+            Object[] array = (Object[]) body;
+            for (Object item : array) {
+                objects.add(item);
+            }
+        } else if (body instanceof List) {
+            objects.addAll((List<?>) body);
+        } else if (body instanceof Iterable) {
+            Iterable<?> iterable = (Iterable<?>) body;
+            for (Object item : iterable) {
+                objects.add(item);
+            }
+        } else {
+            throw new ResultParseException("Object can't convert to List. " + hurl);
+        }
+
+        List<T> results = new ArrayList<>();
+        for (Object item : objects) {
+            try {
+                results.add(TypeUtils.castToJavaBean(item, type));
+            } catch (Exception e) {
+                throw new ResultParseException("Http request success, but TypeUtils.castToJavaBean error. " + hurl, e);
+            }
+        }
+
+        return results;
     }
 
     protected ResponseMessage parseResult(HttpUrl hurl, String string) throws RemoteServiceException, Exception {
@@ -259,8 +291,7 @@ public abstract class HttpTools {
             onBeforeExecute(get); // 发送请求前设置header参数等操作
             try (CloseableHttpResponse response = client.execute(get);) {
                 onAfterExecute(get, response); // 发送请求后的操作
-                HttpEntity entity = response.getEntity();
-                String string = EntityUtils.toString(entity, Consts.UTF_8);
+                String string = responseToString(response);
 
                 StatusLine status = response.getStatusLine();
                 int code = status.getStatusCode();
@@ -305,8 +336,7 @@ public abstract class HttpTools {
             onBeforeExecute(post); // 发送请求前设置header参数等操作
             try (CloseableHttpResponse response = client.execute(post);) {
                 onAfterExecute(post, response); // 发送请求后的操作
-                HttpEntity entity = response.getEntity();
-                String string = EntityUtils.toString(entity);
+                String string = responseToString(response);
 
                 StatusLine status = response.getStatusLine();
                 int code = status.getStatusCode();
@@ -353,8 +383,7 @@ public abstract class HttpTools {
             onBeforeExecute(post); // 发送请求前设置header参数等操作
             try (CloseableHttpResponse response = client.execute(post);) {
                 onAfterExecute(post, response); // 发送请求后的操作
-                HttpEntity entity = response.getEntity();
-                String string = EntityUtils.toString(entity);
+                String string = responseToString(response);
 
                 StatusLine status = response.getStatusLine();
                 int code = status.getStatusCode();
@@ -490,7 +519,7 @@ public abstract class HttpTools {
 
     /** 发送请求前设置header参数等操作 **/
     protected void onBeforeExecute(HttpMessage hm) {
-        Header[] allHeaders = getAllHeaders();
+        Header[] allHeaders = httpHandler.getAllHeaders();
         if (VerifyTools.isNotBlank(allHeaders)) {
             hm.setHeaders(allHeaders);
         }
@@ -500,45 +529,10 @@ public abstract class HttpTools {
     protected void onAfterExecute(HttpMessage hm, HttpResponse resp) {
     }
 
-    /** 追加header参数 **/
-    protected void addHeader(String name, String value) {
-        if (VerifyTools.isAnyBlank(name, value)) {
-            return;
-        }
-        if (this.headers == null) {
-            this.headers = new HeaderGroup();
-        }
-        this.headers.addHeader(new BasicHeader(name, value));
-    }
-
-    /** 删除header参数 **/
-    protected void removeHeader(String name) {
-        if (VerifyTools.isBlank(name)) {
-            return;
-        }
-        if (this.headers == null) {
-            return;
-        }
-        for (HeaderIterator i = this.headers.iterator(); i.hasNext();) {
-            Header header = i.nextHeader();
-            if (name.equalsIgnoreCase(header.getName())) {
-                i.remove();
-            }
-        }
-    }
-
-    /** 遍历header参数 **/
-    protected HeaderIterator headerIterator() {
-        if (this.headers == null) {
-            return new HeaderGroup().iterator();
-        } else {
-            return this.headers.iterator();
-        }
-    }
-
-    /** 获取全部header参数 **/
-    protected Header[] getAllHeaders() {
-        return this.headers == null ? null : this.headers.getAllHeaders();
+    /** 获取响应文本 **/
+    protected String responseToString(HttpResponse resp) throws ParseException, IOException {
+        HttpEntity entity = resp.getEntity();
+        return EntityUtils.toString(entity, charset);
     }
 
     /**
@@ -548,6 +542,14 @@ public abstract class HttpTools {
      * @version 160224
      */
     public static class HttpJsonImpl extends HttpTools {
+
+        public HttpJsonImpl() {
+            super();
+        }
+
+        public HttpJsonImpl(IHttpHandler httpHandler) {
+            super(httpHandler);
+        }
 
         public <P> String get(String url, Map<String, P> params) throws HttpException {
             throw new RuntimeException("GET request method is not supported!");
@@ -584,6 +586,14 @@ public abstract class HttpTools {
      */
     public static class HttpFormImpl extends HttpTools {
 
+        public HttpFormImpl() {
+            super();
+        }
+
+        public HttpFormImpl(IHttpHandler httpHandler) {
+            super(httpHandler);
+        }
+
         /**
          * 设置GET参数
          *
@@ -592,7 +602,7 @@ public abstract class HttpTools {
          */
         protected <P> void setGetParams(URIBuilder builder, Map<String, P> params) {
 
-            builder.setCharset(Consts.UTF_8);
+            builder.setCharset(charset);
             Set<Entry<String, P>> sets = params.entrySet();
             for (Entry<String, P> entry : sets) {
                 String key = entry.getKey();
@@ -645,7 +655,7 @@ public abstract class HttpTools {
                     pairs.add(new BasicNameValuePair(key, toLogString(key, value, logs)));
                 }
             }
-            HttpEntity entity = new UrlEncodedFormEntity(pairs, Consts.UTF_8);
+            HttpEntity entity = new UrlEncodedFormEntity(pairs, charset);
             method.setEntity(entity);
         }
 

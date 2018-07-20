@@ -252,6 +252,14 @@ public abstract class StringTools {
                 lastIsSplitChar = true;
             }
         }
+        if (buffer.length() > 0) {
+            if (trim) {
+                list.add(buffer.toString().trim());
+            } else {
+                list.add(buffer.toString());
+            }
+            buffer.setLength(0);
+        }
         if (lastIsSplitChar) {
             list.add("");
         }

@@ -19,8 +19,10 @@ import com.gitee.zhaohuihua.core.utils.StringTools;
 import com.gitee.zhaohuihua.core.utils.VerifyTools;
 import com.gitee.zhaohuihua.tools.files.FileTools;
 import com.gitee.zhaohuihua.tools.files.PathTools;
+import com.gitee.zhaohuihua.tools.http.BaseHttpHandler;
 import com.gitee.zhaohuihua.tools.http.HttpException;
 import com.gitee.zhaohuihua.tools.http.HttpTools;
+import com.gitee.zhaohuihua.tools.http.HttpTools.HttpFormImpl;
 
 public class PinyinChecker {
 
@@ -176,7 +178,7 @@ public class PinyinChecker {
     // </div>
     private static Pattern FINDER_BAIDU_HANYU =
             Pattern.compile("<div[^<>]+id=\"pinyin\">\\s*<span>\\s*<b>([^<>]+)</b>");
-    private static BaiduHttpTools BAIDU_HTTP_TOOLS = new BaiduHttpTools();
+    private static HttpTools BAIDU_HTTP_TOOLS = new HttpFormImpl(new BaiduHttpHandler());
 
     // hanyu.baidu.com: 百度汉语
     protected String findPinyinByBaiduHanyu(String word) {
@@ -288,9 +290,9 @@ public class PinyinChecker {
         pinyin.put("玢", "fen"); // bin
     }
 
-    private static class BaiduHttpTools extends HttpTools.HttpFormImpl {
+    private static class BaiduHttpHandler extends BaseHttpHandler {
 
-        public BaiduHttpTools() {
+        public BaiduHttpHandler() {
             // 百度有限制UserAgent, Java默认的UserAgent总是报页面不存在
             this.addHeader("Referer", "https://hanyu.baidu.com/");
             this.addHeader("User-Agent", "Mozilla/5.0 AppleWebKit/537.36 Chrome/59.0.3071.86 Safari/537.36");

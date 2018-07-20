@@ -2,6 +2,7 @@ package com.gitee.zhaohuihua.tools.http;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Properties;
 import com.gitee.zhaohuihua.core.utils.StringTools;
 import com.gitee.zhaohuihua.tools.files.PathTools;
 import com.gitee.zhaohuihua.tools.utils.Config;
@@ -22,6 +23,21 @@ public class HostUrlConfig extends Config implements Serializable {
 
     public HostUrlConfig() {
         super();
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param properties 配置文件
+     * @param host 主机配置项KEY
+     */
+    public HostUrlConfig(Properties properties, String host) {
+        super(properties);
+        if (StringTools.isUrl(host)) {
+            this.host = host;
+        } else {
+            this.host = this.getString(host);
+        }
     }
 
     /**

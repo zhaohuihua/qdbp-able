@@ -28,8 +28,8 @@ import com.gitee.zhaohuihua.tools.utils.RandomTools;
 # interface host url
 xxx.auth.host = http://www.xxx.com/auth/
 # interface common return code
-xxx.auth.sys.code.success = 0
-xxx.auth.biz.code.success = 000000
+xxx.auth.code.sys.success = 0
+xxx.auth.code.biz.success = 000000
 # interface common params
 cim.interface.account  = 10000000000
 cim.interface.password = aabbcc112233
@@ -52,15 +52,15 @@ public class XxxAuthHttpExecutor extends HttpExecutor {
     public static final XxxAuthHttpExecutor me = new XxxAuthHttpExecutor();
 
     public XxxAuthHttpExecutor() {
-        // new HttpTools() -- form 方式提交请求参数
-        // new JsonTools() -- json 方式提交请求参数
-        // super(new HostUrlConfig(PATH, "xxx.auth.host"), new HttpTools(), new XxxAuthHandler());
+        // new HttpFormImpl() -- form 方式提交请求参数
+        // new HttpJsonImpl() -- json 方式提交请求参数
+        // super(new HostUrlConfig(PATH, "xxx.auth.host"), new HttpFormImpl(), new XxxAuthHandler());
         super(new HostUrlConfig(PATH, "xxx.auth.host"), new HttpJsonImpl(), new XxxAuthHandler());
     }
 
     // 如果host url prefix是通过数据库配置的, 则可以调这个构造函数, 但最好建一个单例缓存
     // public XxxAuthHttpExecutor(String hostUrlPrefix) {
-    //     super(new HostUrlConfig(PATH, hostUrlPrefix), new JsonTools(), new XxxAuthHandler());
+    //     super(new HostUrlConfig(PATH, hostUrlPrefix), new HttpJsonImpl(), new XxxAuthHandler());
     // }
 
     // 如果针对每个接口存在不一样的请求参数或响应报文配置, 可将hurl强转为KeyedHttpUrl
@@ -106,8 +106,8 @@ public class XxxAuthHttpExecutor extends HttpExecutor {
             // code是系统异常, 0=成功; returnCode是业务异常, 000000=成功
             JSONObject json = JSON.parseObject(string);
             String sysCode = json.getString("code");
-            if (!sysCode.equals(config.getString("xxx.auth.sys.code.success"))) {
-                // xxx.auth.sys.code.success = 0, 不等于0的都是失败
+            if (!sysCode.equals(config.getString("xxx.auth.code.sys.success"))) {
+                // xxx.auth.code.sys.success = 0, 不等于0的都是失败
                 // 这一类异常不应该抛上去给用户看到了, 直接返回接口调用失败, 日志HttpTools会统一记录的
                 ResultCode resultCode = ResultCode.REMOTE_SERVICE_FAIL;
                 throw new RemoteServiceException(resultCode.getCode(), resultCode.getMessage());
@@ -115,8 +115,8 @@ public class XxxAuthHttpExecutor extends HttpExecutor {
                 String jsonString = json.getString("json");
                 JSONObject jsonObject = JSON.parseObject(jsonString);
                 String bizCode = jsonObject.getString("resultCode");
-                if (!bizCode.equals(config.getString("xxx.auth.biz.code.success"))) {
-                    // xxx.auth.biz.code.success = 000000, 不等于000000的都是失败
+                if (!bizCode.equals(config.getString("xxx.auth.code.biz.success"))) {
+                    // xxx.auth.code.biz.success = 000000, 不等于000000的都是失败
                     throw new RemoteServiceException(sysCode, jsonObject.getString("resultMessage"));
                 } else {
                     ResponseMessage result = new ResponseMessage();

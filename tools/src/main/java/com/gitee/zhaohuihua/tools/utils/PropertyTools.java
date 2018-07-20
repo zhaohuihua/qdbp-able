@@ -365,7 +365,7 @@ public abstract class PropertyTools {
 
     private static Properties load(String[] paths, String encoding, Filter[] filters, Class<?>[] classpaths) {
         URL[] urls = findResource(paths, classpaths);
-        return load(urls, encoding, filters, classpaths);
+        return load(urls, encoding, filters, classpaths, null);
     }
 
     /**
@@ -377,7 +377,7 @@ public abstract class PropertyTools {
      * @return 配置文件对象
      */
     public static Properties load(URL url, String encoding, Class<?>... classpaths) {
-        return load(new URL[] { url }, encoding, null, classpaths);
+        return load(new URL[] { url }, encoding, null, classpaths, null);
     }
 
     /**
@@ -403,11 +403,12 @@ public abstract class PropertyTools {
         String encoding = options == null ? null : options.getEncoding();
         Filter[] filters = options == null ? null : options.getFilters();
         Class<?>[] classpaths = options == null ? null : options.getClasspaths();
-        return load(urls, encoding, filters, classpaths);
+        Properties defaults = options == null ? null : options.getDefaults();
+        return load(urls, encoding, filters, classpaths, defaults);
     }
 
-    private static Properties load(URL[] urls, String encoding, Filter[] filters, Class<?>[] classpaths) {
-        Properties temp = new Properties();
+    private static Properties load(URL[] urls, String encoding, Filter[] filters, Class<?>[] classpaths, Properties defaults) {
+        Properties temp = new Properties(defaults);
 
         for (URL url : urls) {
             load(temp, url, encoding, classpaths);
@@ -544,9 +545,20 @@ public abstract class PropertyTools {
     /** 配置文件加载选项 **/
     public static class Options {
 
+        private Properties defaults;
         private String encoding;
         private List<Filter> filters;
         private List<Class<?>> classpaths;
+
+        /** 默认配置 **/
+        public Properties getDefaults() {
+            return defaults;
+        }
+
+        /** 默认配置 **/
+        public void setDefaults(Properties defaults) {
+            this.defaults = defaults;
+        }
 
         /** 获取编码格式 **/
         public String getEncoding() {
