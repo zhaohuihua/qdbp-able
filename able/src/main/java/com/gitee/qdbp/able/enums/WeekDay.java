@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.enums;
+package com.gitee.qdbp.able.enums;
 
 /**
  * 一星期中的每一天<br>

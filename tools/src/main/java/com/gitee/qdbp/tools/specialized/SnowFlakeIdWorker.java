@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.specialized;
+package com.gitee.qdbp.tools.specialized;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

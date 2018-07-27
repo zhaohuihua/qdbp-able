@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.gitee.zhaohuihua</groupId>
-		<artifactId>zhh-parent</artifactId>
+		<groupId>com.gitee.qdbp</groupId>
+		<artifactId>qdbp-parent</artifactId>
 		<version>1.6.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>zhh-core</artifactId>
+	<artifactId>qdbp-able</artifactId>
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
 

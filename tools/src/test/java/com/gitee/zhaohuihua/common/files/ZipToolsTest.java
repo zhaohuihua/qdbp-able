@@ -3,8 +3,8 @@ package com.gitee.zhaohuihua.common.files;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import com.gitee.zhaohuihua.tools.files.ZipTools;
-import com.gitee.zhaohuihua.tools.files.ZipTools.UrlItem;
+import com.gitee.qdbp.tools.files.ZipTools;
+import com.gitee.qdbp.tools.files.ZipTools.UrlItem;
 
 public class ZipToolsTest {
 

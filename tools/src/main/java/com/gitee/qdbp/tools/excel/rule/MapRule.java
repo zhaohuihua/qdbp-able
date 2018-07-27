@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.excel.rule;
+package com.gitee.qdbp.tools.excel.rule;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.gitee.zhaohuihua.core.exception.ServiceException;
-import com.gitee.zhaohuihua.core.result.ResultCode;
-import com.gitee.zhaohuihua.core.utils.StringTools;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
-import com.gitee.zhaohuihua.tools.excel.model.CellInfo;
+import com.gitee.qdbp.able.exception.ServiceException;
+import com.gitee.qdbp.able.result.ResultCode;
+import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.excel.model.CellInfo;
 
 /**
  * 映射规则

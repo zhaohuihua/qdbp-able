@@ -1,6 +1,6 @@
 package com.gitee.zhaohuihua.common.files;
 
-import com.gitee.zhaohuihua.tools.files.PathTools;
+import com.gitee.qdbp.tools.files.PathTools;
 
 public class RelativizeTest {
 

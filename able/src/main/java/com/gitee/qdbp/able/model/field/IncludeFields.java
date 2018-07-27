@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.model.field;
+package com.gitee.qdbp.able.model.field;
 
 /**
  * 导入型字段子集

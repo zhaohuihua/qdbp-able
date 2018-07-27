@@ -3,19 +3,19 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.gitee.zhaohuihua</groupId>
-		<artifactId>zhh-parent</artifactId>
+		<groupId>com.gitee.qdbp</groupId>
+		<artifactId>qdbp-parent</artifactId>
 		<version>1.6.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>zhh-tools</artifactId>
+	<artifactId>qdbp-tools</artifactId>
 	<packaging>jar</packaging>
 
 	<dependencies>
 
 		<dependency>
-			<groupId>com.gitee.zhaohuihua</groupId>
-			<artifactId>zhh-core</artifactId>
+			<groupId>com.gitee.qdbp</groupId>
+			<artifactId>qdbp-able</artifactId>
 		</dependency>
 
 		<dependency>

@@ -1,10 +1,10 @@
-package com.gitee.zhaohuihua.tools.wait;
+package com.gitee.qdbp.tools.wait;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.TimeoutException;
-import com.gitee.zhaohuihua.tools.wait.WaitLock.Checker;
+import com.gitee.qdbp.tools.wait.WaitLock.Checker;
 
 /**
  * 等待结果

@@ -1,12 +1,12 @@
-package com.gitee.zhaohuihua.tools.excel.parse;
+package com.gitee.qdbp.tools.excel.parse;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.gitee.zhaohuihua.core.utils.StringTools;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
+import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
 
 /**
  * 名称列表配置类<br>

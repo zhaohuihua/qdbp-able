@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.utils;
+package com.gitee.qdbp.tools.utils;
 
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
@@ -19,9 +19,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.gitee.zhaohuihua.core.beans.KeyString;
-import com.gitee.zhaohuihua.core.utils.StringTools;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
+import com.gitee.qdbp.able.beans.KeyString;
+import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
 import ognl.Ognl;
 import ognl.OgnlException;
 

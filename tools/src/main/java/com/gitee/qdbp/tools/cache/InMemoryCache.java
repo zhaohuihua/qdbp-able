@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.cache;
+package com.gitee.qdbp.tools.cache;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.gitee.zhaohuihua.core.beans.VolatileData;
+import com.gitee.qdbp.able.beans.VolatileData;
 
 /**
  * 内存中的缓存

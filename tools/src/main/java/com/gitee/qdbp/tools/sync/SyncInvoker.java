@@ -1,8 +1,8 @@
-package com.gitee.zhaohuihua.tools.sync;
+package com.gitee.qdbp.tools.sync;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import com.gitee.zhaohuihua.tools.utils.ReflectTools;
+import com.gitee.qdbp.tools.utils.ReflectTools;
 
 /**
  * 异步执行方法, 带结果回调<br>

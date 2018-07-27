@@ -1,6 +1,6 @@
 package com.gitee.zhaohuihua.common.specialized;
 
-import com.gitee.zhaohuihua.tools.specialized.ShortKeyTools;
+import com.gitee.qdbp.tools.specialized.ShortKeyTools;
 
 public class ShortKeyToolsTest {
 

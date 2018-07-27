@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.excel.parse;
+package com.gitee.qdbp.tools.excel.parse;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,9 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.zhaohuihua.core.utils.StringTools;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
-import com.gitee.zhaohuihua.tools.utils.ConvertTools;
+import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.ConvertTools;
 
 /**
  * 序号列表配置类<br>

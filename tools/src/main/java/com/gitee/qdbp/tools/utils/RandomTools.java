@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.utils;
+package com.gitee.qdbp.tools.utils;
 
 import java.util.Random;
 import java.util.UUID;

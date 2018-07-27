@@ -1,6 +1,6 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
-import com.gitee.zhaohuihua.core.result.IResultMessage;
+import com.gitee.qdbp.able.result.IResultMessage;
 
 /**
  * 远程业务异常类

@@ -1,3 +1,3 @@
-# zhh-base
+# qdbp-apricot
 
-基础代码、公共工具类
+基础能力、公共工具类

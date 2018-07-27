@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.wait;
+package com.gitee.qdbp.tools.wait;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;

@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.files;
+package com.gitee.qdbp.tools.files;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;

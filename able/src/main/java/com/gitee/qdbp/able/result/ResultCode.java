@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.result;
+package com.gitee.qdbp.able.result;
 
 /**
  * 结果返回码枚举类

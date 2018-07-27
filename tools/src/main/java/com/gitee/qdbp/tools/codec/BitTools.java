@@ -1,9 +1,9 @@
-package com.gitee.zhaohuihua.tools.codec;
+package com.gitee.qdbp.tools.codec;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.gitee.zhaohuihua.core.utils.StringTools;
+import com.gitee.qdbp.able.utils.StringTools;
 
 /**
  * Bit工具类

@@ -1,8 +1,8 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
 import java.util.Map;
 import org.apache.http.Header;
-import com.gitee.zhaohuihua.core.result.ResponseMessage;
+import com.gitee.qdbp.able.result.ResponseMessage;
 
 /**
  * 参数处理和结果解析

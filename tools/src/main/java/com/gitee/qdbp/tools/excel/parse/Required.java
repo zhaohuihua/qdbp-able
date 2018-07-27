@@ -1,9 +1,9 @@
-package com.gitee.zhaohuihua.tools.excel.parse;
+package com.gitee.qdbp.tools.excel.parse;
 
 import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
 
 /**
  * 必填字段配置解析

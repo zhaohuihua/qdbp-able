@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.gitee.zhaohuihua</groupId>
-	<artifactId>zhh-parent</artifactId>
+	<groupId>com.gitee.qdbp</groupId>
+	<artifactId>qdbp-parent</artifactId>
 	<version>1.6.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
-	<url>https://gitee.com/zhaohuihua/</url>
-	<description>zhaohuihua parent library</description>
+	<url>https://gitee.com/qdbp/</url>
+	<description>qdbp parent library</description>
 
 	<developers>
 		<developer>
@@ -24,8 +24,8 @@
 	</licenses>
 
 	<modules>
+		<module>able</module>
 		<module>tools</module>
-		<module>core</module>
 	</modules>
 
 	<properties>
@@ -37,19 +37,19 @@
 	</properties>
 
 	<scm>
-        <connection>scm:git:https://gitee.com/zhaohuihua/zhh-base.git</connection>
-        <developerConnection>scm:git:https://gitee.com/zhaohuihua/zhh-base.git</developerConnection>
-        <url>https://gitee.com/zhaohuihua/zhh-base.git</url>
+        <connection>scm:git:https://gitee.com/qdbp/apricot.git</connection>
+        <developerConnection>scm:git:https://gitee.com/qdbp/apricot.git</developerConnection>
+        <url>https://gitee.com/qdbp/apricot.git</url>
         <tag>HEAD</tag>
     </scm>
 
 	<distributionManagement>
 		<repository>
-			<id>sonatype-zhaohuihua</id>
+			<id>sonatype-qdbp</id>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 		<snapshotRepository>
-			<id>sonatype-zhaohuihua</id>
+			<id>sonatype-qdbp</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
@@ -101,7 +101,7 @@
 				<version>1.6.8</version>
 				<extensions>true</extensions>
 				<configuration>
-					<serverId>sonatype-zhaohuihua</serverId>
+					<serverId>sonatype-qdbp</serverId>
 					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>false</autoReleaseAfterClose>
 				</configuration>
@@ -169,13 +169,13 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.gitee.zhaohuihua</groupId>
-				<artifactId>zhh-core</artifactId>
+				<groupId>com.gitee.qdbp</groupId>
+				<artifactId>qdbp-able</artifactId>
 				<version>1.6.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
-				<groupId>com.gitee.zhaohuihua</groupId>
-				<artifactId>zhh-tools</artifactId>
+				<groupId>com.gitee.qdbp</groupId>
+				<artifactId>qdbp-tools</artifactId>
 				<version>1.6.2-SNAPSHOT</version>
 				<exclusions>
 					<exclusion>

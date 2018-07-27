@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.result;
+package com.gitee.qdbp.able.result;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
 /**
  * HTTP请求执行失败

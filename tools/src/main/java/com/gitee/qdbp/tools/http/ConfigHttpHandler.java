@@ -1,6 +1,6 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
-import com.gitee.zhaohuihua.tools.utils.Config;
+import com.gitee.qdbp.tools.utils.Config;
 
 public abstract class ConfigHttpHandler extends BaseHttpHandler implements Config.Aware {
 

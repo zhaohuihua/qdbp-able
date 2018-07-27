@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.specialized;
+package com.gitee.qdbp.tools.specialized;
 
 /*
  * Password Hashing With PBKDF2 (http://crackstation.net/hashing-security.htm).

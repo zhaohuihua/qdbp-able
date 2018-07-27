@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.result;
+package com.gitee.qdbp.able.result;
 
 import java.io.Serializable;
 import java.util.ArrayList;

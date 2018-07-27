@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.beans;
+package com.gitee.qdbp.able.beans;
 
 /**
  * 带有过期时间的数据

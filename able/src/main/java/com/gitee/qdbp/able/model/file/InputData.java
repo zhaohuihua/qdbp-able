@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.model.file;
+package com.gitee.qdbp.able.model.file;
 
 import java.io.InputStream;
 import java.io.Serializable;

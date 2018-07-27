@@ -4,4 +4,4 @@
  * @author zhaohuihua
  * @version 180503
  */
-package com.gitee.zhaohuihua.core.model.field;
+package com.gitee.qdbp.able.model.field;

@@ -1,8 +1,8 @@
-package com.gitee.zhaohuihua.tools.excel.model;
+package com.gitee.qdbp.tools.excel.model;
 
 import java.io.Serializable;
 import java.util.Map;
-import com.gitee.zhaohuihua.tools.excel.XMetadata;
+import com.gitee.qdbp.tools.excel.XMetadata;
 
 /**
  * 行信息

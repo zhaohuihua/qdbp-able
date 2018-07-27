@@ -1,11 +1,11 @@
-package com.gitee.zhaohuihua.tools.utils;
+package com.gitee.qdbp.tools.utils;
 
 import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
-import com.gitee.zhaohuihua.core.beans.KeyString;
-import com.gitee.zhaohuihua.tools.utils.PropertyTools.Options;
+import com.gitee.qdbp.able.beans.KeyString;
+import com.gitee.qdbp.tools.utils.PropertyTools.Options;
 
 /**
  * 加载配置文件<br>

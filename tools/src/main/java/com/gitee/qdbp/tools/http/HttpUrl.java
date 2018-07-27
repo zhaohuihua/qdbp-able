@@ -1,6 +1,6 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
-import com.gitee.zhaohuihua.tools.files.PathTools;
+import com.gitee.qdbp.tools.files.PathTools;
 
 /**
  * 远程请求的URL和HTTP请求方法<br>

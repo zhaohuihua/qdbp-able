@@ -1,6 +1,6 @@
-package com.gitee.zhaohuihua.tools.specialized;
+package com.gitee.qdbp.tools.specialized;
 
-import com.gitee.zhaohuihua.tools.codec.DigestTools;
+import com.gitee.qdbp.tools.codec.DigestTools;
 
 /**
  * 短链接生成器<br>

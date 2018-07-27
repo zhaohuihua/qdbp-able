@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.model.ordering;
+package com.gitee.qdbp.able.model.ordering;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -3,7 +3,7 @@ package com.gitee.zhaohuihua.common.wait;
 import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.zhaohuihua.tools.wait.WaitLock;
+import com.gitee.qdbp.tools.wait.WaitLock;
 
 /**
  * WaitLock测试

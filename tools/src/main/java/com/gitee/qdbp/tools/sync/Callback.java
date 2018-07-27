@@ -1,8 +1,8 @@
-package com.gitee.zhaohuihua.tools.sync;
+package com.gitee.qdbp.tools.sync;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.zhaohuihua.tools.utils.ReflectTools;
+import com.gitee.qdbp.tools.utils.ReflectTools;
 
 /**
  * 回调接口<br>

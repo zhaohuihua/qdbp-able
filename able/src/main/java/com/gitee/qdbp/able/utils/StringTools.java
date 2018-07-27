@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.utils;
+package com.gitee.qdbp.able.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

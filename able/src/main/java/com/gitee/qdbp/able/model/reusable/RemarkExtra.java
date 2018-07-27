@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.model.reusable;
+package com.gitee.qdbp.able.model.reusable;
 
 import java.util.ArrayList;
 import java.util.List;

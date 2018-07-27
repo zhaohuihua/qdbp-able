@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.files;
+package com.gitee.qdbp.tools.files;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,8 +19,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
-import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
+import com.gitee.qdbp.able.exception.ResourceNotFoundException;
+import com.gitee.qdbp.able.utils.VerifyTools;
 
 /**
  * 资源工具类<br>

@@ -1,11 +1,11 @@
-package com.gitee.zhaohuihua.core.result;
+package com.gitee.qdbp.able.result;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.gitee.zhaohuihua.core.model.paging.PageList;
-import com.gitee.zhaohuihua.core.model.paging.PartList;
+import com.gitee.qdbp.able.model.paging.PageList;
+import com.gitee.qdbp.able.model.paging.PartList;
 
 /**
  * 响应消息

@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.codec;
+package com.gitee.qdbp.tools.codec;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

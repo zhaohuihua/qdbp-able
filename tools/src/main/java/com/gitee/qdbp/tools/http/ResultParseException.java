@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
 /**
  * 结果解析失败

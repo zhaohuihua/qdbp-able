@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +37,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.gitee.zhaohuihua.core.beans.KeyString;
-import com.gitee.zhaohuihua.core.exception.ServiceException;
-import com.gitee.zhaohuihua.core.result.ResponseMessage;
-import com.gitee.zhaohuihua.core.result.ResultCode;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
+import com.gitee.qdbp.able.beans.KeyString;
+import com.gitee.qdbp.able.exception.ServiceException;
+import com.gitee.qdbp.able.result.ResponseMessage;
+import com.gitee.qdbp.able.result.ResultCode;
+import com.gitee.qdbp.able.utils.VerifyTools;
 
 /**
  * HTTP请求工具类

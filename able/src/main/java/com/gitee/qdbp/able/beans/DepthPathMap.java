@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.beans;
+package com.gitee.qdbp.able.beans;
 
 import java.util.Arrays;
 import java.util.HashMap;

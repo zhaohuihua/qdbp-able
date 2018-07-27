@@ -1,6 +1,6 @@
-package com.gitee.zhaohuihua.core.exception;
+package com.gitee.qdbp.able.exception;
 
-import com.gitee.zhaohuihua.core.exception.EditableRuntimeException;
+import com.gitee.qdbp.able.exception.EditableRuntimeException;
 
 /**
  * 资源未找到

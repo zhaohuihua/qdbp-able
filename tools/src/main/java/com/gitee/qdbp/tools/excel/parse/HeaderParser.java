@@ -1,14 +1,14 @@
-package com.gitee.zhaohuihua.tools.excel.parse;
+package com.gitee.qdbp.tools.excel.parse;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import com.gitee.zhaohuihua.tools.excel.XMetadata;
-import com.gitee.zhaohuihua.tools.excel.model.CellInfo;
-import com.gitee.zhaohuihua.tools.excel.model.ColumnInfo;
-import com.gitee.zhaohuihua.tools.excel.utils.ExcelUtils;
+import com.gitee.qdbp.tools.excel.XMetadata;
+import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.excel.model.ColumnInfo;
+import com.gitee.qdbp.tools.excel.utils.ExcelUtils;
 
 /**
  * 表头解析器

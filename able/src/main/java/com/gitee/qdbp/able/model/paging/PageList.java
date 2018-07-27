@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.model.paging;
+package com.gitee.qdbp.able.model.paging;
 
 import java.io.Serializable;
 import java.util.ArrayList;

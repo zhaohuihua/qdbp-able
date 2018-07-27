@@ -1,9 +1,9 @@
-package com.gitee.zhaohuihua.tools.cache;
+package com.gitee.qdbp.tools.cache;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.gitee.zhaohuihua.core.beans.Duration;
+import com.gitee.qdbp.able.beans.Duration;
 
 /**
  * 缓存服务接口

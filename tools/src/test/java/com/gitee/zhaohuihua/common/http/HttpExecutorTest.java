@@ -9,21 +9,21 @@ import java.util.HashMap;
 import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.gitee.zhaohuihua.core.result.ResponseMessage;
-import com.gitee.zhaohuihua.core.result.ResultCode;
-import com.gitee.zhaohuihua.tools.codec.DigestTools;
-import com.gitee.zhaohuihua.tools.codec.HexTools;
-import com.gitee.zhaohuihua.tools.files.PathTools;
-import com.gitee.zhaohuihua.tools.http.ConfigHttpHandler;
-import com.gitee.zhaohuihua.tools.http.HostUrlConfig;
-import com.gitee.zhaohuihua.tools.http.HostUrlConfig.KeyedHttpUrl;
-import com.gitee.zhaohuihua.tools.http.HttpException;
-import com.gitee.zhaohuihua.tools.http.HttpExecutor;
-import com.gitee.zhaohuihua.tools.http.HttpTools.HttpJsonImpl;
-import com.gitee.zhaohuihua.tools.http.HttpUrl;
-import com.gitee.zhaohuihua.tools.http.RemoteServiceException;
-import com.gitee.zhaohuihua.tools.utils.JsonTools;
-import com.gitee.zhaohuihua.tools.utils.RandomTools;
+import com.gitee.qdbp.able.result.ResponseMessage;
+import com.gitee.qdbp.able.result.ResultCode;
+import com.gitee.qdbp.tools.codec.DigestTools;
+import com.gitee.qdbp.tools.codec.HexTools;
+import com.gitee.qdbp.tools.files.PathTools;
+import com.gitee.qdbp.tools.http.ConfigHttpHandler;
+import com.gitee.qdbp.tools.http.HostUrlConfig;
+import com.gitee.qdbp.tools.http.HostUrlConfig.KeyedHttpUrl;
+import com.gitee.qdbp.tools.http.HttpException;
+import com.gitee.qdbp.tools.http.HttpExecutor;
+import com.gitee.qdbp.tools.http.HttpTools.HttpJsonImpl;
+import com.gitee.qdbp.tools.http.HttpUrl;
+import com.gitee.qdbp.tools.http.RemoteServiceException;
+import com.gitee.qdbp.tools.utils.JsonTools;
+import com.gitee.qdbp.tools.utils.RandomTools;
 
 public class HttpExecutorTest extends HttpExecutor {
 

@@ -1,9 +1,9 @@
-package com.gitee.zhaohuihua.core.exception;
+package com.gitee.qdbp.able.exception;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 
-import com.gitee.zhaohuihua.core.result.IResultMessage;
+import com.gitee.qdbp.able.result.IResultMessage;
 
 /**
  * 业务异常类

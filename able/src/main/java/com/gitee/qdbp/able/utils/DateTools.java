@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.utils;
+package com.gitee.qdbp.able.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -2,8 +2,8 @@ package com.gitee.zhaohuihua.common.http;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.gitee.zhaohuihua.tools.http.HttpException;
-import com.gitee.zhaohuihua.tools.http.HttpTools;
+import com.gitee.qdbp.tools.http.HttpException;
+import com.gitee.qdbp.tools.http.HttpTools;
 
 public class JsonToolsTest {
 

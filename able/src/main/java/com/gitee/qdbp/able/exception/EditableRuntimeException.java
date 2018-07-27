@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.core.exception;
+package com.gitee.qdbp.able.exception;
 
 /**
  * 可追加消息的RuntimeException

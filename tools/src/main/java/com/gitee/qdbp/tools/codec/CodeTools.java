@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.codec;
+package com.gitee.qdbp.tools.codec;
 
 import java.util.ArrayList;
 import java.util.List;

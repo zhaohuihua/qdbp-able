@@ -15,14 +15,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.zhaohuihua.core.utils.StringTools;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
-import com.gitee.zhaohuihua.tools.files.FileTools;
-import com.gitee.zhaohuihua.tools.files.PathTools;
-import com.gitee.zhaohuihua.tools.http.BaseHttpHandler;
-import com.gitee.zhaohuihua.tools.http.HttpException;
-import com.gitee.zhaohuihua.tools.http.HttpTools;
-import com.gitee.zhaohuihua.tools.http.HttpTools.HttpFormImpl;
+import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.files.FileTools;
+import com.gitee.qdbp.tools.files.PathTools;
+import com.gitee.qdbp.tools.http.BaseHttpHandler;
+import com.gitee.qdbp.tools.http.HttpException;
+import com.gitee.qdbp.tools.http.HttpTools;
+import com.gitee.qdbp.tools.http.HttpTools.HttpFormImpl;
 
 public class PinyinChecker {
 

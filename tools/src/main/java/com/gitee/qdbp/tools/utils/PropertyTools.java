@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.utils;
+package com.gitee.qdbp.tools.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,12 +20,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.zhaohuihua.core.beans.KeyString;
-import com.gitee.zhaohuihua.core.beans.KeyValue;
-import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
-import com.gitee.zhaohuihua.core.utils.StringTools;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
-import com.gitee.zhaohuihua.tools.files.PathTools;
+import com.gitee.qdbp.able.beans.KeyString;
+import com.gitee.qdbp.able.beans.KeyValue;
+import com.gitee.qdbp.able.exception.ResourceNotFoundException;
+import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.files.PathTools;
 
 /**
  * 配置文件工具类<br>

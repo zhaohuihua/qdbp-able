@@ -1,9 +1,9 @@
-package com.gitee.zhaohuihua.tools.http;
+package com.gitee.qdbp.tools.http;
 
 import java.util.List;
 import java.util.Map;
-import com.gitee.zhaohuihua.core.result.ResponseMessage;
-import com.gitee.zhaohuihua.tools.utils.Config;
+import com.gitee.qdbp.able.result.ResponseMessage;
+import com.gitee.qdbp.tools.utils.Config;
 
 /**
  * 接口请求工具类<br>

@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.files;
+package com.gitee.qdbp.tools.files;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.zhaohuihua.core.exception.ResourceNotFoundException;
+import com.gitee.qdbp.able.exception.ResourceNotFoundException;
 
 /**
  * 文件工具类

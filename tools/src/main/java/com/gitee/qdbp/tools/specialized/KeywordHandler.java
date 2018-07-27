@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.tools.specialized;
+package com.gitee.qdbp.tools.specialized;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -14,9 +14,9 @@ import org.lionsoul.jcseg.tokenizer.core.IWord;
 import org.lionsoul.jcseg.tokenizer.core.JcsegException;
 import org.lionsoul.jcseg.tokenizer.core.JcsegTaskConfig;
 import org.lionsoul.jcseg.tokenizer.core.SegmentFactory;
-import com.gitee.zhaohuihua.core.utils.StringTools;
-import com.gitee.zhaohuihua.core.utils.VerifyTools;
-import com.gitee.zhaohuihua.tools.utils.ConvertTools;
+import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.ConvertTools;
 
 /**
  * 关键字收集
