@@ -70,8 +70,8 @@ public class InMemoryCache extends BaseCacheService {
     /** {@inheritDoc} **/
     @Override
     public boolean exist(String key, String subkey) {
-        SimpleItem item = getSimpleItem(key, subkey);
-        return item != null;
+        VolatileData<?> item = this.container.get(concat(key, subkey));
+        return item != null && !item.expired() && item.getValue() != null;
     }
 
     /** {@inheritDoc} **/
