@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.common.specialized;
+package com.gitee.qdbp.tools.specialized;
 
 import com.gitee.qdbp.tools.specialized.ShortKeyTools;
 

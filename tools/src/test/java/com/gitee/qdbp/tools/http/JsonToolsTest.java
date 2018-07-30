@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.common.http;
+package com.gitee.qdbp.tools.http;
 
 import java.util.HashMap;
 import java.util.Map;

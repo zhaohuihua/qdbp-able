@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.common.wait;
+package com.gitee.qdbp.tools.wait;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

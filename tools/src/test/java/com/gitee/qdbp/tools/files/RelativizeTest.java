@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.common.files;
+package com.gitee.qdbp.tools.files;
 
 import com.gitee.qdbp.tools.files.PathTools;
 

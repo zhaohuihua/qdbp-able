@@ -1,4 +1,4 @@
-package com.gitee.zhaohuihua.common.wait;
+package com.gitee.qdbp.tools.wait;
 
 import java.util.HashMap;
 import java.util.Map;
