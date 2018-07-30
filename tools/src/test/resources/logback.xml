@@ -11,7 +11,7 @@
 	</appender>
 
 	<!-- 业务日志记录  -->
-	<logger name="com.gitee.zhaohuihua" level="DEBUG" additivity="true">
+	<logger name="com.gitee.qdbp" level="DEBUG" additivity="true">
 		<appender-ref ref="ASYNC" />
 	</logger>
 
