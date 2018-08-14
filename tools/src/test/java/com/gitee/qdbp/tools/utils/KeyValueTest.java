@@ -13,7 +13,7 @@ public class KeyValueTest {
         System.out.println(JSON.toJSONString(item));
     }
 
-    public static class KeyValue<V> implements Map.Entry<String, V> {
+    protected static class KeyValue<V> implements Map.Entry<String, V> {
 
         /** KEY **/
         private String key;
