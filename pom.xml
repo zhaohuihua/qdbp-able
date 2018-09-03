@@ -560,9 +560,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.alipay</groupId>
+				<groupId>com.alipay.sdk</groupId>
 				<artifactId>alipay-sdk-java</artifactId>
-				<version>20171012102412</version>
+				<version>3.3.49.ALL</version>
 				<exclusions>
 					<exclusion>
 						<groupId>commons-logging</groupId>
