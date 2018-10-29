@@ -78,8 +78,8 @@ public abstract class PathTools {
      * /image/abcdef/png --&gt; /image/abcdef/png<br>
      * /image/abc.def/png --&gt; /image/abc.def/png<br>
      *
-     * @param path
-     * @return
+     * @param path 原始路径
+     * @return 新路径
      */
     public static String removeExtension(String path) {
         if (path == null) {
@@ -88,7 +88,7 @@ public abstract class PathTools {
 
         int i = path.lastIndexOf('.');
         if (i < 0 || i < path.lastIndexOf('/') || i < path.lastIndexOf('/')) {
-            return null;
+            return path;
         }
 
         return path.substring(0, i);
@@ -100,8 +100,8 @@ public abstract class PathTools {
      * /image/abcdef/xxx, .jpg --&gt; /image/abcdef/xxx.jpg<br>
      * /image/abc.def/xxx, .jpg --&gt; /image/abc.def/xxx.jpg<br>
      *
-     * @param path
-     * @return
+     * @param path 原始路径
+     * @return 新路径
      */
     public static String replaceExtension(String path, String extension) {
         String newpath = removeExtension(path);
@@ -111,6 +111,47 @@ public abstract class PathTools {
             return newpath + extension;
         } else {
             return newpath + "." + extension;
+        }
+    }
+
+    /**
+     * 清除文件名, 只保留路径<br>
+     * /image/abc.def.png, .jpg --&gt; /image/<br>
+     * /image/abcdef/png --&gt; /image/abcdef/<br>
+     * /image/abc.def/png --&gt; /image/abc.def/<br>
+     * /image --&gt; "/"<br>
+     * image --&gt; ""<br>
+     * 
+     * @param path 原始路径
+     * @return 不带文件名的路径
+     */
+    public static String removeFileName(String path) {
+        if (path == null) {
+            return null;
+        }
+
+        int i = path.lastIndexOf('/');
+        return i < 0 ? "" : i == 0 ? "/" : path.substring(0, i + 1);
+    }
+
+    /**
+     * 替换文件名<br>
+     * /image/abc.def.png, new.jpg --&gt; /image/new.jpg<br>
+     * /image/abcdef/xxx, yyy --&gt; /image/abcdef/yyy<br>
+     * /image/abc.def/, yyy.jpg --&gt; /image/abc.def/yyy.jpg<br>
+     * /xxx.jpg, yyy.jpg --&gt; /yyy.jpg<br>
+     * xxx.jpg, yyy.jpg --&gt; yyy.jpg<br>
+     *
+     * @param path 原始路径
+     * @param fileName 新的文件名
+     * @return 新的文件路径
+     */
+    public static String replaceFileName(String path, String fileName) {
+        String newpath = removeFileName(path);
+        if (newpath == null || fileName == null) {
+            return newpath;
+        } else {
+            return concat(newpath, fileName);
         }
     }
 
@@ -388,6 +429,15 @@ public abstract class PathTools {
         return new URL(newpath);
     }
 
+    /**
+     * 计算path相对于url的路径, 返回绝对路径<br>
+     * 如: resolve("http://xxx.com/a-module/page.html", "../b-module/index.html")<br>
+     * 返回: http://xxx.com/b-module/index.html
+     * 
+     * @param url 基准URL路径
+     * @param path 相对路径
+     * @return 绝对路径
+     */
     public static URL resolve(URL url, String path) {
         String desc = "Path [" + path + "] relative to [" + url + "]";
         try {
@@ -636,6 +686,10 @@ public abstract class PathTools {
             if (VerifyTools.isBlank(path)) {
                 continue;
             }
+            if (buffer.length() == 0) {
+                buffer.append(path);
+                continue;
+            }
             if (!endsWithSeparator(buffer) && !startsWithSeparator(path)) {
                 buffer.append(SLASH).append(path);
             } else if (endsWithSeparator(folder) && startsWithSeparator(path)) {
@@ -712,14 +766,17 @@ public abstract class PathTools {
 
     /**
      * 将path转换为相对于root的路径<br>
-     * 不用Files.relativize()是为了兼容URL
+     * 不用Path.relativize()是为了兼容URL
      * 
      * <pre>
-     * String root = "D:/domain/biz/"
-     * relativize(root, "D:/domain/biz/index.html") -- index.html
-     * relativize(root, "D:/domain/biz/html/homepage.html") -- html/homepage.html
-     * relativize(root, "D:/domain/assets/libs/mui/mui.js") -- ../assets/libs/mui/mui.js
-     * relativize(root, "D:/static/assets/libs/mui/mui.js") -- ../../static/assets/libs/mui/mui.js
+     * String root = "D:/domain/biz/";
+     * relativize(root, "D:/domain/biz/index.html"); // index.html
+     * relativize(root, "D:/domain/biz/html/homepage.html"); // html/homepage.html
+     * relativize(root, "D:/domain/assets/libs/mui/mui.js"); // ../assets/libs/mui/mui.js
+     * relativize(root, "D:/static/assets/libs/mui/mui.js"); // ../../static/assets/libs/mui/mui.js
+     * relativize(root, "D:/domain/biz/"); // ./
+     * relativize(root, "D:/domain/biz/html/"); // html/
+     * relativize("", "home/index.html"); // home/index.html
      * </pre>
      * 
      * @param root 根路径
@@ -728,7 +785,7 @@ public abstract class PathTools {
      */
     public static String relativize(String root, String path) {
 
-        String[] roots = splitPath(root);
+        String[] roots = splitPath(removeFileName(root));
         String[] paths = splitPath(path);
 
         // 先找到第一个不相同的文件夹
@@ -752,16 +809,27 @@ public abstract class PathTools {
             }
             buffer.append(paths[i]);
         }
+        if (path.trim().endsWith("/") || path.trim().endsWith("\\")) {
+            if (buffer.length() == 0) {
+                buffer.append("./");
+            } else {
+                buffer.append("/");
+            }
+        }
         return buffer.toString();
     }
 
     private static Pattern separator = Pattern.compile("/+");
-    private static Pattern trim = Pattern.compile("^/+|/+$");
+    private static Pattern trim = Pattern.compile("^\\s*/+|/+\\s*$");
 
     private static String[] splitPath(String path) {
         path = formatPath(path);
         path = trim.matcher(path).replaceAll("");
-        return separator.split(path);
+        if (VerifyTools.isBlank(path)) {
+            return new String[0];
+        } else {
+            return separator.split(path);
+        }
     }
 
     /** 判断是不是绝对路径 **/

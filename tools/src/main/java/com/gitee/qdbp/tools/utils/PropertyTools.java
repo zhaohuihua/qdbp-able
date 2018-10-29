@@ -264,10 +264,10 @@ public abstract class PropertyTools {
 
         Set<Map.Entry<Object, Object>> original = properties.entrySet();
         for (Map.Entry<Object, Object> entry : original) {
-            String key = (String) entry.getKey();
-            String value = (String) entry.getValue();
             // 从Properties.getProperty()来看, 只支持字符串
-            if (key instanceof String && value instanceof String) {
+            if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
                 entries.add(new KeyString(key, value));
             }
         }
@@ -407,7 +407,8 @@ public abstract class PropertyTools {
         return load(urls, encoding, filters, classpaths, defaults);
     }
 
-    private static Properties load(URL[] urls, String encoding, Filter[] filters, Class<?>[] classpaths, Properties defaults) {
+    private static Properties load(URL[] urls, String encoding, Filter[] filters, Class<?>[] classpaths,
+            Properties defaults) {
         Properties temp = new Properties(defaults);
 
         for (URL url : urls) {
