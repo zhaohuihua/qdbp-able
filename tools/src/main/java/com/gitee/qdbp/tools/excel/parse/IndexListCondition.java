@@ -21,13 +21,13 @@ import com.gitee.qdbp.tools.utils.ConvertTools;
  * @author zhaohuihua
  * @version 160805
  */
-public class IndexListConfig implements Serializable {
+public class IndexListCondition implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
     /** 日志对象 **/
-    private static final Logger log = LoggerFactory.getLogger(IndexListConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(IndexListCondition.class);
 
     /** 以!开头的是排除法配置 **/
     private static final Pattern EXCLUDE = Pattern.compile("^\\s*!\\s*");
@@ -45,11 +45,11 @@ public class IndexListConfig implements Serializable {
     private List<Integer> indexs;
 
     /** 默认全部允许 **/
-    public IndexListConfig() {
+    public IndexListCondition() {
         this.all = true;
     }
 
-    public IndexListConfig(boolean exclude, int... index) {
+    public IndexListCondition(boolean exclude, int... index) {
         this.exclude = exclude;
         this.indexs = new ArrayList<>();
         for (int i : index) {
@@ -57,17 +57,17 @@ public class IndexListConfig implements Serializable {
         }
     }
 
-    public IndexListConfig(int... index) {
+    public IndexListCondition(int... index) {
         this(false, index);
     }
 
     /** 解析文本规则 **/
-    public IndexListConfig(String text) {
+    public IndexListCondition(String text) {
         this(text, 0);
     }
 
     /** 解析文本规则 **/
-    public IndexListConfig(String text, int startBy) {
+    public IndexListCondition(String text, int startBy) {
         parse(text, startBy);
     }
 
@@ -119,7 +119,7 @@ public class IndexListConfig implements Serializable {
                         indexs.add(i);
                     }
                 } else {
-                    log.warn("ExcelIndex配置错误: " + digit);
+                    log.warn("ExcelIndexError: " + digit);
                 }
             }
         }

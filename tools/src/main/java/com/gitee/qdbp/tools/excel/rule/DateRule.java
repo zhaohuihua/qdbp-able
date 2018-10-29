@@ -17,7 +17,7 @@ import com.gitee.qdbp.tools.excel.model.CellInfo;
  * @author zhaohuihua
  * @version 160302
  */
-public class DateRule implements PresetRule, Serializable {
+public class DateRule extends BaseRule implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -30,30 +30,39 @@ public class DateRule implements PresetRule, Serializable {
      * @param pattern 日期格式
      */
     public DateRule(String pattern) {
+        this(null, pattern);
+    }
+
+    /**
+     * 构造函数
+     * 
+     * @param parent 上级规则
+     * @param pattern 日期格式
+     */
+    public DateRule(PresetRule parent, String pattern) {
+        super(parent);
         this.pattern = pattern;
         // 检查日期格式
         new SimpleDateFormat(pattern).format(new Date());
     }
 
     @Override
-    public void imports(Map<String, Object> map, CellInfo cell) throws ServiceException {
-        String field = cell.getField();
-        Object value = cell.getValue();
-        if (VerifyTools.isBlank(value) || !(value instanceof String)) {
-            map.put(field, value);
-        } else {
+    public void doImports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+        if (value instanceof String) {
             try {
                 map.put(field, new SimpleDateFormat(pattern).parse((String) value));
             } catch (ParseException e) {
                 throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
             }
+        } else if (value instanceof Date) {
+            map.put(field, value);
+        } else {
+            map.put(field, value);
         }
     }
 
     @Override
-    public void exports(Map<String, Object> map, CellInfo cell) throws ServiceException {
-        String field = cell.getField();
-        Object value = cell.getValue();
+    public void doExports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else if (value instanceof Date) {
@@ -63,8 +72,9 @@ public class DateRule implements PresetRule, Serializable {
                 Date date = TypeUtils.castToDate(value);
                 map.put(field, new SimpleDateFormat(pattern).format(date));
             } catch (Exception e) {
-                map.put(field, "#N/A");
+                throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
             }
         }
     }
+
 }

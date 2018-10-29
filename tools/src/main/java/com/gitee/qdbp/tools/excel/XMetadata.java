@@ -5,16 +5,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.gitee.qdbp.able.utils.StringTools;
+import org.apache.poi.ss.usermodel.Row;
+import com.gitee.qdbp.able.beans.KeyString;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.model.ColumnInfo;
-import com.gitee.qdbp.tools.excel.parse.IndexListConfig;
-import com.gitee.qdbp.tools.excel.parse.IndexRangeConfig;
-import com.gitee.qdbp.tools.excel.parse.NameListConfig;
-import com.gitee.qdbp.tools.excel.parse.Required;
+import com.gitee.qdbp.tools.excel.parse.ContainsTextCondition;
+import com.gitee.qdbp.tools.excel.parse.IndexListCondition;
+import com.gitee.qdbp.tools.excel.parse.IndexRangeCondition;
+import com.gitee.qdbp.tools.excel.parse.MatchesRowCondition;
+import com.gitee.qdbp.tools.excel.parse.NameListCondition;
 import com.gitee.qdbp.tools.excel.rule.DateRule;
 import com.gitee.qdbp.tools.excel.rule.MapRule;
 import com.gitee.qdbp.tools.excel.rule.PresetRule;
+import com.gitee.qdbp.tools.excel.utils.MetadataTools;
 import com.gitee.qdbp.tools.utils.Config;
 
 /**
@@ -30,45 +33,70 @@ public class XMetadata implements Serializable {
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    private Config config;
-
+    // columns和fieldRows同时存在时以columns优先
     /** 列名 **/
     private List<ColumnInfo> columns;
+    /** 字段名所在的行 **/
+    private IndexRangeCondition fieldRows;
     /** 列名与转换规则的映射表(配置规则) **/
     private Map<String, PresetRule> rules;
     /** 跳过几行 **/
     private Integer skipRows;
+    /** 包含指定关键字时跳过此行 **/
+    // skip.row.when.1 = 1:NULL
+    // skip.row.when.2 = 2:小计, 10:元
+    // skip.row.when.3 = 2:总计, 10:元
+    // 第1列为空, 或第2列包含小计且第10列包含元, 或第2列包含总计且第10列包含元
+    private List<MatchesRowCondition> skipRowWhen;
     /** 表头 **/
-    private IndexRangeConfig headerRows;
+    private IndexRangeCondition headerRows;
     /** 页脚 **/
-    private IndexRangeConfig footerRows;
+    private IndexRangeCondition footerRows;
     /** Sheet名称填充至哪个字段 **/
     private String sheetNameFillTo;
 
     /** Sheet序号配置, 默认读取第1个Sheet **/
-    private IndexListConfig sheetIndexs = new IndexListConfig(0);
+    private IndexListCondition sheetIndexs = new IndexListCondition(0);
     /** Sheet名称配置, 默认全部匹配 **/
-    private NameListConfig sheetNames = new NameListConfig();
+    private NameListCondition sheetNames = new NameListCondition();
+
+    public XMetadata() {
+        this.skipRows = 0;
+        this.sheetIndexs = new IndexListCondition();
+    }
 
     public XMetadata(Config config) {
-        this.config = config;
-        this.columns = parseColumn(config.getString("columns"));
+        String columns = config.getString("columns", false);
+        if (VerifyTools.isNotBlank(columns)) {
+            this.columns = MetadataTools.parseFields(columns);
+        } else {
+            String columnRows = config.getString("columnRows", false);
+            if (VerifyTools.isNotBlank(columnRows)) {
+                this.fieldRows = new IndexRangeCondition(columnRows, 1); // 配置项从1开始, 程序从0开始
+            } else {
+                throw new IllegalStateException("excel setting columns or columnRows is required.");
+            }
+        }
         // 解析skipRows and headerRows
-        this.skipRows = config.getInteger("skip.rows", false);
+        Integer skipRows = config.getInteger("skip.rows", false);
         String headerRow = config.getString("header.rows", false);
         if (VerifyTools.isBlank(headerRow)) {
             headerRow = config.getString("header.row", false);
         }
         if (VerifyTools.isNotBlank(headerRow)) {
-            this.headerRows = new IndexRangeConfig(headerRow, 1); // 配置项从1开始, 程序从0开始
-            if (this.skipRows == null) {
-                this.skipRows = this.headerRows.getMax() + 1;
-            }
-        } else {
-            if (this.skipRows == null) {
-                this.skipRows = 0;
+            this.headerRows = new IndexRangeCondition(headerRow, 1); // 配置项从1开始, 程序从0开始
+        }
+        if (skipRows == null) {
+            if (this.fieldRows != null && this.headerRows != null) {
+                skipRows = Math.max(this.fieldRows.getMax(), this.headerRows.getMax()) + 1;
+            } else if (this.fieldRows != null) {
+                skipRows = this.fieldRows.getMax() + 1;
+            } else if (this.headerRows != null) {
+                skipRows = this.headerRows.getMax() + 1;
             }
         }
+        this.skipRows = skipRows == null ? 0 : skipRows;
+
         // 解析footerRows
         // 导入时每个excel的页脚位置有可能不一样, 所以导入不能指定页脚行, 只能在导入之前把页脚删掉
         // 如果页脚有公式, 那么数据行必须至少2行, 公式的范围必须包含这两行数据,
@@ -78,35 +106,43 @@ public class XMetadata implements Serializable {
             footerRow = config.getString("footer.row", false);
         }
         if (VerifyTools.isNotBlank(footerRow)) {
-            this.footerRows = new IndexRangeConfig(footerRow, 1); // 配置项从1开始, 程序从0开始
+            this.footerRows = new IndexRangeCondition(footerRow, 1); // 配置项从1开始, 程序从0开始
         }
 
         this.sheetNameFillTo = config.getString("sheet.name.fill.to", false);
         String sheetIndexText = config.getString("sheet.index", false);
         String sheetNameText = config.getString("sheet.name", false);
         if (VerifyTools.isNotBlank(sheetIndexText)) {
-            sheetIndexs = new IndexListConfig(sheetIndexText, 1); // 配置项从1开始
+            sheetIndexs = new IndexListCondition(sheetIndexText, 1); // 配置项从1开始
         }
         if (VerifyTools.isNotBlank(sheetNameText)) {
-            sheetNames = new NameListConfig(sheetNameText);
+            sheetNames = new NameListCondition(sheetNameText);
             // 有SheetName规则而没有SheetIndex规则时, SheetIndex全部通过
             if (VerifyTools.isBlank(sheetIndexText)) {
-                sheetIndexs = new IndexListConfig();
+                sheetIndexs = new IndexListCondition();
             }
         }
 
-        this.rules = new HashMap<>();
-        for (ColumnInfo column : columns) {
-            if (column == null) {
-                continue;
+        Map<String, PresetRule> rules = new HashMap<>();
+        List<MatchesRowCondition> skipRowWhen = new ArrayList<>();
+        for (KeyString entry : config.entries()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key.equals("skip.row.when") || key.startsWith("skip.row.when.")) {
+                skipRowWhen.add(new ContainsTextCondition(value));
+            } else if (key.startsWith("rule.date.")) {
+                String field = key.substring("rule.data.".length());
+                rules.put(field, new DateRule(value));
+            } else if (key.startsWith("rule.map.")) {
+                String field = key.substring("rule.map.".length());
+                rules.put(field, new MapRule(value));
             }
-            String field = column.getField();
-            String key;
-            if (config.getString(key = "rule.date." + field, false) != null) {
-                this.rules.put(field, new DateRule(config.getString(key)));
-            } else if (config.getString(key = "rule.map." + field, false) != null) {
-                this.rules.put(field, new MapRule(config.getString(key)));
-            }
+        }
+        if (!skipRowWhen.isEmpty()) {
+            this.skipRowWhen = skipRowWhen;
+        }
+        if (!rules.isEmpty()) {
+            this.rules = rules;
         }
     }
 
@@ -114,30 +150,28 @@ public class XMetadata implements Serializable {
         return sheetIndexs.isEnable(sheetIndex) && sheetNames.isEnable(sheetName);
     }
 
-    public boolean isEnableHeader(int rowIndex) {
+    public boolean isFieldRow(int rowIndex) {
+        return fieldRows != null && fieldRows.isEnable(rowIndex);
+    }
+
+    public boolean isHeaderRow(int rowIndex) {
         return headerRows != null && headerRows.isEnable(rowIndex);
     }
 
-    public boolean isEnableFooter(int rowIndex) {
+    public boolean isFooterRow(int rowIndex) {
         return footerRows != null && footerRows.isEnable(rowIndex);
     }
 
-    private List<ColumnInfo> parseColumn(String text) {
-        List<ColumnInfo> columns = new ArrayList<>();
-        String[] array = StringTools.split(text);
-        for (int i = 0; i < array.length; i++) {
-            Required required = Required.of(array[i]);
-            if (required == null) {
-                columns.add(null);
-            } else {
-                columns.add(new ColumnInfo(i, required.getName(), required.isRequired()));
+    public boolean isSkipRow(Row row) {
+        if (VerifyTools.isBlank(skipRowWhen)) {
+            return false;
+        }
+        for (MatchesRowCondition condition : skipRowWhen) {
+            if (condition.isMatches(row)) {
+                return true;
             }
         }
-        return columns;
-    }
-
-    public Config getConfig() {
-        return config;
+        return false;
     }
 
     public List<ColumnInfo> getColumns() {
@@ -149,46 +183,72 @@ public class XMetadata implements Serializable {
     }
 
     public void addColumn(ColumnInfo column) {
+        if (this.columns == null) {
+            this.columns = new ArrayList<>();
+        }
         this.columns.add(column);
     }
 
     public Integer getSkipRows() {
-        return skipRows;
+        return skipRows == null ? 0 : skipRows;
     }
 
     public void setSkipRows(Integer skipRows) {
         this.skipRows = skipRows;
     }
 
-    public IndexRangeConfig getHeaderRows() {
+    public List<MatchesRowCondition> getSkipRowWhen() {
+        return skipRowWhen;
+    }
+
+    public void setSkipRowWhen(List<MatchesRowCondition> skipRowWhen) {
+        this.skipRowWhen = skipRowWhen;
+    }
+
+    public void addSkipRowWhen(MatchesRowCondition condition) {
+        if (this.skipRowWhen == null) {
+            this.skipRowWhen = new ArrayList<>();
+        }
+        this.skipRowWhen.add(condition);
+    }
+
+    public IndexRangeCondition getFieldRows() {
+        return fieldRows;
+    }
+
+    public void setFieldRows(IndexRangeCondition fieldRows) {
+        this.fieldRows = fieldRows;
+    }
+
+    public IndexRangeCondition getHeaderRows() {
         return headerRows;
     }
 
-    public void setHeaderRows(IndexRangeConfig headerRows) {
+    public void setHeaderRows(IndexRangeCondition headerRows) {
         this.headerRows = headerRows;
     }
 
-    public IndexRangeConfig getFooterRows() {
+    public IndexRangeCondition getFooterRows() {
         return footerRows;
     }
 
-    public void setFooterRows(IndexRangeConfig footerRows) {
+    public void setFooterRows(IndexRangeCondition footerRows) {
         this.footerRows = footerRows;
     }
 
-    public IndexListConfig getSheetIndexs() {
+    public IndexListCondition getSheetIndexs() {
         return sheetIndexs;
     }
 
-    public void setSheetIndexs(IndexListConfig sheetIndexs) {
+    public void setSheetIndexs(IndexListCondition sheetIndexs) {
         this.sheetIndexs = sheetIndexs;
     }
 
-    public NameListConfig getSheetNames() {
+    public NameListCondition getSheetNames() {
         return sheetNames;
     }
 
-    public void setSheetNames(NameListConfig sheetNames) {
+    public void setSheetNames(NameListCondition sheetNames) {
         this.sheetNames = sheetNames;
     }
 
@@ -209,6 +269,9 @@ public class XMetadata implements Serializable {
     }
 
     public void addRule(String column, PresetRule rule) {
+        if (this.rules == null) {
+            this.rules = new HashMap<>();
+        }
         this.rules.put(column, rule);
     }
 

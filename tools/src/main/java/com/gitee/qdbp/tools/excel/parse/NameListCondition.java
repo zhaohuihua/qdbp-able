@@ -17,7 +17,7 @@ import com.gitee.qdbp.able.utils.VerifyTools;
  * @author zhaohuihua
  * @version 160805
  */
-public class NameListConfig implements Serializable {
+public class NameListCondition implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -35,11 +35,11 @@ public class NameListConfig implements Serializable {
     private List<String> names;
 
     /** 默认全部允许 **/
-    public NameListConfig() {
+    public NameListCondition() {
         this.all = true;
     }
 
-    public NameListConfig(boolean exclude, String... name) {
+    public NameListCondition(boolean exclude, String... name) {
         this.exclude = exclude;
         this.names = new ArrayList<>();
         for (String i : name) {
@@ -48,7 +48,7 @@ public class NameListConfig implements Serializable {
     }
 
     /** 解析文本规则 **/
-    public NameListConfig(String text) {
+    public NameListCondition(String text) {
         parse(text);
     }
 

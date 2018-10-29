@@ -366,7 +366,7 @@ public abstract class StringTools {
     /**
      * 转换为下划线命名法格式<br>
      * 如: userName = user_name, SiteURL = site_url, IUserService = iuser_service<br>
-     * user$Name = user$name, user_Name = user_name, user name = user_name
+     * user$Name = user$name, user_Name = user_name, user name = user_name, md5String = md5_string
      *
      * @author zhaohuihua
      * @param name
@@ -394,7 +394,7 @@ public abstract class StringTools {
                 lastLowerCase = false;
             } else {
                 buffer.append(c);
-                lastLowerCase = Character.isLowerCase(c);
+                lastLowerCase = Character.isLowerCase(c) || Character.isDigit(c);
             }
         }
         return buffer.toString();

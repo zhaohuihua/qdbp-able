@@ -18,13 +18,13 @@ import com.gitee.qdbp.tools.utils.ConvertTools;
  * @author zhaohuihua
  * @version 160805
  */
-public class IndexRangeConfig implements Serializable {
+public class IndexRangeCondition implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
     /** 日志对象 **/
-    private static final Logger log = LoggerFactory.getLogger(IndexRangeConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(IndexRangeCondition.class);
 
     /** 开始序号至结束序号 **/
     private static final Pattern BETWEEN = Pattern.compile("^\\s*(\\d+)\\s*\\-\\s*(\\d+)\\s*$");
@@ -36,7 +36,7 @@ public class IndexRangeConfig implements Serializable {
 
     private Integer max;
 
-    public IndexRangeConfig(int... index) {
+    public IndexRangeCondition(int... index) {
         this.indexs = new ArrayList<>();
         for (int i : index) {
             addIndex(i);
@@ -44,12 +44,12 @@ public class IndexRangeConfig implements Serializable {
     }
 
     /** 解析文本规则 **/
-    public IndexRangeConfig(String text) {
+    public IndexRangeCondition(String text) {
         this(text, 0);
     }
 
     /** 解析文本规则 **/
-    public IndexRangeConfig(String text, int startBy) {
+    public IndexRangeCondition(String text, int startBy) {
         parse(text, startBy);
     }
 
@@ -95,7 +95,7 @@ public class IndexRangeConfig implements Serializable {
                         addIndex(i);
                     }
                 } else {
-                    log.warn("ExcelIndex配置错误: " + digit);
+                    log.warn("ExcelIndexError: " + digit);
                 }
             }
         }

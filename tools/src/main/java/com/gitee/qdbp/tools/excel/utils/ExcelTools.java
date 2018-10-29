@@ -20,9 +20,9 @@ import com.gitee.qdbp.tools.utils.ConvertTools;
  * @author zhaohuihua
  * @version 170223
  */
-public abstract class ExcelUtils {
+public abstract class ExcelTools {
 
-    private static final Logger log = LoggerFactory.getLogger(ExcelUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(ExcelTools.class);
 
     /** 公式中的单元格引用 **/
     private static final Pattern CELL_REF = Pattern.compile("(\\$?[a-z]+)(\\$?[0-9]+)", Pattern.CASE_INSENSITIVE);

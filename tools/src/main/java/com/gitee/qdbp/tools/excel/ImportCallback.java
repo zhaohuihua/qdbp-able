@@ -4,16 +4,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.IBatchResult;
 import com.gitee.qdbp.able.result.IResultMessage;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.excel.model.ColumnInfo;
 import com.gitee.qdbp.tools.excel.model.FailedInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 import com.gitee.qdbp.tools.excel.rule.ConvertRule;
 import com.gitee.qdbp.tools.excel.rule.PresetRule;
+import com.gitee.qdbp.tools.excel.utils.ExcelTools;
 
 /**
  * 导入回调函数
@@ -84,6 +87,11 @@ public abstract class ImportCallback implements IBatchResult, ConvertRule, Seria
 
     /** 具体的业务处理逻辑, 一般是插入数据库之类的持久化操作 **/
     public abstract void callback(Map<String, Object> map, RowInfo row) throws ServiceException;
+
+    /** 读取单元格内容 **/
+    public Object getCellValue(Cell cell, ColumnInfo column) {
+        return ExcelTools.getCellValue(cell);
+    }
 
     /** 单元格字段转换 **/
     @Override

@@ -2,6 +2,7 @@ package com.gitee.qdbp.tools.excel;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -9,8 +10,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.excel.model.ColumnInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 import com.gitee.qdbp.tools.excel.rule.PresetRule;
+import com.gitee.qdbp.tools.excel.utils.ExcelTools;
 
 /**
  * 导出回调函数
@@ -38,6 +41,11 @@ public class ExportCallback {
     }
 
     public void onSheetFinished(Sheet sheet, XMetadata metadata, List<?> data) {
+    }
+
+    /** 写入单元格内容 **/
+    public void setCellValue(Cell cell, Object value, ColumnInfo column) {
+        ExcelTools.setCellValue(cell, value);
     }
 
     public Map<String, Object> convert(Object value) {

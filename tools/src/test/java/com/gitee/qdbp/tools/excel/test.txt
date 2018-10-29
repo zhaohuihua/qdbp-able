@@ -1,5 +1,6 @@
 ## 字段
 columns = *id|*name|positive|height||birthday|gender|subsidy
+# columnRows = 1
 
 ## 跳过的行数(不配置时默认取标题下一行)
 # skip.rows = 2
@@ -9,6 +10,12 @@ header.rows = 2-4
 ## 导入时每个excel的页脚位置有可能不一样, 所以导入不能指定页脚行, 只能在导入之前把页脚删掉
 ## 如果页脚有公式, 那么数据行必须至少2行, 公式的范围必须包含这两行数据, 如SUM($E$5:E6), 而不能是SUM($E$5:E5), 否则公式不会计算
 footer.rows = 7-9
+## 包含指定关键字时跳过此行
+# 第1列为空, 或第2列包含小计且第10列包含元, 或第2列包含总计且第10列包含元
+# skip.row.when.1 = 1:NULL
+# skip.row.when.2 = 2:小计, 10:元
+# skip.row.when.3 = 2:总计, 10:元
+
 
 ## 配置规则: * 表示全部
 ## 配置规则: 1|2|5-8|12

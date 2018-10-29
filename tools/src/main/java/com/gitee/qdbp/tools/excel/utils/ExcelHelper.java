@@ -3,6 +3,7 @@ package com.gitee.qdbp.tools.excel.utils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -18,8 +19,7 @@ import com.gitee.qdbp.tools.excel.XMetadata;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 import com.gitee.qdbp.tools.excel.model.ColumnInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
-import com.gitee.qdbp.tools.excel.parse.HeaderParser;
-import com.gitee.qdbp.tools.excel.parse.IndexRangeConfig;
+import com.gitee.qdbp.tools.excel.parse.IndexRangeCondition;
 
 /**
  * Excel处理类
@@ -35,15 +35,22 @@ public class ExcelHelper {
 
     public static void parse(Sheet sheet, XMetadata metadata, ImportCallback cb) {
 
-        int totalSize = sheet.getPhysicalNumberOfRows();
+        List<ColumnInfo> columns = metadata.getColumns();
+        if (columns == null && metadata.getFieldRows() != null) {
+            columns = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+        }
 
         // 读取标题信息, 生成单元格数据
-        Map<String, CellInfo> cells = new HeaderParser(metadata).parseHeaders(sheet);
+        Map<String, CellInfo> cells = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), columns);
+        for (Entry<String, CellInfo> entry : cells.entrySet()) {
+            entry.getValue().setMetadata(metadata);
+        }
 
         String sheetName = sheet.getSheetName();
         int skipRows = metadata.getSkipRows();
+        int totalSize = sheet.getPhysicalNumberOfRows();
         for (int i = skipRows; i <= totalSize; i++) {
-            if (metadata.isEnableHeader(i)) {
+            if (metadata.isHeaderRow(i)) {
                 // 是表头则跳过
                 // 导入时每个excel的页脚位置有可能不一样, 所以导入不能指定页脚行, 只能在导入之前把页脚删掉
                 continue;
@@ -52,8 +59,12 @@ public class ExcelHelper {
             if (row == null) {
                 continue;
             }
+            if (metadata.isSkipRow(row)) {
+                log.trace("skip row, sheetName={}, row={}", sheetName, i);
+                continue;
+            }
             try {
-                parse(sheetName, row, i, cells, metadata, cb);
+                parse(sheetName, row, i, columns, cells, metadata, cb);
             } catch (ServiceException e) {
                 cb.addFailed(sheetName, i + 1, e);
                 if (e.getCause() != null) {
@@ -70,10 +81,9 @@ public class ExcelHelper {
         }
     }
 
-    private static void parse(String sheetName, Row row, int index, Map<String, CellInfo> cells, XMetadata metadata,
-            ImportCallback cb) throws ServiceException {
+    private static void parse(String sheetName, Row row, int index, List<ColumnInfo> columns,
+            Map<String, CellInfo> cells, XMetadata metadata, ImportCallback cb) throws ServiceException {
         Map<String, Object> map = new HashMap<>();
-        List<ColumnInfo> columns = metadata.getColumns();
         for (int i = 0; i < columns.size() && i < row.getLastCellNum(); i++) {
             ColumnInfo column = columns.get(i);
             if (column == null) {
@@ -81,14 +91,14 @@ public class ExcelHelper {
             }
             Cell cell = row.getCell(i);
 
-            Object object = ExcelUtils.getCellValue(cell);
+            Object value = cb.getCellValue(cell, column);
 
-            if (object instanceof String && VerifyTools.isNotBlank(object)) {
-                object = object.toString().trim();
+            if (value instanceof String && VerifyTools.isNotBlank(value)) {
+                value = value.toString().trim();
             }
 
-            if (VerifyTools.isNotBlank(object)) {
-                map.put(column.getField(), object);
+            if (VerifyTools.isNotBlank(value)) {
+                map.put(column.getField(), value);
             }
         }
 
@@ -150,8 +160,16 @@ public class ExcelHelper {
 
     public static void export(List<?> data, Sheet sheet, XMetadata metadata, ExportCallback cb) {
 
+        List<ColumnInfo> columns = metadata.getColumns();
+        if (columns == null && metadata.getFieldRows() != null) {
+            columns = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+        }
+
         // 读取标题信息, 生成单元格数据
-        Map<String, CellInfo> cells = new HeaderParser(metadata).parseHeaders(sheet);
+        Map<String, CellInfo> cells = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), columns);
+        for (Entry<String, CellInfo> entry : cells.entrySet()) {
+            entry.getValue().setMetadata(metadata);
+        }
 
         cb.onSheetStart(sheet, metadata, data);
 
@@ -160,7 +178,7 @@ public class ExcelHelper {
         Row first = sheet.getRow(begin);
 
         // 如果配置了页脚, 需要插入行将页脚移到数据行之后
-        IndexRangeConfig footerRows = metadata.getFooterRows();
+        IndexRangeCondition footerRows = metadata.getFooterRows();
         if (footerRows != null) {
             if (footerRows.getMin() < begin + 1) {
                 // 页脚不能小于开始行+1, 也就是说表头与页脚之间最少要有一行
@@ -183,7 +201,7 @@ public class ExcelHelper {
             Row row = getOrCreateRow(sheet, index);
             // 从第一行复制行高, i > 0 是因为第一行不用复制
             if (i > 0 && first != null) {
-                ExcelUtils.copyRow(first, row, true);
+                ExcelTools.copyRow(first, row, true);
             }
 
             RowInfo info;
@@ -196,7 +214,6 @@ public class ExcelHelper {
             Map<String, Object> json = cb.convert(data.get(i));
             cb.onRowStart(row, info, json);
 
-            List<ColumnInfo> columns = metadata.getColumns();
             int cellCount = Math.max(columns.size(), row.getPhysicalNumberOfCells());
             for (int c = 0; c < cellCount; c++) {
                 Cell cell = row.getCell(c, Row.CREATE_NULL_AS_BLANK);
@@ -240,10 +257,6 @@ public class ExcelHelper {
         }
 
         Object value = json.get(field);
-        if (value == null) {
-            cell.setCellType(Cell.CELL_TYPE_BLANK);
-        } else {
-            ExcelUtils.setCellValue(cell, value);
-        }
+        cb.setCellValue(cell, value, column);
     }
 }

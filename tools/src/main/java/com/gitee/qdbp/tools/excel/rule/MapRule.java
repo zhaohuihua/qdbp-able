@@ -1,6 +1,5 @@
 package com.gitee.qdbp.tools.excel.rule;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,7 +17,7 @@ import com.gitee.qdbp.tools.excel.model.CellInfo;
  * @author zhaohuihua
  * @version 160302
  */
-public class MapRule implements PresetRule, Serializable {
+public class MapRule extends BaseRule {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -30,10 +29,20 @@ public class MapRule implements PresetRule, Serializable {
     /**
      * 构造函数
      *
-     * @param rule 映射规则<br>
-     *            如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
+     * @param rule 映射规则, 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
      */
     public MapRule(String rule) {
+        this(null, rule);
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param parent 上级规则
+     * @param rule 映射规则 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
+     */
+    public MapRule(PresetRule parent, String rule) {
+        super(parent);
         JSONObject json = JSON.parseObject(rule);
         for (String key : json.keySet()) {
             addRule(key, StringTools.split(json.getString(key)));
@@ -69,11 +78,9 @@ public class MapRule implements PresetRule, Serializable {
     }
 
     @Override
-    public void imports(Map<String, Object> map, CellInfo cell) throws ServiceException {
-        String field = cell.getField();
-        Object value = cell.getValue();
+    public void doImports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
         if (VerifyTools.isBlank(value)) {
-            map.put(field, value);
+            map.put(field, null);
         } else {
             String string = value.toString();
             if (imports.containsKey(string)) {
@@ -85,9 +92,7 @@ public class MapRule implements PresetRule, Serializable {
     }
 
     @Override
-    public void exports(Map<String, Object> map, CellInfo cell) throws ServiceException {
-        String field = cell.getField();
-        Object value = cell.getValue();
+    public void doExports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else {
@@ -96,7 +101,7 @@ public class MapRule implements PresetRule, Serializable {
             if (exports.containsKey(string)) {
                 map.put(field, exports.get(string));
             } else {
-                map.put(field, "#N/A");
+                throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
             }
         }
     }
