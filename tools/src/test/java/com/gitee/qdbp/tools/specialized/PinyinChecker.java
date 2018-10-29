@@ -23,7 +23,15 @@ import com.gitee.qdbp.tools.http.BaseHttpHandler;
 import com.gitee.qdbp.tools.http.HttpException;
 import com.gitee.qdbp.tools.http.HttpTools;
 import com.gitee.qdbp.tools.http.HttpTools.HttpFormImpl;
+import com.github.stuxuhai.jpinyin.PinyinFormat;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
 
+/**
+ * 拼音正确性检查
+ *
+ * @author zhaohuihua
+ * @version 180704
+ */
 public class PinyinChecker {
 
     private static Logger log = LoggerFactory.getLogger(PinyinChecker.class);
@@ -31,8 +39,9 @@ public class PinyinChecker {
     private static Pattern SEPARATOR = Pattern.compile("/");
 
     public static void main(String[] args) throws IOException {
-        // System.out.println(new PinyinChecker().findPinyinByBaiduHanyu("觉"));
-        new PinyinChecker().check("lex-chars.lex");
+        PinyinChecker checker = new PinyinChecker();
+        // System.out.println(checker.findPinyinByBaiduHanyu("觉"));
+        checker.check("lex-chars.lex");
     }
 
     public PinyinChecker() {
@@ -74,7 +83,8 @@ public class PinyinChecker {
                 if (this.pinyin.containsKey(word)) {
                     realPinyin = this.pinyin.get(word);
                 } else {
-                    realPinyin = findPinyinByBaiduHanyu(word); // 查询正确的拼音
+                    // realPinyin = findPinyinByBaiduHanyu(word); // 查询正确的拼音
+                    realPinyin = findPinyinByJpinyin(word); // 查询正确的拼音
                     realPinyin = replaceYinBiao(realPinyin);
                 }
 
@@ -105,22 +115,29 @@ public class PinyinChecker {
             return pinyin;
         }
         char[] chars = pinyin.toCharArray();
-        boolean changed = false;
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             String key = String.valueOf(c);
             if (yinbiao.containsKey(key)) {
-                chars[i] = yinbiao.get(key).charAt(0);
-                changed = true;
+                buffer.append(yinbiao.get(key));
+            } else {
+                buffer.append(c);
             }
         }
-        return changed ? new String(chars) : pinyin;
+        return buffer.toString();
+    }
+
+    /** jpinyin.jar **/
+    protected String findPinyinByJpinyin(String word) {
+        String pinyin = PinyinHelper.convertToPinyinString(word, " ", PinyinFormat.WITHOUT_TONE);
+        return VerifyTools.equals(word, pinyin) ? null : pinyin;
     }
 
     // <script>s5f("lü4");</script>
     private static Pattern FINDER_ZIDIAN = Pattern.compile("<script>s5f\\(\"([^\"]+?)\\d*\"\\);</script>");
 
-    // zidian.51240.com: 此网站某些多音字常用的拼音未排在最前面
+    /** zidian.51240.com: 此网站某些多音字常用的拼音未排在最前面 **/
     protected String findPinyinByZidian(String word) {
         String code;
         try {
@@ -148,7 +165,7 @@ public class PinyinChecker {
     // <span>[lǚ]</span>
     private static Pattern FINDER_ICIBA = Pattern.compile("<span>\\[([^\\[\\]]+)\\]</span>");
 
-    // www.iciba.com: 金山词霸, 此网站很多字没有拼音
+    /** www.iciba.com: 金山词霸, 此网站很多字没有拼音 **/
     protected String findPinyinByIciba(String word) {
         String code;
         try {
@@ -180,7 +197,7 @@ public class PinyinChecker {
             Pattern.compile("<div[^<>]+id=\"pinyin\">\\s*<span>\\s*<b>([^<>]+)</b>");
     private static HttpTools BAIDU_HTTP_TOOLS = new HttpFormImpl(new BaiduHttpHandler());
 
-    // hanyu.baidu.com: 百度汉语
+    /** hanyu.baidu.com: 百度汉语 **/
     protected String findPinyinByBaiduHanyu(String word) {
         // String code = Integer.toString(word.charAt(0), 16).toUpperCase();
         // System.out.println(code);
@@ -240,12 +257,23 @@ public class PinyinChecker {
         yinbiao.put("ǘ", "u:");
         yinbiao.put("ǚ", "u:");
         yinbiao.put("ǜ", "u:");
+        yinbiao.put("v", "u:");
     }
 
     private void initPinyin() {
         // 这是hanyu.baidu.com上拼音不合理的名单
 
         // 常用字拼音优先
+        pinyin.put("貉", "he"); // mò
+        pinyin.put("般", "ban"); // pan
+        pinyin.put("褪", "tui"); // tun
+        pinyin.put("俩", "liang"); // lia
+        pinyin.put("曾", "ceng"); // zēng
+        pinyin.put("砢", "ke"); // luǒ
+        pinyin.put("咀", "ju"); // zui
+        pinyin.put("吱", "zhi"); // zi
+        pinyin.put("咳", "ke"); // hai
+        pinyin.put("朮", "shu"); // zhu
         pinyin.put("查", "cha"); // zha
         pinyin.put("爪", "zhua"); // zhao
         pinyin.put("胳", "ge"); // ga
