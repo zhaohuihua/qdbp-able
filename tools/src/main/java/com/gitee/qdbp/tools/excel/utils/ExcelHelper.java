@@ -16,10 +16,10 @@ import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.ExportCallback;
 import com.gitee.qdbp.tools.excel.ImportCallback;
 import com.gitee.qdbp.tools.excel.XMetadata;
+import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 import com.gitee.qdbp.tools.excel.model.ColumnInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
-import com.gitee.qdbp.tools.excel.parse.IndexRangeCondition;
 
 /**
  * Excel处理类
