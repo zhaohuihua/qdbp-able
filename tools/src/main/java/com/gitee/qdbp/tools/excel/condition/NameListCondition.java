@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.ConvertTools;
 
 /**
  * 名称列表配置类<br>
@@ -89,4 +90,12 @@ public class NameListCondition implements Serializable {
         this.names = names;
     }
 
+
+    public String toString() {
+        if (all) {
+            return "*";
+        } else {
+            return (exclude ? "exclude " : "include ") + "[" + ConvertTools.joinToString(names) + "]";
+        }
+    }
 }

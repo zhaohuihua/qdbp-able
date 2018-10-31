@@ -60,11 +60,11 @@ public class IndexRangeCondition implements Serializable {
             return indexs.indexOf(index) >= 0;
         }
     }
-    
+
     public Integer getMin() {
         return min;
     }
-    
+
     public Integer getMax() {
         return max;
     }
@@ -108,6 +108,22 @@ public class IndexRangeCondition implements Serializable {
         }
         if (max == null || max < index) {
             max = index;
+        }
+    }
+
+    public String toString() {
+        if (this.min == null && this.max == null) {
+            return "[]";
+        } else if (this.min == null) {
+            return "[" + this.max + "]";
+        } else if (this.max == null) {
+            return "[" + this.min + "]";
+        } else {
+            if (this.min == max) {
+                return "[" + this.min + "]";
+            } else {
+                return "[" + this.min + "," + this.max + "]";
+            }
         }
     }
 }

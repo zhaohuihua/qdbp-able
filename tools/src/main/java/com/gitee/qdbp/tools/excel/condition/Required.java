@@ -55,4 +55,11 @@ public class Required implements Serializable {
         }
     }
 
+    public String toString() {
+        if (name == null) {
+            return "null";
+        } else {
+            return name + (required ? "(*)" : "");
+        }
+    }
 }

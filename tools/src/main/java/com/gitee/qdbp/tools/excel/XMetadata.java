@@ -70,9 +70,9 @@ public class XMetadata implements Serializable {
         if (VerifyTools.isNotBlank(columns)) {
             this.columns = MetadataTools.parseFields(columns);
         } else {
-            String columnRows = config.getString("columnRows", false);
-            if (VerifyTools.isNotBlank(columnRows)) {
-                this.fieldRows = new IndexRangeCondition(columnRows, 1); // 配置项从1开始, 程序从0开始
+            String fieldRows = config.getString("field.rows", false);
+            if (VerifyTools.isNotBlank(fieldRows)) {
+                this.fieldRows = new IndexRangeCondition(fieldRows, 1); // 配置项从1开始, 程序从0开始
             } else {
                 throw new IllegalStateException("excel setting columns or columnRows is required.");
             }

@@ -126,4 +126,11 @@ public class IndexListCondition implements Serializable {
         this.indexs = indexs;
     }
 
+    public String toString() {
+        if (all) {
+            return "*";
+        } else {
+            return (exclude ? "exclude " : "include ") + "[" + ConvertTools.joinToString(indexs) + "]";
+        }
+    }
 }

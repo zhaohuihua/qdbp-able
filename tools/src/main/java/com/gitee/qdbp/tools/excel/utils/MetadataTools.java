@@ -57,7 +57,7 @@ public class MetadataTools {
      */
     public static List<ColumnInfo> parseFields(Sheet sheet, IndexRangeCondition fieldRows) {
         if (sheet == null || fieldRows == null) {
-            return null;
+            return new ArrayList<>();
         }
 
         // 如果有多行表头, 后一行覆盖前一行
@@ -85,11 +85,16 @@ public class MetadataTools {
                 map.put(i, new ColumnInfo(i + 1, required.getName(), required.isRequired()));
             }
         }
+        boolean isEmpty = true;
         List<ColumnInfo> fields = new ArrayList<>();
-        for (int i = 0; i < maxColumnIndex; i++) {
-            fields.add(map.get(i));
+        for (int i = 0; i <= maxColumnIndex; i++) {
+            ColumnInfo column = map.get(i);
+            fields.add(column);
+            if (column != null) {
+                isEmpty = false;
+            }
         }
-        return fields;
+        return isEmpty ? new ArrayList<>() : fields;
     }
 
     /**

@@ -133,4 +133,18 @@ public class ContainsTextCondition implements MatchesRowCondition {
         }
     }
 
+    public String toString() {
+        if (conditions == null) {
+            return "null";
+        }
+        List<String> buffer = new ArrayList<>();
+        for (Item item : conditions) {
+            if (item == null) {
+                buffer.add("null");
+            } else {
+                buffer.add(item.getColumn() + ":" + item.getText());
+            }
+        }
+        return "[" + ConvertTools.joinToString(buffer) + "]";
+    }
 }

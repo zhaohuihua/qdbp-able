@@ -35,9 +35,13 @@ public class ExcelHelper {
 
     public static void parse(Sheet sheet, XMetadata metadata, ImportCallback cb) {
 
+        String sheetName = sheet.getSheetName();
         List<ColumnInfo> columns = metadata.getColumns();
         if (columns == null && metadata.getFieldRows() != null) {
             columns = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+            if (columns.isEmpty()) {
+                log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());
+            }
         }
 
         // 读取标题信息, 生成单元格数据
@@ -46,7 +50,6 @@ public class ExcelHelper {
             entry.getValue().setMetadata(metadata);
         }
 
-        String sheetName = sheet.getSheetName();
         int skipRows = metadata.getSkipRows();
         int totalSize = sheet.getPhysicalNumberOfRows();
         for (int i = skipRows; i <= totalSize; i++) {
@@ -163,6 +166,10 @@ public class ExcelHelper {
         List<ColumnInfo> columns = metadata.getColumns();
         if (columns == null && metadata.getFieldRows() != null) {
             columns = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+            if (columns.isEmpty()) {
+                String sheetName = sheet.getSheetName();
+                log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());
+            }
         }
 
         // 读取标题信息, 生成单元格数据
@@ -182,18 +189,18 @@ public class ExcelHelper {
         if (footerRows != null) {
             if (footerRows.getMin() < begin + 1) {
                 // 页脚不能小于开始行+1, 也就是说表头与页脚之间最少要有一行
-                String m = "Footer must be greater than begin row. FooterMinRow={}, BeginRow={}.";
+                String m = "Footer must be greater than begin row + 1. FooterMinRow={}, BeginRow={}.";
                 log.warn(m, footerRows.getMin() + 1, begin + 1);
                 footerRows = null;
-            }
-
-            int footerMin = Math.max(footerRows.getMin(), begin + 1);
-            // 计算需要插入多少行, = 需要多少行 - (footer至begin之间已有多少行)
-            int insert = data.size() - (footerMin - begin);
-            if (insert > 0) {
-                // shiftRows会自动处理公式中引用的单元格
-                // 将页脚往下移
-                sheet.shiftRows(begin + 1, footerRows.getMax(), insert, true, false);
+            } else {
+                int footerMin = Math.max(footerRows.getMin(), begin + 1);
+                // 计算需要插入多少行, = 需要多少行 - (footer至begin之间已有多少行)
+                int insert = data.size() - (footerMin - begin);
+                if (insert > 0) {
+                    // shiftRows会自动处理公式中引用的单元格
+                    // 将页脚往下移
+                    sheet.shiftRows(begin + 1, footerRows.getMax(), insert, true, false);
+                }
             }
         }
         for (int i = 0; i < data.size(); i++) {

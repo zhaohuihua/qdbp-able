@@ -274,6 +274,69 @@ public abstract class PropertyTools {
         return entries;
     }
 
+    /**
+     * 合并资源文件
+     * 
+     * @param container 容器
+     * @param properties 资源文件
+     * @return 返回容器
+     */
+    public static Properties concat(Properties container, Properties... properties) {
+        if (container == null || VerifyTools.isBlank(properties)) {
+            return container;
+        }
+        for (Properties p : properties) {
+            container.putAll(p);
+        }
+        return container;
+    }
+
+    /**
+     * 根据前缀查找, 得到一个子集
+     * 
+     * @param original 原集合
+     * @param prefixes 前缀
+     * @return 子集
+     */
+    public static Properties filter(Properties original, String... prefixes) {
+        return filter(original, true, prefixes);
+    }
+
+    /**
+     * 根据前缀查找, 得到一个子集
+     * 
+     * @param original 原集合
+     * @param cutPrefix 是否截掉前缀
+     * @param prefixes 前缀
+     * @return 子集
+     */
+    public static Properties filter(Properties original, boolean cutPrefix, String... prefixes) {
+        if (original == null) {
+            return null;
+        }
+        Properties p = new Properties();
+        if (original.isEmpty() || VerifyTools.isBlank(prefixes)) {
+            return p;
+        }
+        if (prefixes.length == 1) {
+            String prefix = prefixes[0];
+            for (String key : original.stringPropertyNames()) {
+                if (key.startsWith(prefix)) {
+                    p.setProperty(cutPrefix ? key.substring(prefix.length()) : key, original.getProperty(key));
+                }
+            }
+        } else {
+            for (String key : original.stringPropertyNames()) {
+                for (String prefix : prefixes) {
+                    if (key.startsWith(prefix)) {
+                        p.setProperty(cutPrefix ? key.substring(prefix.length()) : key, original.getProperty(key));
+                    }
+                }
+            }
+        }
+        return p;
+    }
+
     private static String getRealValue(Properties properties, String key, boolean warning) {
         Object value = properties.get(key);
         if (value == null) {

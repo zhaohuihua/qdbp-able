@@ -10,21 +10,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResultCode;
 import com.gitee.qdbp.able.utils.DateTools;
-import com.gitee.qdbp.tools.excel.ImportCallback;
-import com.gitee.qdbp.tools.excel.XExcelExporter;
-import com.gitee.qdbp.tools.excel.XExcelParser;
-import com.gitee.qdbp.tools.excel.XMetadata;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 import com.gitee.qdbp.tools.files.PathTools;
 import com.gitee.qdbp.tools.utils.Config;
 import com.gitee.qdbp.tools.utils.ConvertTools;
 import com.gitee.qdbp.tools.utils.JsonTools;
+import com.gitee.qdbp.tools.utils.PropertyTools;
 
 public class ExcelTest {
 
@@ -33,7 +31,12 @@ public class ExcelTest {
         /** 版本序列号 **/
         private static final long serialVersionUID = 1L;
 
+        private int index;
         private List<EmployeeInfo> employees = new ArrayList<>();
+
+        public Callback(int index) {
+            this.index = index;
+        }
 
         @Override
         public void callback(Map<String, Object> map, RowInfo row) throws ServiceException {
@@ -46,33 +49,42 @@ public class ExcelTest {
             } catch (JSONException e) {
                 throw new ServiceException(ResultCode.PARAMETER_IS_REQUIRED, e);
             }
-            System.out.println(JsonTools.toJsonString(model));
+            System.out.println(index + "\timport: " + JsonTools.toJsonString(model));
         }
 
     }
 
     public static void main(String[] args) {
-
         URL path = PathTools.findClassResource(ExcelTest.class, "test.txt");
-        URL xlsx = PathTools.findClassResource(ExcelTest.class, "员工信息导入.xlsx");
         System.out.println(path);
-        XMetadata metadata = new XMetadata(new Config(path));
+        Properties original = PropertyTools.load(path, "UTF-8");
+        Properties common = PropertyTools.filter(original, "common."); // 公共配置
+        Properties test1 = PropertyTools.filter(original, "test.1."); // 测试1的配置
+        Properties test2 = PropertyTools.filter(original, "test.2."); // 测试2的配置
+        // test(PropertyTools.concat(new Properties(), common, test1), 1);
+        test(PropertyTools.concat(new Properties(), common, test2), 2);
+    }
+
+    private static void test(Properties properties, int index) {
+
+        URL xlsx = PathTools.findClassResource(ExcelTest.class, "员工信息导入." + index + ".xlsx");
+        XMetadata metadata = new XMetadata(new Config(properties));
         XExcelParser parser = new XExcelParser(metadata);
 
         // 导入
         List<EmployeeInfo> employees;
         try (InputStream is = xlsx.openStream()) {
-            Callback callback = new Callback();
+            Callback callback = new Callback(index);
             parser.parse(is, callback);
-            System.out.println(JSON.toJSONString(callback));
+            System.out.println(index + "\t" + JSON.toJSONString(callback));
             employees = callback.employees;
         } catch (IOException | ServiceException e) {
             e.printStackTrace();
             return;
         }
 
-        URL tpl = PathTools.findClassResource(ExcelTest.class, "员工信息(模板).xlsx");
-        String save = "D:/员工信息导出-%s.xlsx";
+        URL tpl = PathTools.findClassResource(ExcelTest.class, "员工信息(模板)." + index + ".xlsx");
+        String save = "D:/员工信息导出." + index + ".%s.xlsx";
         XExcelExporter exporter = new XExcelExporter(metadata);
 
         // 导出
@@ -82,21 +94,20 @@ public class ExcelTest {
             for (int j = i; j < count; j++) {
                 list.addAll(employees);
             }
-            new Runner(exporter, list, tpl, String.format(save, i + 1)).start();
+            new Runner(index, exporter, list, tpl, String.format(save, i + 1)).start();
         }
     }
 
     private static class Runner extends Thread {
 
+        private int index;
         private XExcelExporter exporter;
-
         private List<?> data;
-
         private URL template;
-
         private String savepath;
 
-        public Runner(XExcelExporter exporter, List<?> data, URL template, String savepath) {
+        public Runner(int index, XExcelExporter exporter, List<?> data, URL template, String savepath) {
+            this.index = index;
             this.exporter = exporter;
             this.data = data;
             this.template = template;
@@ -107,17 +118,17 @@ public class ExcelTest {
 
             Date start = new Date();
 
-            System.out.println(this.getName() + " start --> " + DateTools.toNormativeString(start));
+            System.out.println(index + "\t" + this.getName() + " start --> " + DateTools.toNormativeString(start));
 
             File file = new File(savepath);
             try (InputStream input = template.openStream(); OutputStream out = new FileOutputStream(file)) {
                 exporter.export(data, input, out);
-                System.out.println("export successful, " + file.getAbsolutePath());
+                System.out.println(index + "\t" + this.getName() + " export successful, " + file.getAbsolutePath());
             } catch (IOException | ServiceException e) {
                 e.printStackTrace();
             }
 
-            System.out.println(this.getName() + " done --> " + ConvertTools.toDuration(start, true));
+            System.out.println(index + "\t" + this.getName() + " done --> " + ConvertTools.toDuration(start, true));
         }
     }
 
