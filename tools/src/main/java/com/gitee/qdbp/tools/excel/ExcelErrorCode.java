@@ -10,6 +10,12 @@ import com.gitee.qdbp.able.result.IResultMessage;
  */
 public enum ExcelErrorCode implements IResultMessage {
 
+    /** 数据格式错误 **/
+    EXCEL_DATA_FORMAT_ERROR("数据格式错误"),
+
+    /** 文件不存在 **/
+    FILE_NOT_FOUND("文件不存在"),
+
     /** 文件读取失败 **/
     FILE_READ_ERROR("文件读取失败"),
 

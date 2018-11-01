@@ -8,22 +8,22 @@ import com.gitee.qdbp.tools.excel.XMetadata;
  * @author zhaohuihua
  * @version 181101
  */
-public class MergeToList extends MergeBase {
+public class MergeToList extends MergeMetadata {
 
     /** serialVersionUID **/
     private static final long serialVersionUID = 1L;
 
-    /** 字段名称 **/
-    private String fieldName;
+    /** 自身名称 **/
+    private String selfName;
 
-    /** 字段名称 **/
-    public String getFieldName() {
-        return fieldName;
+    /** 自身名称 **/
+    public String getSelfName() {
+        return selfName;
     }
 
-    /** 字段名称 **/
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
+    /** 自身名称 **/
+    public void setSelfName(String selfName) {
+        this.selfName = selfName;
     }
 
     /**
@@ -35,9 +35,9 @@ public class MergeToList extends MergeBase {
     public <T extends XMetadata> T to(Class<T> clazz) {
         T instance = super.to(clazz);
 
-        if (instance instanceof MergeToList) {
-            MergeToList real = (MergeToList) instance;
-            real.setFieldName(this.getFieldName()); // 字段名称
+        if (instance instanceof MergeToJson) {
+            MergeToJson real = (MergeToJson) instance;
+            real.setSelfName(this.getSelfName()); // 自身名称
         }
         return instance;
     }

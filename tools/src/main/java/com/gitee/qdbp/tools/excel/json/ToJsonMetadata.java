@@ -5,7 +5,7 @@ import java.util.List;
 import com.gitee.qdbp.tools.excel.XMetadata;
 
 /**
- * 主数据参数
+ * 数据转换参数
  *
  * @author zhaohuihua
  * @version 181101
@@ -15,24 +15,14 @@ public class ToJsonMetadata extends XMetadata {
     /** serialVersionUID **/
     private static final long serialVersionUID = 1L;
 
-    /** 字段名称 **/
-    private String fieldName;
     /** Excel文件路径 **/
     private String fileName;
-    /** ID所在的列号 **/
-    private Integer idColumn;
+    /** 自身名称 **/
+    private String selfName;
+    /** ID字段名 **/
+    private String idField;
     /** 合并参数 **/
     private List<MergeMetadata> mergers;
-
-    /** 字段名称 **/
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    /** 字段名称 **/
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
 
     /** Excel文件路径 **/
     public String getFileName() {
@@ -44,14 +34,24 @@ public class ToJsonMetadata extends XMetadata {
         this.fileName = fileName;
     }
 
-    /** ID所在的列号 **/
-    public Integer getIdColumn() {
-        return idColumn;
+    /** 自身名称 **/
+    public String getSelfName() {
+        return selfName;
     }
 
-    /** ID所在的列号 **/
-    public void setIdColumn(Integer idColumn) {
-        this.idColumn = idColumn;
+    /** 自身名称 **/
+    public void setSelfName(String selfName) {
+        this.selfName = selfName;
+    }
+
+    /** ID字段名 **/
+    public String getIdField() {
+        return idField;
+    }
+
+    /** ID字段名 **/
+    public void setIdField(String idField) {
+        this.idField = idField;
     }
 
     /** 合并参数 **/

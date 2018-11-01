@@ -33,8 +33,15 @@ import com.gitee.qdbp.tools.utils.PropertyTools;
  */
 public class MetadataTools {
 
+    /**
+     * 解析XMetadata
+     * 
+     * @param properties 配置内容
+     * @return XMetadata
+     */
     public static XMetadata parseMetadata(Properties properties) {
 
+        // 解析fieldNames和fieldRows
         String sFieldNames = PropertyTools.getStringUseDefKeys(properties, "field.names", "columns");
         List<FieldInfo> fieldNames = null;
         IndexRangeCondition fieldRows = null;
@@ -48,8 +55,8 @@ public class MetadataTools {
                 throw new IllegalStateException("excel setting columns or columnRows is required.");
             }
         }
-        // 解析skipRows and headerRows
-        Integer skipRows = PropertyTools.getInteger(properties, "skip.rows", false);
+
+        // 解析headerRows
         IndexRangeCondition headerRows = null;
         String sHeaderRows = PropertyTools.getString(properties, "header.rows", false);
         if (VerifyTools.isBlank(sHeaderRows)) {
@@ -58,6 +65,8 @@ public class MetadataTools {
         if (VerifyTools.isNotBlank(sHeaderRows)) {
             headerRows = new IndexRangeCondition(sHeaderRows, 1); // 配置项从1开始, 程序从0开始
         }
+        // 解析skipRows
+        Integer skipRows = PropertyTools.getInteger(properties, "skip.rows", false);
         if (skipRows == null) {
             if (fieldRows != null && headerRows != null) {
                 skipRows = Math.max(fieldRows.getMax(), headerRows.getMax()) + 1;
@@ -67,7 +76,6 @@ public class MetadataTools {
                 skipRows = headerRows.getMax() + 1;
             }
         }
-        skipRows = skipRows == null ? 0 : skipRows;
 
         // 解析footerRows
         // 导入时每个excel的页脚位置有可能不一样, 所以导入不能指定页脚行, 只能在导入之前把页脚删掉
@@ -82,6 +90,7 @@ public class MetadataTools {
             footerRows = new IndexRangeCondition(sFooterRow, 1); // 配置项从1开始, 程序从0开始
         }
 
+        // 解析sheetIndexs和sheetNames
         IndexListCondition sheetIndexs = null;
         NameListCondition sheetNames = null;
         String sSheetIndex = PropertyTools.getString(properties, "sheet.index", false);
@@ -96,8 +105,6 @@ public class MetadataTools {
                 sheetIndexs = new IndexListCondition();
             }
         }
-
-        String sheetNameFillTo = PropertyTools.getString(properties, "sheet.name.fill.to", false);
 
         // 解析转换规则和跳过行规则
         Map<String, PresetRule> rules = new HashMap<>();
@@ -118,10 +125,13 @@ public class MetadataTools {
             }
         }
 
+        // Sheet名称填充至哪个字段
+        String sheetNameFillTo = PropertyTools.getString(properties, "sheet.name.fill.to", false);
+
         XMetadata metadata = new XMetadata();
         metadata.setFieldInfos(fieldNames); // 字段信息列表
         metadata.setFieldRows(fieldRows); // 字段名所在的行
-        metadata.setSkipRows(skipRows); // 跳过几行
+        metadata.setSkipRows(skipRows == null ? 0 : skipRows); // 跳过几行
         metadata.setHeaderRows(headerRows); // 表头所在的行号
         metadata.setFooterRows(footerRows); // 页脚所在的行号
         metadata.setSheetNameFillTo(sheetNameFillTo); // Sheet名称填充至哪个字段

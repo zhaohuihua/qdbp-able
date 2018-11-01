@@ -6,7 +6,7 @@ package com.gitee.qdbp.tools.excel.json;
  * @author zhaohuihua
  * @version 181101
  */
-public class MergeToField extends MergeBase {
+public class MergeToField extends MergeMetadata {
 
     /** serialVersionUID **/
     private static final long serialVersionUID = 1L;

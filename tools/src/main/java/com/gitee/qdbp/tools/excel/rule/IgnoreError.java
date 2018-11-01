@@ -6,7 +6,7 @@ import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 
 /**
- * 忽略错误
+ * 忽略错误, 如果不加这个规则, 解析失败将返回原文
  *
  * @author zhaohuihua
  * @version 181027

@@ -1,6 +1,7 @@
 package com.gitee.qdbp.tools.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -386,6 +387,23 @@ public abstract class PropertyTools {
             buffer.append(value.substring(index));
             return buffer.toString();
         }
+    }
+
+    /**
+     * 加载资源文件
+     * 
+     * @param text 资源文件内容
+     * @return Properties
+     */
+    public static Properties loadByString(String text) {
+        Properties properties = new Properties();
+        try (InputStream is = new ByteArrayInputStream(text.getBytes("UTF-8"));
+                InputStreamReader reader = new InputStreamReader(is, "UTF-8")) {
+            properties.load(reader);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("load properties error", e);
+        }
+        return properties;
     }
 
     /**

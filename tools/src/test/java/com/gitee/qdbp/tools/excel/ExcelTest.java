@@ -15,11 +15,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.qdbp.able.exception.ServiceException;
-import com.gitee.qdbp.able.result.ResultCode;
 import com.gitee.qdbp.able.utils.DateTools;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
+import com.gitee.qdbp.tools.excel.utils.MetadataTools;
 import com.gitee.qdbp.tools.files.PathTools;
-import com.gitee.qdbp.tools.utils.Config;
 import com.gitee.qdbp.tools.utils.ConvertTools;
 import com.gitee.qdbp.tools.utils.JsonTools;
 import com.gitee.qdbp.tools.utils.PropertyTools;
@@ -47,7 +46,7 @@ public class ExcelTest {
                 model = JSON.toJavaObject(json, EmployeeInfo.class);
                 employees.add(model);
             } catch (JSONException e) {
-                throw new ServiceException(ResultCode.PARAMETER_IS_REQUIRED, e);
+                throw new ServiceException(ExcelErrorCode.EXCEL_DATA_FORMAT_ERROR, e);
             }
             System.out.println(index + "\timport: " + JsonTools.toJsonString(model));
         }
@@ -68,7 +67,7 @@ public class ExcelTest {
     private static void test(Properties properties, int index) {
 
         URL xlsx = PathTools.findClassResource(ExcelTest.class, "员工信息导入." + index + ".xlsx");
-        XMetadata metadata = new XMetadata(new Config(properties));
+        XMetadata metadata = MetadataTools.parseMetadata(properties);
         XExcelParser parser = new XExcelParser(metadata);
 
         // 导入
