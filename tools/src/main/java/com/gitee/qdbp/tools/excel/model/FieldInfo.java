@@ -2,14 +2,13 @@ package com.gitee.qdbp.tools.excel.model;
 
 import java.io.Serializable;
 
-
 /**
  * 列信息
  *
  * @author zhaohuihua
  * @version 160302
  */
-public class ColumnInfo implements Serializable {
+public class FieldInfo implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -23,7 +22,7 @@ public class ColumnInfo implements Serializable {
     /** 第几列, 从1开始 **/
     private final Integer column;
 
-    public ColumnInfo(Integer column, String field, boolean required) {
+    public FieldInfo(Integer column, String field, boolean required) {
         this.column = column;
         this.field = field;
         this.required = required;
@@ -42,6 +41,26 @@ public class ColumnInfo implements Serializable {
     /** 获取第几列, 从1开始 **/
     public Integer getColumn() {
         return column;
+    }
+
+    public String toString() {
+        if (field == null) {
+            return "null";
+        } else {
+            StringBuilder buffer = new StringBuilder();
+            if (column != null) {
+                buffer.append(column).append(":");
+            }
+            if (field.trim().length() == 0) {
+                buffer.append("\"\"");
+            } else {
+                buffer.append(field);
+            }
+            if (required) {
+                buffer.append("(*)");
+            }
+            return buffer.toString();
+        }
     }
 
 }

@@ -11,7 +11,7 @@ import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.IBatchResult;
 import com.gitee.qdbp.able.result.IResultMessage;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
-import com.gitee.qdbp.tools.excel.model.ColumnInfo;
+import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.FailedInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 import com.gitee.qdbp.tools.excel.rule.ConvertRule;
@@ -89,7 +89,7 @@ public abstract class ImportCallback implements IBatchResult, ConvertRule, Seria
     public abstract void callback(Map<String, Object> map, RowInfo row) throws ServiceException;
 
     /** 读取单元格内容 **/
-    public Object getCellValue(Cell cell, ColumnInfo column) {
+    public Object getCellValue(Cell cell, FieldInfo column) {
         return ExcelTools.getCellValue(cell);
     }
 

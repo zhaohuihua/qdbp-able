@@ -61,7 +61,7 @@ public class ExcelTest {
         Properties common = PropertyTools.filter(original, "common."); // 公共配置
         Properties test1 = PropertyTools.filter(original, "test.1."); // 测试1的配置
         Properties test2 = PropertyTools.filter(original, "test.2."); // 测试2的配置
-        // test(PropertyTools.concat(new Properties(), common, test1), 1);
+        test(PropertyTools.concat(new Properties(), common, test1), 1);
         test(PropertyTools.concat(new Properties(), common, test2), 2);
     }
 

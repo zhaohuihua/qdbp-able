@@ -5,17 +5,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import org.apache.poi.ss.usermodel.Row;
 import com.gitee.qdbp.able.beans.KeyString;
 import com.gitee.qdbp.able.utils.VerifyTools;
-import com.gitee.qdbp.tools.excel.condition.ContainsTextCondition;
 import com.gitee.qdbp.tools.excel.condition.IndexListCondition;
 import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.condition.MatchesRowCondition;
 import com.gitee.qdbp.tools.excel.condition.NameListCondition;
-import com.gitee.qdbp.tools.excel.model.ColumnInfo;
-import com.gitee.qdbp.tools.excel.rule.DateRule;
-import com.gitee.qdbp.tools.excel.rule.MapRule;
+import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.rule.PresetRule;
 import com.gitee.qdbp.tools.excel.utils.MetadataTools;
 import com.gitee.qdbp.tools.utils.Config;
@@ -34,11 +32,11 @@ public class XMetadata implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // columns和fieldRows同时存在时以columns优先
-    /** 列名 **/
-    private List<ColumnInfo> columns;
+    /** 字段信息列表 **/
+    private List<FieldInfo> fieldInfos;
     /** 字段名所在的行 **/
     private IndexRangeCondition fieldRows;
-    /** 列名与转换规则的映射表(配置规则) **/
+    /** 字段与转换规则的映射表(配置规则) **/
     private Map<String, PresetRule> rules;
     /** 跳过几行 **/
     private Integer skipRows;
@@ -48,9 +46,9 @@ public class XMetadata implements Serializable {
     // skip.row.when.3 = 2:总计, 10:元
     // 第1列为空, 或第2列包含小计且第10列包含元, 或第2列包含总计且第10列包含元
     private List<MatchesRowCondition> skipRowWhen;
-    /** 表头 **/
+    /** 表头所在的行号 **/
     private IndexRangeCondition headerRows;
-    /** 页脚 **/
+    /** 页脚所在的行号 **/
     private IndexRangeCondition footerRows;
     /** Sheet名称填充至哪个字段 **/
     private String sheetNameFillTo;
@@ -65,103 +63,52 @@ public class XMetadata implements Serializable {
         this.sheetIndexs = new IndexListCondition();
     }
 
+    /**
+     * 构造函数
+     * 
+     * @param config 配置项
+     * @deprecated 改为{@linkplain MetadataTools#parseMetadata(Properties)}
+     */
+    @Deprecated
     public XMetadata(Config config) {
-        String columns = config.getString("columns", false);
-        if (VerifyTools.isNotBlank(columns)) {
-            this.columns = MetadataTools.parseFields(columns);
-        } else {
-            String fieldRows = config.getString("field.rows", false);
-            if (VerifyTools.isNotBlank(fieldRows)) {
-                this.fieldRows = new IndexRangeCondition(fieldRows, 1); // 配置项从1开始, 程序从0开始
-            } else {
-                throw new IllegalStateException("excel setting columns or columnRows is required.");
-            }
-        }
-        // 解析skipRows and headerRows
-        Integer skipRows = config.getInteger("skip.rows", false);
-        String headerRow = config.getString("header.rows", false);
-        if (VerifyTools.isBlank(headerRow)) {
-            headerRow = config.getString("header.row", false);
-        }
-        if (VerifyTools.isNotBlank(headerRow)) {
-            this.headerRows = new IndexRangeCondition(headerRow, 1); // 配置项从1开始, 程序从0开始
-        }
-        if (skipRows == null) {
-            if (this.fieldRows != null && this.headerRows != null) {
-                skipRows = Math.max(this.fieldRows.getMax(), this.headerRows.getMax()) + 1;
-            } else if (this.fieldRows != null) {
-                skipRows = this.fieldRows.getMax() + 1;
-            } else if (this.headerRows != null) {
-                skipRows = this.headerRows.getMax() + 1;
-            }
-        }
-        this.skipRows = skipRows == null ? 0 : skipRows;
-
-        // 解析footerRows
-        // 导入时每个excel的页脚位置有可能不一样, 所以导入不能指定页脚行, 只能在导入之前把页脚删掉
-        // 如果页脚有公式, 那么数据行必须至少2行, 公式的范围必须包含这两行数据,
-        // 如SUM($E$5:E6), 而不能是SUM($E$5:E5), 否则导出数据行之后公式不正确
-        String footerRow = config.getString("footer.rows", false);
-        if (VerifyTools.isBlank(footerRow == null)) {
-            footerRow = config.getString("footer.row", false);
-        }
-        if (VerifyTools.isNotBlank(footerRow)) {
-            this.footerRows = new IndexRangeCondition(footerRow, 1); // 配置项从1开始, 程序从0开始
-        }
-
-        this.sheetNameFillTo = config.getString("sheet.name.fill.to", false);
-        String sheetIndexText = config.getString("sheet.index", false);
-        String sheetNameText = config.getString("sheet.name", false);
-        if (VerifyTools.isNotBlank(sheetIndexText)) {
-            sheetIndexs = new IndexListCondition(sheetIndexText, 1); // 配置项从1开始
-        }
-        if (VerifyTools.isNotBlank(sheetNameText)) {
-            sheetNames = new NameListCondition(sheetNameText);
-            // 有SheetName规则而没有SheetIndex规则时, SheetIndex全部通过
-            if (VerifyTools.isBlank(sheetIndexText)) {
-                sheetIndexs = new IndexListCondition();
-            }
-        }
-
-        Map<String, PresetRule> rules = new HashMap<>();
-        List<MatchesRowCondition> skipRowWhen = new ArrayList<>();
+        Properties properties = new Properties();
         for (KeyString entry : config.entries()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.equals("skip.row.when") || key.startsWith("skip.row.when.")) {
-                skipRowWhen.add(new ContainsTextCondition(value));
-            } else if (key.startsWith("rule.date.")) {
-                String field = key.substring("rule.data.".length());
-                rules.put(field, new DateRule(value));
-            } else if (key.startsWith("rule.map.")) {
-                String field = key.substring("rule.map.".length());
-                rules.put(field, new MapRule(value));
-            }
+            properties.put(entry.getKey(), entry.getValue());
         }
-        if (!skipRowWhen.isEmpty()) {
-            this.skipRowWhen = skipRowWhen;
-        }
-        if (!rules.isEmpty()) {
-            this.rules = rules;
-        }
+        XMetadata metadata = MetadataTools.parseMetadata(properties);
+        this.setFieldInfos(metadata.getFieldInfos()); // 字段信息列表
+        this.setFieldRows(metadata.getFieldRows()); // 字段名所在的行
+        this.setRules(metadata.getRules()); // 字段与转换规则的映射表
+        this.setSkipRows(metadata.getSkipRows()); // 跳过几行
+        this.setSkipRowWhen(metadata.getSkipRowWhen()); // 包含指定关键字时跳过此行
+        this.setHeaderRows(metadata.getHeaderRows()); // 表头所在的行号
+        this.setFooterRows(metadata.getFooterRows()); // 页脚所在的行号
+        this.setSheetNameFillTo(metadata.getSheetNameFillTo()); // Sheet名称填充至哪个字段
+        this.setSheetIndexs(metadata.getSheetIndexs()); // Sheet序号配置
+        this.setSheetNames(metadata.getSheetNames()); // Sheet名称配置
     }
 
+    /** 判断指定页签是否有效 **/
     public boolean isEnableSheet(int sheetIndex, String sheetName) {
         return sheetIndexs.isEnable(sheetIndex) && sheetNames.isEnable(sheetName);
     }
 
+    /** 判断指定行是否为字段行 **/
     public boolean isFieldRow(int rowIndex) {
         return fieldRows != null && fieldRows.isEnable(rowIndex);
     }
 
+    /** 判断指定行是否为页头 **/
     public boolean isHeaderRow(int rowIndex) {
         return headerRows != null && headerRows.isEnable(rowIndex);
     }
 
+    /** 判断指定行是否为页脚 **/
     public boolean isFooterRow(int rowIndex) {
         return footerRows != null && footerRows.isEnable(rowIndex);
     }
 
+    /** 判断指定行是否跳过 **/
     public boolean isSkipRow(Row row) {
         if (VerifyTools.isBlank(skipRowWhen)) {
             return false;
@@ -174,37 +121,45 @@ public class XMetadata implements Serializable {
         return false;
     }
 
-    public List<ColumnInfo> getColumns() {
-        return columns;
+    /** 字段信息列表 **/
+    public List<FieldInfo> getFieldInfos() {
+        return fieldInfos;
     }
 
-    public void setColumns(List<ColumnInfo> columns) {
-        this.columns = columns;
+    /** 字段信息列表 **/
+    public void setFieldInfos(List<FieldInfo> fieldInfos) {
+        this.fieldInfos = fieldInfos;
     }
 
-    public void addColumn(ColumnInfo column) {
-        if (this.columns == null) {
-            this.columns = new ArrayList<>();
+    /** 增加字段名称信息 **/
+    public void addColumn(FieldInfo fieldInfo) {
+        if (this.fieldInfos == null) {
+            this.fieldInfos = new ArrayList<>();
         }
-        this.columns.add(column);
+        this.fieldInfos.add(fieldInfo);
     }
 
+    /** 跳过几行 **/
     public Integer getSkipRows() {
         return skipRows == null ? 0 : skipRows;
     }
 
+    /** 跳过几行 **/
     public void setSkipRows(Integer skipRows) {
         this.skipRows = skipRows;
     }
 
+    /** 包含指定关键字时跳过此行 **/
     public List<MatchesRowCondition> getSkipRowWhen() {
         return skipRowWhen;
     }
 
+    /** 包含指定关键字时跳过此行 **/
     public void setSkipRowWhen(List<MatchesRowCondition> skipRowWhen) {
         this.skipRowWhen = skipRowWhen;
     }
 
+    /** 增加跳过某行的关键字 **/
     public void addSkipRowWhen(MatchesRowCondition condition) {
         if (this.skipRowWhen == null) {
             this.skipRowWhen = new ArrayList<>();
@@ -212,62 +167,77 @@ public class XMetadata implements Serializable {
         this.skipRowWhen.add(condition);
     }
 
+    /** 字段名所在的行 **/
     public IndexRangeCondition getFieldRows() {
         return fieldRows;
     }
 
+    /** 字段名所在的行 **/
     public void setFieldRows(IndexRangeCondition fieldRows) {
         this.fieldRows = fieldRows;
     }
 
+    /** 表头所在的行号 **/
     public IndexRangeCondition getHeaderRows() {
         return headerRows;
     }
 
+    /** 表头所在的行号 **/
     public void setHeaderRows(IndexRangeCondition headerRows) {
         this.headerRows = headerRows;
     }
 
+    /** 页脚所在的行号 **/
     public IndexRangeCondition getFooterRows() {
         return footerRows;
     }
 
+    /** 页脚所在的行号 **/
     public void setFooterRows(IndexRangeCondition footerRows) {
         this.footerRows = footerRows;
     }
 
+    /** Sheet序号配置, 默认读取第1个Sheet **/
     public IndexListCondition getSheetIndexs() {
         return sheetIndexs;
     }
 
+    /** Sheet序号配置, 默认读取第1个Sheet **/
     public void setSheetIndexs(IndexListCondition sheetIndexs) {
         this.sheetIndexs = sheetIndexs;
     }
 
+    /** Sheet名称配置, 默认全部匹配 **/
     public NameListCondition getSheetNames() {
         return sheetNames;
     }
 
+    /** Sheet名称配置, 默认全部匹配 **/
     public void setSheetNames(NameListCondition sheetNames) {
         this.sheetNames = sheetNames;
     }
 
+    /** Sheet名称填充至哪个字段 **/
     public String getSheetNameFillTo() {
         return sheetNameFillTo;
     }
 
+    /** Sheet名称填充至哪个字段 **/
     public void setSheetNameFillTo(String sheetNameFillTo) {
         this.sheetNameFillTo = sheetNameFillTo;
     }
 
+    /** 字段与转换规则的映射表 **/
     public Map<String, PresetRule> getRules() {
         return rules;
     }
 
+    /** 字段与转换规则的映射表 **/
     public void setRules(Map<String, PresetRule> rules) {
         this.rules = rules;
     }
 
+    /** 增加转换规则 **/
     public void addRule(String column, PresetRule rule) {
         if (this.rules == null) {
             this.rules = new HashMap<>();
@@ -275,7 +245,35 @@ public class XMetadata implements Serializable {
         this.rules.put(column, rule);
     }
 
+    /** 获取指定列的转换规则 **/
     public PresetRule getRule(String column) {
         return this.rules.get(column);
+    }
+
+    /**
+     * 将当前对象转换为子类对象
+     *
+     * @param clazz 目标类型
+     * @return 目标对象
+     */
+    public <T extends XMetadata> T to(Class<T> clazz) {
+        T instance;
+        try {
+            instance = clazz.newInstance();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to create " + clazz.getSimpleName() + " instance.", e);
+        }
+
+        instance.setFieldInfos(this.getFieldInfos()); // 字段信息列表
+        instance.setFieldRows(this.getFieldRows()); // 字段名所在的行
+        instance.setRules(this.getRules()); // 字段与转换规则的映射表
+        instance.setSkipRows(this.getSkipRows()); // 跳过几行
+        instance.setSkipRowWhen(this.getSkipRowWhen()); // 包含指定关键字时跳过此行
+        instance.setHeaderRows(this.getHeaderRows()); // 表头所在的行号
+        instance.setFooterRows(this.getFooterRows()); // 页脚所在的行号
+        instance.setSheetNameFillTo(this.getSheetNameFillTo()); // Sheet名称填充至哪个字段
+        instance.setSheetIndexs(this.getSheetIndexs()); // Sheet序号配置
+        instance.setSheetNames(this.getSheetNames()); // Sheet名称配置
+        return instance;
     }
 }

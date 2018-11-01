@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
-import com.gitee.qdbp.tools.excel.model.ColumnInfo;
+import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 import com.gitee.qdbp.tools.excel.rule.PresetRule;
 import com.gitee.qdbp.tools.excel.utils.ExcelTools;
@@ -44,7 +44,7 @@ public class ExportCallback {
     }
 
     /** 写入单元格内容 **/
-    public void setCellValue(Cell cell, Object value, ColumnInfo column) {
+    public void setCellValue(Cell cell, Object value, FieldInfo column) {
         ExcelTools.setCellValue(cell, value);
     }
 

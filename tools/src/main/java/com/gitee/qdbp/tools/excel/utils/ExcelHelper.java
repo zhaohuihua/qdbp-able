@@ -18,7 +18,7 @@ import com.gitee.qdbp.tools.excel.ImportCallback;
 import com.gitee.qdbp.tools.excel.XMetadata;
 import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
-import com.gitee.qdbp.tools.excel.model.ColumnInfo;
+import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 
 /**
@@ -36,17 +36,17 @@ public class ExcelHelper {
     public static void parse(Sheet sheet, XMetadata metadata, ImportCallback cb) {
 
         String sheetName = sheet.getSheetName();
-        List<ColumnInfo> columns = metadata.getColumns();
-        if (columns == null && metadata.getFieldRows() != null) {
-            columns = MetadataTools.parseFields(sheet, metadata.getFieldRows());
-            if (columns.isEmpty()) {
+        List<FieldInfo> fieldInfos = metadata.getFieldInfos();
+        if (fieldInfos == null && metadata.getFieldRows() != null) {
+            fieldInfos = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+            if (fieldInfos.isEmpty()) {
                 log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());
             }
         }
 
         // 读取标题信息, 生成单元格数据
-        Map<String, CellInfo> cells = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), columns);
-        for (Entry<String, CellInfo> entry : cells.entrySet()) {
+        Map<String, CellInfo> cellInfos = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), fieldInfos);
+        for (Entry<String, CellInfo> entry : cellInfos.entrySet()) {
             entry.getValue().setMetadata(metadata);
         }
 
@@ -67,7 +67,7 @@ public class ExcelHelper {
                 continue;
             }
             try {
-                parse(sheetName, row, i, columns, cells, metadata, cb);
+                parse(sheetName, row, i, fieldInfos, cellInfos, metadata, cb);
             } catch (ServiceException e) {
                 cb.addFailed(sheetName, i + 1, e);
                 if (e.getCause() != null) {
@@ -84,11 +84,11 @@ public class ExcelHelper {
         }
     }
 
-    private static void parse(String sheetName, Row row, int index, List<ColumnInfo> columns,
-            Map<String, CellInfo> cells, XMetadata metadata, ImportCallback cb) throws ServiceException {
+    private static void parse(String sheetName, Row row, int index, List<FieldInfo> fieldInfos,
+            Map<String, CellInfo> cellInfos, XMetadata metadata, ImportCallback cb) throws ServiceException {
         Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < columns.size() && i < row.getLastCellNum(); i++) {
-            ColumnInfo column = columns.get(i);
+        for (int i = 0; i < fieldInfos.size() && i < row.getLastCellNum(); i++) {
+            FieldInfo column = fieldInfos.get(i);
             if (column == null) {
                 continue;
             }
@@ -119,15 +119,15 @@ public class ExcelHelper {
             }
         }
 
-        for (ColumnInfo column : columns) {
-            if (column == null) {
+        for (FieldInfo fieldInfo : fieldInfos) {
+            if (fieldInfo == null) {
                 continue;
             }
 
-            String field = column.getField();
+            String field = fieldInfo.getField();
 
             Object object = map.get(field);
-            CellInfo info = cells.get(field);
+            CellInfo info = cellInfos.get(field);
             info.setRow(index + 1);
             info.setValue(object);
 
@@ -156,25 +156,25 @@ public class ExcelHelper {
 
         // 回调具体的业务处理方法
         RowInfo info = new RowInfo(sheetName, index + 1);
-        info.setCells(cells);
+        info.setCells(cellInfos);
         info.setMetadata(metadata);
         cb.callback(map, info);
     }
 
     public static void export(List<?> data, Sheet sheet, XMetadata metadata, ExportCallback cb) {
 
-        List<ColumnInfo> columns = metadata.getColumns();
-        if (columns == null && metadata.getFieldRows() != null) {
-            columns = MetadataTools.parseFields(sheet, metadata.getFieldRows());
-            if (columns.isEmpty()) {
+        List<FieldInfo> fieldInfos = metadata.getFieldInfos();
+        if (fieldInfos == null && metadata.getFieldRows() != null) {
+            fieldInfos = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+            if (fieldInfos.isEmpty()) {
                 String sheetName = sheet.getSheetName();
                 log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());
             }
         }
 
         // 读取标题信息, 生成单元格数据
-        Map<String, CellInfo> cells = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), columns);
-        for (Entry<String, CellInfo> entry : cells.entrySet()) {
+        Map<String, CellInfo> cellInfos = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), fieldInfos);
+        for (Entry<String, CellInfo> entry : cellInfos.entrySet()) {
             entry.getValue().setMetadata(metadata);
         }
 
@@ -214,19 +214,19 @@ public class ExcelHelper {
             RowInfo info;
             { // RowInfo
                 info = new RowInfo(sheet.getSheetName(), index + 1);
-                info.setCells(cells);
+                info.setCells(cellInfos);
                 info.setMetadata(metadata);
             }
 
             Map<String, Object> json = cb.convert(data.get(i));
             cb.onRowStart(row, info, json);
 
-            int cellCount = Math.max(columns.size(), row.getPhysicalNumberOfCells());
+            int cellCount = Math.max(fieldInfos.size(), row.getPhysicalNumberOfCells());
             for (int c = 0; c < cellCount; c++) {
                 Cell cell = row.getCell(c, Row.CREATE_NULL_AS_BLANK);
                 // 设置值
-                if (c < columns.size()) {
-                    setValue(cell, columns.get(c), index, cells, json, cb);
+                if (c < fieldInfos.size()) {
+                    setValue(cell, fieldInfos.get(c), index, cellInfos, json, cb);
                 }
             }
 
@@ -245,25 +245,25 @@ public class ExcelHelper {
         }
     }
 
-    private static void setValue(Cell cell, ColumnInfo column, int index, Map<String, CellInfo> cells,
+    private static void setValue(Cell cell, FieldInfo fieldInfo, int index, Map<String, CellInfo> cellInfos,
             Map<String, Object> json, ExportCallback cb) {
-        if (column == null) {
+        if (fieldInfo == null) {
             return;
         }
 
-        String field = column.getField();
+        String field = fieldInfo.getField();
         Object object = json.get(field);
-        CellInfo info = cells.get(field);
+        CellInfo info = cellInfos.get(field);
         info.setRow(index + 1);
         info.setValue(object);
         try {
             // 调用转换规则
-            cb.convert(json, cells.get(field));
+            cb.convert(json, cellInfos.get(field));
         } catch (ServiceException ignore) {
             // 转换失败则输出原内容
         }
 
         Object value = json.get(field);
-        cb.setCellValue(cell, value, column);
+        cb.setCellValue(cell, value, fieldInfo);
     }
 }
