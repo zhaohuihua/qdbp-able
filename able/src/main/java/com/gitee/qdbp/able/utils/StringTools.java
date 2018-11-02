@@ -266,20 +266,6 @@ public abstract class StringTools {
         return list.toArray(new String[0]);
     }
 
-    public static String remove(String string, int start, int end) {
-        if (string == null) {
-            return null;
-        }
-        StringBuilder buffer = new StringBuilder();
-        if (start > 0) {
-            buffer.append(string.substring(0, start));
-        }
-        if (end < string.length()) {
-            buffer.append(string.substring(end));
-        }
-        return buffer.toString();
-    }
-
     /**
      * 超过指定长度则省略中间字符<br>
      * 如果未超过指定长度则返回原字符, length小于20时省略最后部分而不是中间部分<br>
@@ -519,6 +505,43 @@ public abstract class StringTools {
             }
         }
         return ((st > 0) || (len < value.length)) ? text.substring(st, len) : text;
+    }
+
+    public static String remove(String string, int start, int end) {
+        if (string == null) {
+            return null;
+        }
+        StringBuilder buffer = new StringBuilder();
+        if (start > 0) {
+            buffer.append(string.substring(0, start));
+        }
+        if (end < string.length()) {
+            buffer.append(string.substring(end));
+        }
+        return buffer.toString();
+    }
+
+    /** 删除前缀, removePrefix("userNameEquals", "userName") = "Equals" **/
+    public static String removePrefix(String string, String prefix) {
+        if (string == null || prefix == null || !string.startsWith(prefix)) {
+            return string;
+        }
+        if (string.length() < prefix.length()) {
+            return "";
+        }
+        return string.substring(prefix.length());
+    }
+
+    /** 删除后缀, removeSuffix("userNameEquals", "Equals") = "userName" **/
+    public static String removeSuffix(String string, String suffix) {
+        if (string == null || suffix == null || !string.endsWith(suffix)) {
+            return string;
+        }
+        int end = string.length() - suffix.length();
+        if (end <= 0) {
+            return "";
+        }
+        return string.substring(0, end);
     }
 
     private static boolean inArray(char c, char[] array) {

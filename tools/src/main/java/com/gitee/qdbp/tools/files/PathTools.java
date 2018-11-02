@@ -812,7 +812,7 @@ public abstract class PathTools {
         if (path.trim().endsWith("/") || path.trim().endsWith("\\")) {
             if (buffer.length() == 0) {
                 buffer.append("./");
-            } else {
+            } else if (!buffer.toString().endsWith("/")) {
                 buffer.append("/");
             }
         }

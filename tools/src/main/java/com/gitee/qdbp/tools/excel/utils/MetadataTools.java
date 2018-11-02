@@ -34,7 +34,8 @@ import com.gitee.qdbp.tools.utils.PropertyTools;
 public class MetadataTools {
 
     /**
-     * 解析XMetadata
+     * 解析XMetadata<br>
+     * MetadataTools.parseMetadata(PropertyTools.load(filePath));
      * 
      * @param properties 配置内容
      * @return XMetadata

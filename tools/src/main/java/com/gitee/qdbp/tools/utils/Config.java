@@ -287,9 +287,17 @@ public class Config implements Serializable {
     }
 
     /**
+     * 返回Properties
+     *
+     * @return Properties
+     */
+    public Properties properties() {
+        return this.properties;
+    }
+
+    /**
      * 返回所有配置项条目
      *
-     * @author zhaohuihua
      * @return 所有配置项条目
      */
     public List<KeyString> entries() {

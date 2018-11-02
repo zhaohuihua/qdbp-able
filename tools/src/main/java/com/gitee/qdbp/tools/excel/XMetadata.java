@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.poi.ss.usermodel.Row;
-import com.gitee.qdbp.able.beans.KeyString;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.condition.IndexListCondition;
 import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
@@ -71,11 +70,7 @@ public class XMetadata implements Serializable {
      */
     @Deprecated
     public XMetadata(Config config) {
-        Properties properties = new Properties();
-        for (KeyString entry : config.entries()) {
-            properties.put(entry.getKey(), entry.getValue());
-        }
-        XMetadata metadata = MetadataTools.parseMetadata(properties);
+        XMetadata metadata = MetadataTools.parseMetadata(config.properties());
         this.setFieldInfos(metadata.getFieldInfos()); // 字段信息列表
         this.setFieldRows(metadata.getFieldRows()); // 字段名所在的行
         this.setRules(metadata.getRules()); // 字段与转换规则的映射表

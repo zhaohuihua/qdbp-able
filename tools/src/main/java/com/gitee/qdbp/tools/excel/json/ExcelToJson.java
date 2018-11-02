@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.ExcelErrorCode;
@@ -51,7 +54,7 @@ import com.gitee.qdbp.tools.utils.PropertyTools;
  *     如果子数据有多条后出现的会覆盖前面的, 如下示例的主数据多了address字段, home数据被office覆盖了
  *     MergeToJson = { selfName:address, sheetName:AddressSheet, idField:1, headerRows:1 }
  *     users:[ { id:1, name:jack, address:{ name:office, city:nanjing, details:yyyyy } } ]
-*
+ *
  * <b>MergeToList</b>, 一对多合并, 将子数据列表以selfName指定的字段名合并至主数据, 
  *     如下示例的主数据多了address字段, 内容为子数据列表
  *     MergeToJson = { selfName:address, sheetName:AddressSheet, idField:1, headerRows:1 }
@@ -74,6 +77,14 @@ public class ExcelToJson {
         json, list, field
     }
 
+    /**
+     * 执行数据转换
+     * 
+     * @param folder 文件夹路径
+     * @param params 数据转换参数
+     * @return JSON数据列表
+     * @throws ServiceException
+     */
     public Map<String, Object> convert(String folder, List<ToJsonParams> params) throws ServiceException {
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < params.size(); i++) {
@@ -85,7 +96,7 @@ public class ExcelToJson {
                 continue;
             }
 
-            List<?> result = loadExcelRows(folder, metadata);
+            List<?> result = loadAndMergeData(folder, metadata);
             if (result != null) {
                 String selfName = VerifyTools.nvl(metadata.getSelfName(), String.valueOf(i));
                 map.put(selfName, result);
@@ -94,25 +105,8 @@ public class ExcelToJson {
         return map;
     }
 
-    private static class Callback extends ImportCallback {
-
-        /** 版本序列号 **/
-        private static final long serialVersionUID = 1L;
-
-        private List<Map<String, Object>> rows = new ArrayList<>();
-
-        @Override
-        public void callback(Map<String, Object> map, RowInfo row) throws ServiceException {
-            try {
-                rows.add(map);
-            } catch (JSONException e) {
-                throw new ServiceException(ExcelErrorCode.EXCEL_DATA_FORMAT_ERROR, e);
-            }
-        }
-
-    }
-
-    private List<?> loadExcelRows(String folder, ToJsonMetadata metadata) throws ServiceException {
+    /** 导入及合并Excel数据 **/
+    private List<?> loadAndMergeData(String folder, ToJsonMetadata metadata) throws ServiceException {
 
         // 导入主数据
         List<Map<String, Object>> mainRows = loadExcelRows(folder, metadata.getFileName(), metadata);
@@ -138,7 +132,8 @@ public class ExcelToJson {
                 continue;
             }
             // 导入数据
-            List<Map<String, Object>> subRows = loadExcelRows(folder, merge.getFileName(), merge);
+            String fileName = VerifyTools.nvl(merge.getFileName(), metadata.getFileName());
+            List<Map<String, Object>> subRows = loadExcelRows(folder, fileName, merge);
             if (VerifyTools.isBlank(subRows)) {
                 continue;
             }
@@ -156,33 +151,7 @@ public class ExcelToJson {
         return mainRows;
     }
 
-    private static Map<String, ExcelRowsItem> EXCEL_ROWS_CACHE = new HashMap<>();
-
-    private static class ExcelRowsItem implements Serializable {
-
-        /** serialVersionUID **/
-        private static final long serialVersionUID = 1L;
-
-        private long lastModified;
-        private List<Map<String, Object>> rows;
-
-        public ExcelRowsItem(long lastModified, List<Map<String, Object>> rows) {
-            this.lastModified = lastModified;
-            this.rows = rows;
-        }
-
-    }
-
-    private String generateCacheKey(XMetadata metadata) {
-        if (metadata instanceof ToJsonMetadata) {
-            ToJsonMetadata copy = metadata.to(ToJsonMetadata.class);
-            copy.setMergers(null);
-            return JsonTools.toJsonString(copy);
-        } else {
-            return JsonTools.toJsonString(metadata);
-        }
-    }
-
+    /** 导入Excel数据 **/
     private List<Map<String, Object>> loadExcelRows(String folder, String fileName, XMetadata metadata)
             throws ServiceException {
         String msg = "Failed to load excel rows. ";
@@ -213,6 +182,54 @@ public class ExcelToJson {
         }
     }
 
+    private static class Callback extends ImportCallback {
+
+        /** 版本序列号 **/
+        private static final long serialVersionUID = 1L;
+
+        private List<Map<String, Object>> rows = new ArrayList<>();
+
+        @Override
+        public void callback(Map<String, Object> map, RowInfo row) throws ServiceException {
+            try {
+                rows.add(map);
+            } catch (JSONException e) {
+                throw new ServiceException(ExcelErrorCode.EXCEL_DATA_FORMAT_ERROR, e);
+            }
+        }
+
+    }
+
+    /** 数据缓存 **/
+    private static Map<String, ExcelRowsItem> EXCEL_ROWS_CACHE = new HashMap<>();
+
+    private static class ExcelRowsItem implements Serializable {
+
+        /** serialVersionUID **/
+        private static final long serialVersionUID = 1L;
+
+        private long lastModified;
+        private List<Map<String, Object>> rows;
+
+        public ExcelRowsItem(long lastModified, List<Map<String, Object>> rows) {
+            this.lastModified = lastModified;
+            this.rows = rows;
+        }
+
+    }
+
+    private static Pattern SPACE_CLEAR = Pattern.compile("\\s+");
+
+    /** 根据查询条件生成CacheKey **/
+    private String generateCacheKey(XMetadata metadata) {
+        Map<String, Object> map = (JSONObject) JSON.toJSON(metadata);
+        map.remove("rules");
+        map.remove("mergers");
+        String cacheKey = JsonTools.toJsonString(map);
+        return SPACE_CLEAR.matcher(cacheKey).replaceAll(" ");
+    }
+
+    /** 合并数据(MergeToField) **/
     private void mergeData(List<Map<String, Object>> mainRows, String mainIdField, List<Map<String, Object>> subRows,
             MergeToField merge) {
         if (VerifyTools.isBlank(merge.getIdField())) {
@@ -238,6 +255,7 @@ public class ExcelToJson {
         }
     }
 
+    /** 合并数据(MergeToList) **/
     private void mergeData(List<Map<String, Object>> mainRows, String mainIdField, List<Map<String, Object>> subRows,
             MergeToList merge) {
         if (VerifyTools.isBlank(merge.getIdField())) {
@@ -270,6 +288,7 @@ public class ExcelToJson {
         }
     }
 
+    /** 合并数据(MergeToJson) **/
     private void mergeData(List<Map<String, Object>> mainRows, String mainIdField, List<Map<String, Object>> subRows,
             MergeToJson merge) {
         if (VerifyTools.isBlank(merge.getIdField())) {

@@ -56,7 +56,7 @@ public abstract class PropertyTools {
     private static final Pattern REFERENCED = Pattern.compile("\\{(?:property|config)\\:(.*?)\\}");
 
     /** 默认的文件编码格式 **/
-    private static String CHARSET = "UTF-8";
+    public static String DEFAULT_CHARSET = "UTF-8";
     /** XML文件扩展名 **/
     private static final String XML = ".xml";
     /** TXT文件扩展名 **/
@@ -410,6 +410,16 @@ public abstract class PropertyTools {
      * 加载path指定的配置文件
      * 
      * @param path 配置文件路径
+     * @return 配置文件对象
+     */
+    public static Properties load(String path) {
+        return load(new String[] { path }, DEFAULT_CHARSET, null, null);
+    }
+
+    /**
+     * 加载path指定的配置文件
+     * 
+     * @param path 配置文件路径
      * @param encoding 文件编码
      * @param classpaths 查找文件的classpath
      * @return 配置文件对象
@@ -447,6 +457,16 @@ public abstract class PropertyTools {
     private static Properties load(String[] paths, String encoding, Filter[] filters, Class<?>[] classpaths) {
         URL[] urls = findResource(paths, classpaths);
         return load(urls, encoding, filters, classpaths, null);
+    }
+
+    /**
+     * 加载url指定的配置文件
+     * 
+     * @param url 配置文件路径
+     * @return 配置文件对象
+     */
+    public static Properties load(URL url) {
+        return load(new URL[] { url }, DEFAULT_CHARSET, null, null, null);
     }
 
     /**
@@ -546,7 +566,7 @@ public abstract class PropertyTools {
 
     /** 加载配置文件, 根据文件扩展名决定加载方式, 支持:txt|xml|properties, 其他都按properties处理 **/
     private static Properties doLoad(URL url, String encoding) {
-        Charset charset = Charset.forName(VerifyTools.nvl(encoding, CHARSET));
+        Charset charset = Charset.forName(VerifyTools.nvl(encoding, DEFAULT_CHARSET));
         String path = PathTools.toUriPath(url);
         String extension = PathTools.getExtension(path).toLowerCase();
         try (InputStream input = url.openStream()) {
