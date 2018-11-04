@@ -24,16 +24,13 @@ public class RateRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
+    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+            throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else if (value instanceof String) {
-            try {
-                Double number = TypeUtils.castToDouble(value);
-                map.put(field, number == null ? null : number.doubleValue() * rate);
-            } catch (Exception e) {
-                throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
-            }
+            Double number = TypeUtils.castToDouble(value);
+            map.put(field, number == null ? null : number.doubleValue() * rate);
         } else if (value instanceof Number) {
             Number number = (Number) value;
             map.put(field, number.doubleValue() * rate);
@@ -43,18 +40,24 @@ public class RateRule extends BaseRule {
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
+    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+            throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else if (value instanceof Number) {
             map.put(field, ((Number) value).doubleValue() / rate);
         } else {
-            try {
-                Double number = TypeUtils.castToDouble(value);
-                map.put(field, number == null ? null : number.doubleValue() / rate);
-            } catch (Exception e) {
-                throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
-            }
+            Double number = TypeUtils.castToDouble(value);
+            map.put(field, number == null ? null : number.doubleValue() / rate);
         }
+    }
+
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        if (this.getParent() != null) {
+            buffer.append(this.getParent().toString()).append(", ");
+        }
+        buffer.append("{rate:").append(rate).append("}");
+        return buffer.toString();
     }
 }

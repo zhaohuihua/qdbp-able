@@ -54,7 +54,7 @@ public class ExcelTest {
     }
 
     public static void main(String[] args) {
-        URL path = PathTools.findClassResource(ExcelTest.class, "test.txt");
+        URL path = PathTools.findClassResource(ExcelTest.class, "ExcelTest.txt");
         System.out.println(path);
         Properties original = PropertyTools.load(path, "UTF-8");
         Properties common = PropertyTools.filter(original, "common."); // 公共配置

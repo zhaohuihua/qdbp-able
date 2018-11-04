@@ -1,7 +1,5 @@
 package com.gitee.qdbp.tools.files;
 
-import com.gitee.qdbp.tools.files.PathTools;
-
 public class RelativizeTest {
 
     public static void main(String[] args) throws Exception {

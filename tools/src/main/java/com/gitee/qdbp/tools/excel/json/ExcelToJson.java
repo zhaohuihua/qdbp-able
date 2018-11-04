@@ -9,19 +9,36 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.JSONSerializer;
+import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson.serializer.SerializeWriter;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.serializer.ToStringSerializer;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.ExcelErrorCode;
 import com.gitee.qdbp.tools.excel.ImportCallback;
 import com.gitee.qdbp.tools.excel.XExcelParser;
 import com.gitee.qdbp.tools.excel.XMetadata;
+import com.gitee.qdbp.tools.excel.condition.CellValueCondition;
+import com.gitee.qdbp.tools.excel.condition.CellValueContainsTextCondition;
+import com.gitee.qdbp.tools.excel.condition.CellValueEqualsTextCondition;
+import com.gitee.qdbp.tools.excel.condition.IndexListCondition;
+import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
+import com.gitee.qdbp.tools.excel.condition.NameListCondition;
+import com.gitee.qdbp.tools.excel.condition.Required;
+import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
+import com.gitee.qdbp.tools.excel.rule.ClearRule;
+import com.gitee.qdbp.tools.excel.rule.DateRule;
+import com.gitee.qdbp.tools.excel.rule.IgnoreIllegalValue;
+import com.gitee.qdbp.tools.excel.rule.MapRule;
+import com.gitee.qdbp.tools.excel.rule.NumberRule;
+import com.gitee.qdbp.tools.excel.rule.RateRule;
+import com.gitee.qdbp.tools.excel.rule.SplitRule;
 import com.gitee.qdbp.tools.files.PathTools;
 import com.gitee.qdbp.tools.utils.JsonTools;
 
@@ -71,7 +88,7 @@ public class ExcelToJson {
 
     /**
      * 执行数据转换 <br>
-     * ToJsonMetadata metadata = ExcelToJson.parseParams(ToJsonParams params)<br>
+     * ToJsonMetadata metadata = ExcelToJson.parseMetadata(ToJsonParams params)<br>
      * List&lt;Map<String, Object>&gt; result = ExcelToJson.convert(folder, metadata);<br>
      * 
      * @param folder 文件夹路径
@@ -79,7 +96,7 @@ public class ExcelToJson {
      * @return JSON数据列表
      * @throws ServiceException
      */
-    public List<Map<String, Object>> convert(String folder, ToJsonMetadata metadata) throws ServiceException {
+    public static List<Map<String, Object>> convert(String folder, ToJsonMetadata metadata) throws ServiceException {
         // fileName为必填参数, idField如果为空就不合并子数据
         if (VerifyTools.isBlank(metadata.getFileName())) {
             log.warn("Failed to load excel rows. ToJsonMetadata fileName is null");
@@ -99,7 +116,7 @@ public class ExcelToJson {
      * @return JSON数据列表
      * @throws ServiceException
      */
-    public Map<String, Object> convert(String folder, List<ToJsonMetadata> metadata) throws ServiceException {
+    public static Map<String, Object> convert(String folder, List<ToJsonMetadata> metadata) throws ServiceException {
         if (VerifyTools.isBlank(metadata)) {
             return null;
         }
@@ -122,7 +139,8 @@ public class ExcelToJson {
     }
 
     /** 导入及合并Excel数据 **/
-    private List<Map<String, Object>> loadAndMergeData(String folder, ToJsonMetadata metadata) throws ServiceException {
+    private static List<Map<String, Object>> loadAndMergeData(String folder, ToJsonMetadata metadata)
+            throws ServiceException {
 
         // 导入主数据
         List<Map<String, Object>> mainRows = loadExcelRows(folder, metadata.getFileName(), metadata);
@@ -168,7 +186,7 @@ public class ExcelToJson {
     }
 
     /** 导入Excel数据 **/
-    private List<Map<String, Object>> loadExcelRows(String folder, String fileName, XMetadata metadata)
+    private static List<Map<String, Object>> loadExcelRows(String folder, String fileName, XMetadata metadata)
             throws ServiceException {
         String msg = "Failed to load excel rows. ";
 
@@ -234,20 +252,49 @@ public class ExcelToJson {
 
     }
 
-    private static Pattern SPACE_CLEAR = Pattern.compile("\\s+");
+    private static SerializeConfig SERIALIZE_CONFIG = new SerializeConfig();
+    static {
+        SERIALIZE_CONFIG.put(FieldInfo.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(CellValueCondition.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(CellValueContainsTextCondition.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(CellValueEqualsTextCondition.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(IndexListCondition.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(IndexRangeCondition.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(NameListCondition.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(Required.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(ClearRule.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(DateRule.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(IgnoreIllegalValue.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(MapRule.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(NumberRule.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(RateRule.class, ToStringSerializer.instance);
+        SERIALIZE_CONFIG.put(SplitRule.class, ToStringSerializer.instance);
+    }
 
     /** 根据查询条件生成CacheKey **/
-    private String generateCacheKey(XMetadata metadata) {
-        Map<String, Object> map = (JSONObject) JSON.toJSON(metadata);
-        map.remove("rules");
-        map.remove("mergers");
-        String cacheKey = JsonTools.toJsonString(map);
-        return SPACE_CLEAR.matcher(cacheKey).replaceAll(" ");
+    private static String generateCacheKey(XMetadata metadata) {
+        if (metadata == null) {
+            return "null";
+        }
+
+        try (SerializeWriter out = new SerializeWriter()) {
+            JSONSerializer serializer = new JSONSerializer(out, SERIALIZE_CONFIG);
+            serializer.config(SerializerFeature.QuoteFieldNames, false);
+            serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
+            if (metadata instanceof ToJsonMetadata) {
+                ToJsonMetadata copy = ((ToJsonMetadata) metadata).to(ToJsonMetadata.class);
+                copy.setMergers(null);
+                serializer.write(copy);
+            } else {
+                serializer.write(metadata);
+            }
+            return out.toString();
+        }
     }
 
     /** 合并数据(MergeToField) **/
-    private void mergeData(List<Map<String, Object>> mainRows, String mainIdField, List<Map<String, Object>> subRows,
-            MergeToField merge) {
+    private static void mergeData(List<Map<String, Object>> mainRows, String mainIdField,
+            List<Map<String, Object>> subRows, MergeToField merge) {
         if (VerifyTools.isBlank(merge.getIdField())) {
             log.warn("MergeToField idField is null");
             return;
@@ -263,7 +310,7 @@ public class ExcelToJson {
         for (Map<String, Object> mainItem : mainRows) {
             Object id = mainItem.get(mainIdField);
             if (VerifyTools.isNotBlank(id)) {
-                Map<String, Object> subItem = subData.get(id);
+                Map<String, Object> subItem = subData.get(id.toString());
                 if (subItem != null) {
                     mainItem.putAll(subItem);
                 }
@@ -272,8 +319,8 @@ public class ExcelToJson {
     }
 
     /** 合并数据(MergeToList) **/
-    private void mergeData(List<Map<String, Object>> mainRows, String mainIdField, List<Map<String, Object>> subRows,
-            MergeToList merge) {
+    private static void mergeData(List<Map<String, Object>> mainRows, String mainIdField,
+            List<Map<String, Object>> subRows, MergeToList merge) {
         if (VerifyTools.isBlank(merge.getIdField())) {
             log.warn("MergeToList idField is null");
             return;
@@ -287,16 +334,16 @@ public class ExcelToJson {
         for (Map<String, Object> item : subRows) {
             Object id = item.get(merge.getIdField());
             if (VerifyTools.isNotBlank(id)) {
-                if (!subData.containsKey(id)) {
+                if (!subData.containsKey(id.toString())) {
                     subData.put(id.toString(), new ArrayList<>());
                 }
-                subData.get(id).add(item);
+                subData.get(id.toString()).add(item);
             }
         }
         for (Map<String, Object> mainItem : mainRows) {
             Object id = mainItem.get(mainIdField);
             if (VerifyTools.isNotBlank(id)) {
-                List<Map<String, Object>> subItems = subData.get(id);
+                List<Map<String, Object>> subItems = subData.get(id.toString());
                 if (subItems != null) {
                     mainItem.put(merge.getSelfName(), subItems);
                 }
@@ -305,8 +352,8 @@ public class ExcelToJson {
     }
 
     /** 合并数据(MergeToJson) **/
-    private void mergeData(List<Map<String, Object>> mainRows, String mainIdField, List<Map<String, Object>> subRows,
-            MergeToJson merge) {
+    private static void mergeData(List<Map<String, Object>> mainRows, String mainIdField,
+            List<Map<String, Object>> subRows, MergeToJson merge) {
         if (VerifyTools.isBlank(merge.getIdField())) {
             log.warn("MergeToJson idField is null");
             return;
@@ -322,10 +369,10 @@ public class ExcelToJson {
             for (Map<String, Object> item : subRows) {
                 Object id = item.get(merge.getIdField());
                 if (VerifyTools.isNotBlank(id)) {
-                    if (!subData.containsKey(id)) {
+                    if (!subData.containsKey(id.toString())) {
                         subData.put(id.toString(), new ArrayList<>());
                     }
-                    subData.get(id).add(item);
+                    subData.get(id.toString()).add(item);
                 }
             }
             for (Map<String, Object> mainItem : mainRows) {
@@ -353,7 +400,7 @@ public class ExcelToJson {
             for (Map<String, Object> mainItem : mainRows) {
                 Object id = mainItem.get(mainIdField);
                 if (VerifyTools.isNotBlank(id)) {
-                    Map<String, Object> subItem = subData.get(id);
+                    Map<String, Object> subItem = subData.get(id.toString());
                     if (subItem != null) {
                         mainItem.put(merge.getSelfName(), subItem);
                     }

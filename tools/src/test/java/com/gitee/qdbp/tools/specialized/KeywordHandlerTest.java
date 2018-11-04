@@ -1,7 +1,5 @@
 package com.gitee.qdbp.tools.specialized;
 
-import com.gitee.qdbp.tools.specialized.KeywordHandler;
-
 public class KeywordHandlerTest {
 
     public static void main(String[] args) {

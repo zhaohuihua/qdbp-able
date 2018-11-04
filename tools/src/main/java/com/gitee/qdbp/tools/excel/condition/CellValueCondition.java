@@ -15,6 +15,12 @@ import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.utils.ExcelTools;
 import com.gitee.qdbp.tools.utils.ConvertTools;
 
+/**
+ * 单元格值的判断条件
+ *
+ * @author zhaohuihua
+ * @version 181104
+ */
 public abstract class CellValueCondition implements MatchesRowCondition {
 
     /** 日志对象 **/

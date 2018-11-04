@@ -1,0 +1,22 @@
+
+
+exceltojson.1.main.self.name = users
+exceltojson.1.main.file.name = 员工信息导入.2.xlsx
+exceltojson.1.main.sheet.name = !说明
+exceltojson.1.main.field.rows = 5
+exceltojson.1.main.id.field = id
+exceltojson.1.main.rules.height = { number:"int" }, { ignoreIllegalValue:true }
+exceltojson.1.main.rule.map.gender = { "UNKNOWN":"未知|0", "MALE":"男|1", "FEMALE":"女|2" }
+exceltojson.1.main.rule.date.birthday = yyyy/MM/dd
+exceltojson.1.merge.1.type = list
+exceltojson.1.merge.1.file.name = 员工详情导入.2.xlsx
+exceltojson.1.merge.1.sheet.name = 地址
+exceltojson.1.merge.1.self.name = address
+exceltojson.1.merge.1.field.rows = 4
+exceltojson.1.merge.1.id.field = userId
+exceltojson.1.merge.2.type = field
+exceltojson.1.merge.2.file.name = 员工详情导入.2.xlsx
+exceltojson.1.merge.2.sheet.name = 简介
+exceltojson.1.merge.2.field.rows = 3
+exceltojson.1.merge.2.id.field = userId
+exceltojson.1.merge.2.rules.skills = { split:"、" }

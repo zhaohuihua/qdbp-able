@@ -2,8 +2,6 @@ package com.gitee.qdbp.tools.wait;
 
 import java.util.concurrent.TimeoutException;
 import com.gitee.qdbp.tools.utils.RandomTools;
-import com.gitee.qdbp.tools.wait.WaitLock;
-import com.gitee.qdbp.tools.wait.WaitLocks;
 
 /**
  * WaitLock测试

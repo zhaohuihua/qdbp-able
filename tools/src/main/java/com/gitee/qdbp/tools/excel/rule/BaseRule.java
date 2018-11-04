@@ -50,4 +50,14 @@ public class BaseRule implements CellRule, Serializable {
             throws ServiceException {
         map.put(field, value);
     }
+
+    /** 上级规则 **/
+    public void setParent(CellRule parent) {
+        this.parent = parent;
+    }
+
+    /** 上级规则 **/
+    public CellRule getParent() {
+        return parent;
+    }
 }

@@ -32,6 +32,7 @@ import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.rule.CellRule;
 import com.gitee.qdbp.tools.excel.rule.ClearRule;
 import com.gitee.qdbp.tools.excel.rule.DateRule;
+import com.gitee.qdbp.tools.excel.rule.IgnoreIllegalValue;
 import com.gitee.qdbp.tools.excel.rule.MapRule;
 import com.gitee.qdbp.tools.excel.rule.NumberRule;
 import com.gitee.qdbp.tools.excel.rule.RateRule;
@@ -85,7 +86,7 @@ public class MetadataTools {
      * sheet.name.fill.to = dept
      * 
      * ## 字段转换规则(支持多个转换规则)
-     * rules.rate = { clear:"[^\\.\\d]" }, { number:"int" }, { rate:100 }
+     * rules.rate = { clear:"[^\\.\\d]" }, { number:"int" }, { ignoreIllegalValue:true }, { rate:100 }
      * rules.tags = { split:"|" }
      * rules.positive = { map:{ true:"已转正|是|Y", false:"未转正|否|N" } }
      * rules.gender = { map:{ UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" } }
@@ -206,7 +207,13 @@ public class MetadataTools {
                     if (rules.containsKey(field)) {
                         continue; // 已有新版本, 忽略旧版本
                     }
-                    CellRule rule = parseCellRules("{" + type + ":" + value + "}");
+                    String jsonString;
+                    if (value.startsWith("{") || value.startsWith("[")) {
+                        jsonString = "{" + type + ":" + value + "}";
+                    } else {
+                        jsonString = "{" + type + ":\"" + value + "\"}";
+                    }
+                    CellRule rule = parseCellRules(jsonString);
                     if (rule != null) {
                         rules.put(field, rule);
                     }
@@ -299,6 +306,10 @@ public class MetadataTools {
                             rule = new MapRule(rule, (JSONObject) value);
                         } else {
                             log.warn("CellRuleError, type = {}, json string format error: {}", type, value);
+                        }
+                    } else if (key.equals(type = "ignoreIllegalValue")) {
+                        if (value.toString().equals("true")) {
+                            rule = new IgnoreIllegalValue(rule);
                         }
                     }
                 } catch (Exception e) {

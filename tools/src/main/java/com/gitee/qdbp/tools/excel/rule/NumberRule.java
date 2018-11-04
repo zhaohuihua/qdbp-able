@@ -3,10 +3,16 @@ package com.gitee.qdbp.tools.excel.rule;
 import java.util.Map;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.exception.ServiceException;
-import com.gitee.qdbp.able.result.ResultCode;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.utils.JsonTools;
 
+/**
+ * 数字规则
+ *
+ * @author zhaohuihua
+ * @version 181104
+ */
 public class NumberRule extends BaseRule {
 
     /** 版本序列号 **/
@@ -29,11 +35,7 @@ public class NumberRule extends BaseRule {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else {
-            try {
-                map.put(field, toNumber(value, type));
-            } catch (Exception e) {
-                throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
-            }
+            map.put(field, toNumber(value, type));
         }
     }
 
@@ -43,11 +45,7 @@ public class NumberRule extends BaseRule {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else {
-            try {
-                map.put(field, toNumber(value, type));
-            } catch (Exception e) {
-                throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
-            }
+            map.put(field, toNumber(value, type));
         }
     }
 
@@ -68,5 +66,14 @@ public class NumberRule extends BaseRule {
         } else {
             return TypeUtils.castToDouble(value);
         }
+    }
+
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        if (this.getParent() != null) {
+            buffer.append(this.getParent().toString()).append(", ");
+        }
+        buffer.append("{number:").append(JsonTools.toJsonString(type)).append("}");
+        return buffer.toString();
     }
 }

@@ -1,7 +1,5 @@
 package com.gitee.qdbp.tools.specialized;
 
-import com.gitee.qdbp.tools.specialized.ShortKeyTools;
-
 public class ShortKeyToolsTest {
 
     public static void main(String[] args) {

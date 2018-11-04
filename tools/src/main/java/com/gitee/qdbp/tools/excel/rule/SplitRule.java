@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 import com.gitee.qdbp.tools.utils.ConvertTools;
+import com.gitee.qdbp.tools.utils.JsonTools;
 
 /** 拆分规则 **/
 public class SplitRule extends BaseRule {
@@ -52,5 +53,14 @@ public class SplitRule extends BaseRule {
         } else {
             map.put(field, value);
         }
+    }
+
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        if (this.getParent() != null) {
+            buffer.append(this.getParent().toString()).append(", ");
+        }
+        buffer.append("{split:").append(JsonTools.toJsonString(separator)).append("}");
+        return buffer.toString();
     }
 }

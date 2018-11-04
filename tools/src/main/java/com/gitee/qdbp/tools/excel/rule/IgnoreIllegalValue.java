@@ -49,4 +49,23 @@ public class IgnoreIllegalValue implements CellRule, Serializable {
         }
     }
 
+    /** 上级规则 **/
+    public void setParent(CellRule parent) {
+        this.parent = parent;
+    }
+
+    /** 上级规则 **/
+    public CellRule getParent() {
+        return parent;
+    }
+
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        if (this.getParent() != null) {
+            buffer.append(this.getParent().toString()).append(", ");
+        }
+        buffer.append("{ignoreIllegalValue:true}");
+        return buffer.toString();
+    }
+
 }

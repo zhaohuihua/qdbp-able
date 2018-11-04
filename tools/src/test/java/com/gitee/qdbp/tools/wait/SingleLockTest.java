@@ -2,7 +2,6 @@ package com.gitee.qdbp.tools.wait;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.qdbp.tools.wait.SingleLock;
 
 /**
  * WaitLock测试

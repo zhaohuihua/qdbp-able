@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.utils.JsonTools;
 
 /**
  * 清除规则
@@ -28,7 +29,8 @@ public class ClearRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
+    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+            throws ServiceException {
         if (value instanceof String) {
             map.put(field, clear.matcher((String) value).replaceAll(""));
         } else {
@@ -36,4 +38,12 @@ public class ClearRule extends BaseRule {
         }
     }
 
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        if (this.getParent() != null) {
+            buffer.append(this.getParent().toString()).append(", ");
+        }
+        buffer.append("{clear:").append(JsonTools.toJsonString(clear)).append("}");
+        return buffer.toString();
+    }
 }

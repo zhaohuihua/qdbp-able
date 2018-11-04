@@ -34,7 +34,7 @@ import com.gitee.qdbp.tools.utils.PropertyTools;
  * exceltojson.1.merge.1.self.name = address
  * exceltojson.1.merge.1.field.rows = 1
  * exceltojson.1.merge.1.id.field = id
- * exceltojson.1.merge.2.merge.type = field
+ * exceltojson.1.merge.2.type = field
  * exceltojson.1.merge.2.sheet.name = AddressSheet
  * exceltojson.1.merge.2.field.rows = 1
  * exceltojson.1.merge.2.id.field = id
@@ -51,12 +51,12 @@ public class ToJsonProperties implements Serializable {
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    public static List<ToJsonMetadata> toMetadata(String config) {
+    public static List<ToJsonMetadata> parseMetadata(String config) {
         Properties properties = PropertyTools.loadByString(config);
-        return toMetadata(properties);
+        return parseMetadata(properties);
     }
 
-    public static List<ToJsonMetadata> toMetadata(Properties properties) {
+    public static List<ToJsonMetadata> parseMetadata(Properties properties) {
         // 先统计有哪些前缀
         Map<String, Map<String, Object>> prefixes = new HashMap<>();
         for (Entry<Object, Object> entry : properties.entrySet()) {
@@ -103,7 +103,7 @@ public class ToJsonProperties implements Serializable {
         List<ToJsonMetadata> results = new ArrayList<>();
         for (String mainKey : keys) {
             Properties mainProperties = PropertyTools.filter(properties, mainKey);
-            ToJsonMetadata mainMetadata = parseToJsonMetadata(mainProperties);
+            ToJsonMetadata mainMetadata = parse(mainProperties);
             Map<String, Object> mergeMap = prefixes.get(mainKey);
             if (mergeMap != null) {
                 List<String> mergeKeys = new ArrayList<>(mergeMap.keySet());
@@ -120,7 +120,7 @@ public class ToJsonProperties implements Serializable {
     }
 
     /** 解析JsonMetadata配置项 **/
-    private static ToJsonMetadata parseToJsonMetadata(Properties properties) {
+    private static ToJsonMetadata parse(Properties properties) {
         XMetadata base = MetadataTools.parseProperties(properties);
 
         String fileName = PropertyTools.getString(properties, "file.name", false); // Excel文件路径
@@ -138,7 +138,7 @@ public class ToJsonProperties implements Serializable {
     private static MergeMetadata parseMergeParams(Properties properties) {
         XMetadata metadata = MetadataTools.parseProperties(properties);
 
-        String sMergeType = PropertyTools.getString(properties, "merge.type"); // 合并类型
+        String sMergeType = PropertyTools.getString(properties, "type"); // 合并类型
         String fileName = PropertyTools.getString(properties, "file.name", false); // Excel文件路径
         String idField = PropertyTools.getString(properties, "id.field"); // ID字段名
         String selfName = PropertyTools.getString(properties, "self.name", false); // 自身字段名称

@@ -29,7 +29,7 @@ public class XMetadata implements Serializable {
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    // columns和fieldRows同时存在时以columns优先
+    // fieldInfos和fieldRows同时存在时以fieldInfos优先
     /** 字段信息列表 **/
     private List<FieldInfo> fieldInfos;
     /** 字段名所在的行 **/
@@ -241,7 +241,7 @@ public class XMetadata implements Serializable {
 
     /** 获取指定列的转换规则 **/
     public CellRule getRule(String column) {
-        return this.rules.get(column);
+        return this.rules == null ? null : this.rules.get(column);
     }
 
     /**
@@ -270,4 +270,5 @@ public class XMetadata implements Serializable {
         instance.setSheetNames(this.getSheetNames()); // Sheet名称配置
         return instance;
     }
+    
 }

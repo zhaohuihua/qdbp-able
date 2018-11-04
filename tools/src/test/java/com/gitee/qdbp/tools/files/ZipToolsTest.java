@@ -3,7 +3,6 @@ package com.gitee.qdbp.tools.files;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import com.gitee.qdbp.tools.files.ZipTools;
 import com.gitee.qdbp.tools.files.ZipTools.UrlItem;
 
 public class ZipToolsTest {
