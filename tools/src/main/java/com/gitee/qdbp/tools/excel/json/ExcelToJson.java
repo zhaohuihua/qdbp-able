@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +22,8 @@ import com.gitee.qdbp.tools.excel.ImportCallback;
 import com.gitee.qdbp.tools.excel.XExcelParser;
 import com.gitee.qdbp.tools.excel.XMetadata;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
-import com.gitee.qdbp.tools.excel.utils.MetadataTools;
 import com.gitee.qdbp.tools.files.PathTools;
 import com.gitee.qdbp.tools.utils.JsonTools;
-import com.gitee.qdbp.tools.utils.PropertyTools;
 
 /**
  * Excel数据转换为JSON格式数据<br>
@@ -72,33 +69,52 @@ public class ExcelToJson {
 
     private static Logger log = LoggerFactory.getLogger(ExcelToJson.class);
 
-    /** 合并类型枚举 **/
-    public static enum MergeType {
-        json, list, field
-    }
-
     /**
-     * 执行数据转换
+     * 执行数据转换 <br>
+     * ToJsonMetadata metadata = ExcelToJson.parseParams(ToJsonParams params)<br>
+     * List&lt;Map<String, Object>&gt; result = ExcelToJson.convert(folder, metadata);<br>
      * 
      * @param folder 文件夹路径
-     * @param params 数据转换参数
+     * @param metadata 数据转换参数
      * @return JSON数据列表
      * @throws ServiceException
      */
-    public Map<String, Object> convert(String folder, List<ToJsonParams> params) throws ServiceException {
+    public List<Map<String, Object>> convert(String folder, ToJsonMetadata metadata) throws ServiceException {
+        // fileName为必填参数, idField如果为空就不合并子数据
+        if (VerifyTools.isBlank(metadata.getFileName())) {
+            log.warn("Failed to load excel rows. ToJsonMetadata fileName is null");
+            return null;
+        }
+
+        return loadAndMergeData(folder, metadata);
+    }
+
+    /**
+     * 执行数据转换 <br>
+     * List&lt;ToJsonMetadata&gt; metadata = ExcelToJson.parseParams(List&lt;ToJsonParams&gt; params);<br>
+     * Map<String, Object> result = ExcelToJson.convert(folder, metadata);<br>
+     * 
+     * @param folder 文件夹路径
+     * @param metadata 数据转换参数
+     * @return JSON数据列表
+     * @throws ServiceException
+     */
+    public Map<String, Object> convert(String folder, List<ToJsonMetadata> metadata) throws ServiceException {
+        if (VerifyTools.isBlank(metadata)) {
+            return null;
+        }
         Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < params.size(); i++) {
-            ToJsonParams item = params.get(i);
-            ToJsonMetadata metadata = parseToJsonMetadata(item);
+        for (int i = 0; i < metadata.size(); i++) {
+            ToJsonMetadata item = metadata.get(i);
             // fileName为必填参数, idField如果为空就不合并子数据, selfName如果为空就用index作为自身字段名称
-            if (VerifyTools.isBlank(metadata.getFileName())) {
+            if (VerifyTools.isBlank(item.getFileName())) {
                 log.warn("Failed to load excel rows. ToJsonMetadata fileName is null");
                 continue;
             }
 
-            List<?> result = loadAndMergeData(folder, metadata);
+            List<?> result = loadAndMergeData(folder, item);
             if (result != null) {
-                String selfName = VerifyTools.nvl(metadata.getSelfName(), String.valueOf(i));
+                String selfName = VerifyTools.nvl(item.getSelfName(), String.valueOf(i));
                 map.put(selfName, result);
             }
         }
@@ -106,7 +122,7 @@ public class ExcelToJson {
     }
 
     /** 导入及合并Excel数据 **/
-    private List<?> loadAndMergeData(String folder, ToJsonMetadata metadata) throws ServiceException {
+    private List<Map<String, Object>> loadAndMergeData(String folder, ToJsonMetadata metadata) throws ServiceException {
 
         // 导入主数据
         List<Map<String, Object>> mainRows = loadExcelRows(folder, metadata.getFileName(), metadata);
@@ -344,89 +360,5 @@ public class ExcelToJson {
                 }
             }
         }
-    }
-
-    /** 解析JsonMetadata参数 **/
-    private ToJsonMetadata parseToJsonMetadata(ToJsonParams params) {
-        String mainField = params.getMainField();
-        List<String> mergeFields = params.getMergeFields();
-        ToJsonMetadata metadata = parseToJsonMetadata(mainField);
-        if (VerifyTools.isNotBlank(mergeFields)) {
-            for (String item : mergeFields) {
-                MergeMetadata merge = parseMergeParams(item);
-                if (merge != null) {
-                    metadata.addMergers(merge);
-                }
-            }
-        }
-        return metadata;
-    }
-
-    /** 解析JsonMetadata配置项 **/
-    private ToJsonMetadata parseToJsonMetadata(String config) {
-        Properties properties = PropertyTools.loadByString(config);
-        XMetadata base = MetadataTools.parseMetadata(properties);
-
-        String fileName = PropertyTools.getString(properties, "file.name", false); // Excel文件路径
-        String idField = PropertyTools.getString(properties, "id.field"); // ID字段名
-        String selfName = PropertyTools.getString(properties, "self.name", false); // 自身字段名称
-
-        ToJsonMetadata metadata = base.to(ToJsonMetadata.class);
-        metadata.setFileName(fileName); // Excel文件路径
-        metadata.setIdField(idField); // ID字段名
-        metadata.setSelfName(selfName); // 自身字段名称
-        return metadata;
-    }
-
-    /** 解析MergeMetadata配置项 **/
-    private MergeMetadata parseMergeParams(String config) {
-        Properties properties = PropertyTools.loadByString(config);
-        XMetadata metadata = MetadataTools.parseMetadata(properties);
-
-        String sMergeType = PropertyTools.getString(properties, "merge.type"); // 合并类型
-        String fileName = PropertyTools.getString(properties, "file.name", false); // Excel文件路径
-        String idField = PropertyTools.getString(properties, "id.field"); // ID字段名
-        String selfName = PropertyTools.getString(properties, "self.name", false); // 自身字段名称
-        String selfWith = PropertyTools.getString(properties, "self.with", false); // 自身字段名称所在的字段名
-
-        MergeType mergeType = parseMergeType(sMergeType);
-        if (mergeType == null) {
-            return null;
-        }
-        switch (mergeType) {
-        case json: {
-            MergeToJson merge = metadata.to(MergeToJson.class);
-            merge.setFileName(fileName); // Excel文件路径
-            merge.setIdField(idField); // ID字段名
-            merge.setSelfName(selfName); // 自身字段名称
-            merge.setSelfWith(selfWith); // 自身名称所在的字段名
-            return merge;
-        }
-        case list: {
-            MergeToList merge = metadata.to(MergeToList.class);
-            merge.setFileName(fileName); // Excel文件路径
-            merge.setIdField(idField); // ID字段名
-            merge.setSelfName(selfName); // 自身字段名称
-            return merge;
-        }
-        case field: {
-            MergeToField merge = metadata.to(MergeToField.class);
-            merge.setFileName(fileName); // Excel文件路径
-            merge.setIdField(idField); // ID字段名
-            return merge;
-        }
-        default:
-            return null;
-        }
-    }
-
-    /** 解析MergeType **/
-    private MergeType parseMergeType(String mergeType) {
-        for (MergeType item : MergeType.values()) {
-            if (item.name().equals(mergeType)) {
-                return item;
-            }
-        }
-        return null;
     }
 }

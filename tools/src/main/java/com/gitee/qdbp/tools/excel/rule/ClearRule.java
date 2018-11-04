@@ -5,6 +5,12 @@ import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 
+/**
+ * 清除规则
+ *
+ * @author zhaohuihua
+ * @version 181104
+ */
 public class ClearRule extends BaseRule {
 
     /** 版本序列号 **/
@@ -16,13 +22,13 @@ public class ClearRule extends BaseRule {
         this(null, regexp);
     }
 
-    public ClearRule(PresetRule parent, String regexp) {
+    public ClearRule(CellRule parent, String regexp) {
         super(parent);
         this.clear = Pattern.compile(regexp);
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
         if (value instanceof String) {
             map.put(field, clear.matcher((String) value).replaceAll(""));
         } else {

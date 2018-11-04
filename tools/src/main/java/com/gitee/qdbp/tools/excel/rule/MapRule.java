@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResultCode;
 import com.gitee.qdbp.able.utils.StringTools;
@@ -41,11 +40,22 @@ public class MapRule extends BaseRule {
      * @param parent 上级规则
      * @param rule 映射规则 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
      */
-    public MapRule(PresetRule parent, String rule) {
+    public MapRule(CellRule parent, String rule) {
+        this(parent, JSON.parseObject(rule));
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param parent 上级规则
+     * @param rule 映射规则 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
+     */
+    public MapRule(CellRule parent, Map<String, Object> rule) {
         super(parent);
-        JSONObject json = JSON.parseObject(rule);
-        for (String key : json.keySet()) {
-            addRule(key, StringTools.split(json.getString(key)));
+        for (Entry<String, Object> entry : rule.entrySet()) {
+            if (VerifyTools.isNoneBlank(entry.getKey(), entry.getValue())) {
+                addRule(entry.getKey(), StringTools.split(entry.getValue().toString()));
+            }
         }
     }
 
@@ -78,7 +88,8 @@ public class MapRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+            throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else {
@@ -92,7 +103,8 @@ public class MapRule extends BaseRule {
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+            throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else {

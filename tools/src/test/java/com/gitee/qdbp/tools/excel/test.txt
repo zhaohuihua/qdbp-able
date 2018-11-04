@@ -5,7 +5,7 @@ test.1.columns = *id|*name|positive|height||birthday|gender|subsidy
 test.2.field.rows = 5
 
 
-## 跳过的行数(不配置时默认取标题下一行)
+## 跳过的行数(不配置时默认取字段行或标题行的下一行)
 # common.skip.rows = 2
 ## 标题行号,从1开始
 common.header.rows = 2-4
@@ -14,10 +14,8 @@ common.header.rows = 2-4
 ## 如果页脚有公式, 那么数据行必须至少2行, 公式的范围必须包含这两行数据, 如SUM($E$5:E6), 而不能是SUM($E$5:E5), 否则公式不会计算
 common.footer.rows = 7-9
 ## 包含指定关键字时跳过此行
-# 第1列为空, 或第2列包含小计且第10列包含元, 或第2列包含总计且第10列包含元
-# common.skip.row.when.1 = 1:NULL
-# common.skip.row.when.2 = 2:小计, 10:元
-# common.skip.row.when.3 = 2:总计, 10:元
+## A列为空, 或B列包含小计且H列包含元, 或B列包含总计且H列包含元
+# common.skip.row.when = { A:"NULL" }, { B:"小计", H:"元" }, { B:"总计", H:"元" }
 
 
 ## 配置规则: * 表示全部
@@ -32,8 +30,8 @@ common.sheet.name = !说明
 ## 页签名称填充至哪个字段
 common.sheet.name.fill.to = dept
 
-common.rule.map.positive = { "true":"已转正|是|Y", "false":"未转正|否|N" }
-common.rule.map.gender = { "UNKNOWN":"未知|0", "MALE":"男|1", "FEMALE":"女|2" }
+common.rule.map.positive = { true:"已转正|是|Y", false:"未转正|否|N" }
+common.rule.map.gender = { UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" }
 common.rule.date.birthday = yyyy/MM/dd
 
 

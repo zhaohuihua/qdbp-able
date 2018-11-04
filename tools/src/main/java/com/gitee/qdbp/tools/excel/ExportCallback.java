@@ -12,7 +12,7 @@ import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
-import com.gitee.qdbp.tools.excel.rule.PresetRule;
+import com.gitee.qdbp.tools.excel.rule.CellRule;
 import com.gitee.qdbp.tools.excel.utils.ExcelTools;
 
 /**
@@ -31,10 +31,10 @@ public class ExportCallback {
     public void finish(Workbook workbook, XMetadata metadata) throws ServiceException {
     }
 
-    public void onRowStart(Row row, RowInfo info, Map<String, Object> json) {
+    public void onRowStart(Row row, RowInfo rowInfo, Map<String, Object> json) {
     }
 
-    public void onRowFinished(Row row, RowInfo info, Map<String, Object> data) {
+    public void onRowFinished(Row row, RowInfo rowInfo, Map<String, Object> data) {
     }
 
     public void onSheetStart(Sheet sheet, XMetadata metadata, List<?> data) {
@@ -44,7 +44,7 @@ public class ExportCallback {
     }
 
     /** 写入单元格内容 **/
-    public void setCellValue(Cell cell, Object value, FieldInfo column) {
+    public void setCellValue(Cell cell, Object value, FieldInfo fieldInfo) {
         ExcelTools.setCellValue(cell, value);
     }
 
@@ -53,16 +53,16 @@ public class ExportCallback {
     }
 
     /** 单元格字段转换 **/
-    public void convert(Map<String, Object> map, CellInfo cell) throws ServiceException {
+    public void convert(Map<String, Object> map, CellInfo cellInfo) throws ServiceException {
 
-        String key = cell.getField();
-        PresetRule rule = cell.getMetadata().getRule(key);
+        String key = cellInfo.getField();
+        CellRule rule = cellInfo.getMetadata().getRule(key);
         if (rule == null) {
             // 没有预置的转换规则
-            map.put(key, convert(map, key, cell.getValue()));
+            map.put(key, convert(map, key, cellInfo.getValue()));
         } else {
             // 调用转换规则
-            rule.exports(map, cell);
+            rule.exports(map, cellInfo);
         }
 
     }

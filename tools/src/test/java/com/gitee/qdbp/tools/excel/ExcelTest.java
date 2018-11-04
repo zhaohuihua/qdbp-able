@@ -67,7 +67,7 @@ public class ExcelTest {
     private static void test(Properties properties, int index) {
 
         URL xlsx = PathTools.findClassResource(ExcelTest.class, "员工信息导入." + index + ".xlsx");
-        XMetadata metadata = MetadataTools.parseMetadata(properties);
+        XMetadata metadata = MetadataTools.parseProperties(properties);
         XExcelParser parser = new XExcelParser(metadata);
 
         // 导入

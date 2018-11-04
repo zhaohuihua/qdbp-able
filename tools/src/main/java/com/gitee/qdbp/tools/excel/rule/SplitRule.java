@@ -24,7 +24,7 @@ public class SplitRule extends BaseRule {
         this(null, separator);
     }
 
-    public SplitRule(PresetRule parent, char... separator) {
+    public SplitRule(CellRule parent, char... separator) {
         super(parent);
         String string = REG_CHAR.matcher(new String(separator)).replaceAll("\\\\$1");
         this.regexp = Pattern.compile("[" + string + "]");
@@ -32,7 +32,8 @@ public class SplitRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+            throws ServiceException {
         if (value instanceof String) {
             String string = (String) value;
             List<String> result = ConvertTools.toList(regexp.split(string));
@@ -43,7 +44,8 @@ public class SplitRule extends BaseRule {
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+            throws ServiceException {
         if (value instanceof Collection) {
             Collection<?> collection = (Collection<?>) value;
             map.put(field, ConvertTools.joinToString(collection, separator));

@@ -15,7 +15,7 @@ import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.FailedInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 import com.gitee.qdbp.tools.excel.rule.ConvertRule;
-import com.gitee.qdbp.tools.excel.rule.PresetRule;
+import com.gitee.qdbp.tools.excel.rule.CellRule;
 import com.gitee.qdbp.tools.excel.utils.ExcelTools;
 
 /**
@@ -89,22 +89,22 @@ public abstract class ImportCallback implements IBatchResult, ConvertRule, Seria
     public abstract void callback(Map<String, Object> map, RowInfo row) throws ServiceException;
 
     /** 读取单元格内容 **/
-    public Object getCellValue(Cell cell, FieldInfo column) {
+    public Object getCellValue(Cell cell, FieldInfo fieldInfo) {
         return ExcelTools.getCellValue(cell);
     }
 
     /** 单元格字段转换 **/
     @Override
-    public void convert(Map<String, Object> map, CellInfo cell) throws ServiceException {
+    public void convert(Map<String, Object> map, CellInfo cellInfo) throws ServiceException {
 
-        String key = cell.getField();
-        PresetRule rule = cell.getMetadata().getRule(key);
+        String key = cellInfo.getField();
+        CellRule rule = cellInfo.getMetadata().getRule(key);
         if (rule == null) {
             // 没有预置的转换规则
-            map.put(key, convert(map, key, cell.getValue()));
+            map.put(key, convert(map, key, cellInfo.getValue()));
         } else {
             // 调用转换规则
-            rule.imports(map, cell);
+            rule.imports(map, cellInfo);
         }
 
     }

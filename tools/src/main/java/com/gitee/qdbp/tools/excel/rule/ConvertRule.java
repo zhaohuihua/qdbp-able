@@ -13,6 +13,6 @@ import com.gitee.qdbp.tools.excel.model.CellInfo;
 public interface ConvertRule {
 
     /** 单元格字段转换 **/
-    void convert(Map<String, Object> map, CellInfo cell) throws ServiceException;
+    void convert(Map<String, Object> map, CellInfo cellInfo) throws ServiceException;
 
 }

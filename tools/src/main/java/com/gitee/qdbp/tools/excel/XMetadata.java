@@ -13,14 +13,13 @@ import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.condition.MatchesRowCondition;
 import com.gitee.qdbp.tools.excel.condition.NameListCondition;
 import com.gitee.qdbp.tools.excel.model.FieldInfo;
-import com.gitee.qdbp.tools.excel.rule.PresetRule;
+import com.gitee.qdbp.tools.excel.rule.CellRule;
 import com.gitee.qdbp.tools.excel.utils.MetadataTools;
 import com.gitee.qdbp.tools.utils.Config;
 
 /**
  * excel配置数据<br>
- * rule.map.areaType = { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }<br>
- * rule.date.createTime = yyyy/MM/dd<br>
+ * 有哪些配置项详见{@linkplain MetadataTools#parseProperties(Properties)}<br>
  *
  * @author zhaohuihua
  * @version 160302
@@ -36,7 +35,7 @@ public class XMetadata implements Serializable {
     /** 字段名所在的行 **/
     private IndexRangeCondition fieldRows;
     /** 字段与转换规则的映射表(配置规则) **/
-    private Map<String, PresetRule> rules;
+    private Map<String, CellRule> rules;
     /** 跳过几行 **/
     private Integer skipRows;
     /** 包含指定关键字时跳过此行 **/
@@ -66,11 +65,11 @@ public class XMetadata implements Serializable {
      * 构造函数
      * 
      * @param config 配置项
-     * @deprecated 改为{@linkplain MetadataTools#parseMetadata(Properties)}
+     * @deprecated 改为{@linkplain MetadataTools#parseProperties(Properties)}
      */
     @Deprecated
     public XMetadata(Config config) {
-        XMetadata metadata = MetadataTools.parseMetadata(config.properties());
+        XMetadata metadata = MetadataTools.parseProperties(config.properties());
         this.setFieldInfos(metadata.getFieldInfos()); // 字段信息列表
         this.setFieldRows(metadata.getFieldRows()); // 字段名所在的行
         this.setRules(metadata.getRules()); // 字段与转换规则的映射表
@@ -223,17 +222,17 @@ public class XMetadata implements Serializable {
     }
 
     /** 字段与转换规则的映射表 **/
-    public Map<String, PresetRule> getRules() {
+    public Map<String, CellRule> getRules() {
         return rules;
     }
 
     /** 字段与转换规则的映射表 **/
-    public void setRules(Map<String, PresetRule> rules) {
+    public void setRules(Map<String, CellRule> rules) {
         this.rules = rules;
     }
 
     /** 增加转换规则 **/
-    public void addRule(String column, PresetRule rule) {
+    public void addRule(String column, CellRule rule) {
         if (this.rules == null) {
             this.rules = new HashMap<>();
         }
@@ -241,7 +240,7 @@ public class XMetadata implements Serializable {
     }
 
     /** 获取指定列的转换规则 **/
-    public PresetRule getRule(String column) {
+    public CellRule getRule(String column) {
         return this.rules.get(column);
     }
 

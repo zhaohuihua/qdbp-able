@@ -39,7 +39,7 @@ public class DateRule extends BaseRule implements Serializable {
      * @param parent 上级规则
      * @param pattern 日期格式
      */
-    public DateRule(PresetRule parent, String pattern) {
+    public DateRule(CellRule parent, String pattern) {
         super(parent);
         this.pattern = pattern;
         // 检查日期格式
@@ -47,7 +47,7 @@ public class DateRule extends BaseRule implements Serializable {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
         if (value instanceof String) {
             try {
                 map.put(field, new SimpleDateFormat(pattern).parse((String) value));
@@ -62,7 +62,7 @@ public class DateRule extends BaseRule implements Serializable {
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else if (value instanceof Date) {

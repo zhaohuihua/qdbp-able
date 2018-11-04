@@ -12,19 +12,19 @@ public class RateRule extends BaseRule {
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    private int rate;
+    private double rate;
 
-    public RateRule(int rate) {
+    public RateRule(double rate) {
         this(null, rate);
     }
 
-    public RateRule(PresetRule parent, int rate) {
+    public RateRule(CellRule parent, double rate) {
         super(parent);
         this.rate = rate;
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else if (value instanceof String) {
@@ -43,7 +43,7 @@ public class RateRule extends BaseRule {
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cell, String field, Object value) throws ServiceException {
+    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value) throws ServiceException {
         if (VerifyTools.isBlank(value)) {
             map.put(field, null);
         } else if (value instanceof Number) {

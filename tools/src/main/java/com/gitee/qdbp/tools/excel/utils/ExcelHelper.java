@@ -88,20 +88,20 @@ public class ExcelHelper {
             Map<String, CellInfo> cellInfos, XMetadata metadata, ImportCallback cb) throws ServiceException {
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < fieldInfos.size() && i < row.getLastCellNum(); i++) {
-            FieldInfo column = fieldInfos.get(i);
-            if (column == null) {
+            FieldInfo fieldInfo = fieldInfos.get(i);
+            if (fieldInfo == null) {
                 continue;
             }
             Cell cell = row.getCell(i);
 
-            Object value = cb.getCellValue(cell, column);
+            Object value = cb.getCellValue(cell, fieldInfo);
 
             if (value instanceof String && VerifyTools.isNotBlank(value)) {
                 value = value.toString().trim();
             }
 
             if (VerifyTools.isNotBlank(value)) {
-                map.put(column.getField(), value);
+                map.put(fieldInfo.getField(), value);
             }
         }
 
@@ -155,10 +155,10 @@ public class ExcelHelper {
         }
 
         // 回调具体的业务处理方法
-        RowInfo info = new RowInfo(sheetName, index + 1);
-        info.setCells(cellInfos);
-        info.setMetadata(metadata);
-        cb.callback(map, info);
+        RowInfo rowInfo = new RowInfo(sheetName, index + 1);
+        rowInfo.setCells(cellInfos);
+        rowInfo.setMetadata(metadata);
+        cb.callback(map, rowInfo);
     }
 
     public static void export(List<?> data, Sheet sheet, XMetadata metadata, ExportCallback cb) {
@@ -211,15 +211,15 @@ public class ExcelHelper {
                 ExcelTools.copyRow(first, row, true);
             }
 
-            RowInfo info;
+            RowInfo rowInfo;
             { // RowInfo
-                info = new RowInfo(sheet.getSheetName(), index + 1);
-                info.setCells(cellInfos);
-                info.setMetadata(metadata);
+                rowInfo = new RowInfo(sheet.getSheetName(), index + 1);
+                rowInfo.setCells(cellInfos);
+                rowInfo.setMetadata(metadata);
             }
 
             Map<String, Object> json = cb.convert(data.get(i));
-            cb.onRowStart(row, info, json);
+            cb.onRowStart(row, rowInfo, json);
 
             int cellCount = Math.max(fieldInfos.size(), row.getPhysicalNumberOfCells());
             for (int c = 0; c < cellCount; c++) {
@@ -230,7 +230,7 @@ public class ExcelHelper {
                 }
             }
 
-            cb.onRowFinished(row, info, json);
+            cb.onRowFinished(row, rowInfo, json);
         }
 
         cb.onSheetFinished(sheet, metadata, data);

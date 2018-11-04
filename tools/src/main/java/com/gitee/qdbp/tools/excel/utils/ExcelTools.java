@@ -27,6 +27,55 @@ public abstract class ExcelTools {
     /** 公式中的单元格引用 **/
     private static final Pattern CELL_REF = Pattern.compile("(\\$?[a-z]+)(\\$?[0-9]+)", Pattern.CASE_INSENSITIVE);
 
+    /**
+     * 列名转换为列序号<br>
+     * A = 1, AA = 27, AK = 37, HH = 216
+     * 
+     * @param columnName 列名, 如A, AA, AK, HH
+     * @return 列序号, 从1开始
+     */
+    public static int columnNameToIndex(String columnName) {
+        char[] chars = columnName.toUpperCase().toCharArray();
+        int index = 0;
+        for (int i = 0, len = chars.length; i < len; i++) {
+            char c = chars[len - 1 - i];
+            if (c < 'A' || c > 'Z') {
+                throw new NumberFormatException(columnName);
+            }
+            index += (c - 'A' + 1) * Math.pow(26, i);
+        }
+        return index; // 从1开始
+    }
+
+    /**
+     * 列序号转换为列名<br>
+     * 1 = A, 27 = AA, 37 = AK, 216 = HH
+     * 
+     * @param columnIndex 列序号, 从1开始
+     * @return 列名, 如A, AA, AK, HH
+     */
+    public static String columnIndexToName(int columnIndex) {
+        if (columnIndex <= 0) {
+            throw new IllegalArgumentException("columnIndex must be greater than 0.");
+        }
+
+        StringBuilder buffer = new StringBuilder();
+        int temp = columnIndex;
+        int min = 'A';
+        int max = 'Z';
+        int radix = max - min + 1;
+        while (temp > 0) {
+            int n = temp % radix;
+            if (n == 0) {
+                n = radix;
+            }
+            buffer.append((char) (min + n - 1));
+            temp = (temp - n) / radix;
+        }
+        return buffer.reverse().toString();
+
+    }
+
     public static void copyRow(Row src, Row target, boolean copyValue) {
         if (src == null || target == null) {
             return;

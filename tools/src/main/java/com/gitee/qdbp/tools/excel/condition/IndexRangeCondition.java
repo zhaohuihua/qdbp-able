@@ -38,8 +38,10 @@ public class IndexRangeCondition implements Serializable {
 
     public IndexRangeCondition(int... index) {
         this.indexs = new ArrayList<>();
-        for (int i : index) {
-            addIndex(i);
+        if (index != null) {
+            for (int i : index) {
+                addIndex(i);
+            }
         }
     }
 
