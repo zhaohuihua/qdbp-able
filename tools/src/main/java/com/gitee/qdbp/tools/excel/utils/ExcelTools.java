@@ -3,6 +3,8 @@ package com.gitee.qdbp.tools.excel.utils;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.poi.ss.usermodel.Cell;
@@ -12,6 +14,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.excel.model.CopyConcat;
 import com.gitee.qdbp.tools.utils.ConvertTools;
 
 /**
@@ -74,6 +78,32 @@ public abstract class ExcelTools {
         }
         return buffer.reverse().toString();
 
+    }
+
+    /** 将多个字段复制合并到一个字段 **/
+    public static void copyConcat(Map<String, Object> data, List<CopyConcat> copyConcatFields) {
+        if (VerifyTools.isBlank(copyConcatFields)) {
+            return;
+        }
+        for (CopyConcat i : copyConcatFields) {
+            String targetField = i.getTargetField();
+            List<String> sourceFields = i.getSourceFields();
+            if (VerifyTools.isAnyBlank(targetField, sourceFields)) {
+                continue;
+            }
+            String separator = i.getSeparator() == null ? " " : i.getSeparator();
+            StringBuilder buffer = new StringBuilder();
+            for (String src : sourceFields) {
+                Object value = data.get(src);
+                if (VerifyTools.isNotBlank(value)) {
+                    if (buffer.length() > 0) {
+                        buffer.append(separator);
+                    }
+                    buffer.append(value);
+                }
+            }
+            data.put(targetField, buffer.toString());
+        }
     }
 
     public static void copyRow(Row src, Row target, boolean copyValue) {

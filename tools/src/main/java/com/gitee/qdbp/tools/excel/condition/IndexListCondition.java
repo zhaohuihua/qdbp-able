@@ -130,7 +130,7 @@ public class IndexListCondition implements Serializable {
         if (all) {
             return "*";
         } else {
-            return (exclude ? "exclude " : "include ") + "[" + ConvertTools.joinToString(indexs) + "]";
+            return (exclude ? "exclude" : "include") + "[" + ConvertTools.joinToString(indexs) + "]";
         }
     }
 }

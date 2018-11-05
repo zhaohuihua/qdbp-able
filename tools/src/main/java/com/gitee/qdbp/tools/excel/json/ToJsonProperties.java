@@ -16,7 +16,7 @@ import com.gitee.qdbp.tools.utils.PropertyTools;
 /**
  * 数据转换配置<br>
  * 有哪些配置项详见{@linkplain MetadataTools#parseProperties(Properties)}<br>
- * exceltojson.x.main增加了file.name, id.field, self.name<br>
+ * exceltojson.x.main增加了file.name, id.field, self.name, copy.concat<br>
  * exceltojson.x.merge.y.type = json|list|field<br>
  * json = {@linkplain MergeToJson}, 增加了file.name, id.field, self.name, self.with<br>
  * list = {@linkplain MergeToList}, 增加了file.name, id.field, self.name<br>
@@ -29,6 +29,7 @@ import com.gitee.qdbp.tools.utils.PropertyTools;
  * exceltojson.1.main.id.field = id
  * exceltojson.1.main.rule.map.gender = { "UNKNOWN":"未知|0", "MALE":"男|1", "FEMALE":"女|2" }
  * exceltojson.1.main.rule.date.birthday = yyyy/MM/dd
+ * exceltojson.1.main.copy.concat = { keywords:"userName,nickName,deptName" }
  * exceltojson.1.merge.1.type = list
  * exceltojson.1.merge.1.sheet.name = AddressSheet
  * exceltojson.1.merge.1.self.name = address

@@ -5,7 +5,6 @@ import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
-import com.gitee.qdbp.tools.utils.JsonTools;
 
 /**
  * 数字规则
@@ -73,7 +72,7 @@ public class NumberRule extends BaseRule {
         if (this.getParent() != null) {
             buffer.append(this.getParent().toString()).append(", ");
         }
-        buffer.append("{number:").append(JsonTools.toJsonString(type)).append("}");
+        buffer.append("{number:").append(type).append("}");
         return buffer.toString();
     }
 }

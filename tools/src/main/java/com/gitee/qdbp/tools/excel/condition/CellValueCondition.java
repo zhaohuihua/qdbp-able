@@ -1,16 +1,9 @@
 package com.gitee.qdbp.tools.excel.condition;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.utils.ExcelTools;
 import com.gitee.qdbp.tools.utils.ConvertTools;
@@ -22,9 +15,6 @@ import com.gitee.qdbp.tools.utils.ConvertTools;
  * @version 181104
  */
 public abstract class CellValueCondition implements MatchesRowCondition {
-
-    /** 日志对象 **/
-    private static final Logger log = LoggerFactory.getLogger(IndexRangeCondition.class);
 
     // skip.row.when = { A:"小计", H:"元" }
     private List<Item> items;
@@ -38,55 +28,6 @@ public abstract class CellValueCondition implements MatchesRowCondition {
 
     public CellValueCondition(List<Item> items) {
         this.items = items;
-    }
-
-    /** 解析JSON字符串: { A:"NULL" }, { B:"小计", H:"元" }, { B:"总计", H:"元" } **/
-    public static List<List<Item>> parse(String jsonString) {
-        if (VerifyTools.isBlank(jsonString)) {
-            return null;
-        }
-        if (!jsonString.startsWith("[")) {
-            jsonString = "[" + jsonString + "]";
-        }
-        // 转换为JSON数组
-        JSONArray array;
-        try {
-            array = JSON.parseArray(jsonString);
-        } catch (Exception e) {
-            log.warn("ContainsTextConditionError, json string format error: " + jsonString, e);
-            return null;
-        }
-        // 逐一解析
-        List<List<Item>> conditions = new ArrayList<>();
-        for (Object i : array) {
-            if (!(i instanceof JSONObject)) {
-                continue;
-            }
-            JSONObject json = (JSONObject) i;
-            if (json.isEmpty()) {
-                continue;
-            }
-            List<Item> items = new ArrayList<>();
-            List<String> keys = new ArrayList<>();
-            Collections.sort(keys);
-            for (String key : keys) {
-                int index;
-                if (StringTools.isDigit(key)) { // 数字
-                    index = ConvertTools.toInteger(key);
-                } else { // A,B,AA,AB之类的列名
-                    index = ExcelTools.columnNameToIndex(key);
-                }
-                Object value = json.get(key);
-                String text = value == null ? null : value.toString();
-                items.add(new Item(index, text));
-            }
-            if (!items.isEmpty()) {
-                conditions.add(items);
-            }
-        }
-
-        return conditions;
-
     }
 
     /** {@inheritDoc} **/

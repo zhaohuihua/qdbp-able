@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
-import com.gitee.qdbp.tools.utils.JsonTools;
 
 /**
  * 清除规则
@@ -43,7 +42,7 @@ public class ClearRule extends BaseRule {
         if (this.getParent() != null) {
             buffer.append(this.getParent().toString()).append(", ");
         }
-        buffer.append("{clear:").append(JsonTools.toJsonString(clear)).append("}");
+        buffer.append("{clear:").append(clear).append("}");
         return buffer.toString();
     }
 }

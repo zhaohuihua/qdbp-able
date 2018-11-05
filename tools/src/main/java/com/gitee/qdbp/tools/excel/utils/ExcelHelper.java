@@ -38,7 +38,7 @@ public class ExcelHelper {
         String sheetName = sheet.getSheetName();
         List<FieldInfo> fieldInfos = metadata.getFieldInfos();
         if (fieldInfos == null && metadata.getFieldRows() != null) {
-            fieldInfos = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+            fieldInfos = MetadataTools.parseFieldInfoByRows(sheet, metadata.getFieldRows());
             if (fieldInfos.isEmpty()) {
                 log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());
             }
@@ -154,6 +154,11 @@ public class ExcelHelper {
             }
         }
 
+        // 字段复制合并
+        if (VerifyTools.isNotBlank(metadata.getCopyConcatFields())) {
+            ExcelTools.copyConcat(map, metadata.getCopyConcatFields());
+        }
+
         // 回调具体的业务处理方法
         RowInfo rowInfo = new RowInfo(sheetName, index + 1);
         rowInfo.setCells(cellInfos);
@@ -165,7 +170,7 @@ public class ExcelHelper {
 
         List<FieldInfo> fieldInfos = metadata.getFieldInfos();
         if (fieldInfos == null && metadata.getFieldRows() != null) {
-            fieldInfos = MetadataTools.parseFields(sheet, metadata.getFieldRows());
+            fieldInfos = MetadataTools.parseFieldInfoByRows(sheet, metadata.getFieldRows());
             if (fieldInfos.isEmpty()) {
                 String sheetName = sheet.getSheetName();
                 log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());

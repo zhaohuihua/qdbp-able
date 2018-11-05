@@ -1,6 +1,8 @@
 package com.gitee.qdbp.tools.excel.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +20,6 @@ import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.XMetadata;
-import com.gitee.qdbp.tools.excel.condition.CellValueCondition;
 import com.gitee.qdbp.tools.excel.condition.CellValueCondition.Item;
 import com.gitee.qdbp.tools.excel.condition.CellValueContainsTextCondition;
 import com.gitee.qdbp.tools.excel.condition.CellValueEqualsTextCondition;
@@ -28,6 +29,7 @@ import com.gitee.qdbp.tools.excel.condition.MatchesRowCondition;
 import com.gitee.qdbp.tools.excel.condition.NameListCondition;
 import com.gitee.qdbp.tools.excel.condition.Required;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.excel.model.CopyConcat;
 import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.rule.CellRule;
 import com.gitee.qdbp.tools.excel.rule.ClearRule;
@@ -37,6 +39,7 @@ import com.gitee.qdbp.tools.excel.rule.MapRule;
 import com.gitee.qdbp.tools.excel.rule.NumberRule;
 import com.gitee.qdbp.tools.excel.rule.RateRule;
 import com.gitee.qdbp.tools.excel.rule.SplitRule;
+import com.gitee.qdbp.tools.utils.ConvertTools;
 import com.gitee.qdbp.tools.utils.PropertyTools;
 
 /**
@@ -91,6 +94,9 @@ public class MetadataTools {
      * rules.positive = { map:{ true:"已转正|是|Y", false:"未转正|否|N" } }
      * rules.gender = { map:{ UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" } }
      * rules.birthday = { date:"yyyy/MM/dd" }
+     * 
+     * ## 将多个字段复制合并到一个字段
+     * copy.concat = { keywords:"userName,nickName,deptName" }
      * </pre>
      * 
      * @param properties 配置内容
@@ -103,7 +109,7 @@ public class MetadataTools {
         List<FieldInfo> fieldNames = null;
         IndexRangeCondition fieldRows = null;
         if (VerifyTools.isNotBlank(sFieldNames)) {
-            fieldNames = MetadataTools.parseFieldInfos(sFieldNames);
+            fieldNames = MetadataTools.parseFieldInfoByText(sFieldNames);
         } else {
             String sFieldRows = PropertyTools.getString(properties, "field.rows", false);
             if (VerifyTools.isNotBlank(sFieldRows)) {
@@ -167,7 +173,7 @@ public class MetadataTools {
         List<MatchesRowCondition> skipRowWhen = new ArrayList<>();
         String sSkipRowWhenContains = PropertyTools.getString(properties, "skip.row.when.contains", false);
         if (VerifyTools.isNotBlank(sSkipRowWhenContains)) {
-            List<List<Item>> conditions = CellValueCondition.parse(sSkipRowWhenContains);
+            List<List<Item>> conditions = parseCellValueCondition(sSkipRowWhenContains);
             if (VerifyTools.isNotBlank(conditions)) {
                 for (List<Item> items : conditions) {
                     skipRowWhen.add(new CellValueContainsTextCondition(items));
@@ -177,7 +183,7 @@ public class MetadataTools {
         // # skip.row.when.equals = { A:"NULL" }, { B:"小计", H:"元" }, { B:"总计", H:"元" }
         String sSkipRowWhenEquals = PropertyTools.getString(properties, "skip.row.when.equals", false);
         if (VerifyTools.isNotBlank(sSkipRowWhenEquals)) {
-            List<List<Item>> conditions = CellValueCondition.parse(sSkipRowWhenEquals);
+            List<List<Item>> conditions = parseCellValueCondition(sSkipRowWhenEquals);
             if (VerifyTools.isNotBlank(conditions)) {
                 for (List<Item> items : conditions) {
                     skipRowWhen.add(new CellValueEqualsTextCondition(items));
@@ -233,6 +239,10 @@ public class MetadataTools {
         // Sheet名称填充至哪个字段
         String sheetNameFillTo = PropertyTools.getString(properties, "sheet.name.fill.to", false);
 
+        // 解析字段复制合并参数
+        String sCopyConcat = PropertyTools.getString(properties, "copy.concat", false);
+        List<CopyConcat> copyConcatFields = sCopyConcat == null ? null : parseCopyConcatFields(sCopyConcat);
+
         XMetadata metadata = new XMetadata();
         metadata.setFieldInfos(fieldNames); // 字段信息列表
         metadata.setFieldRows(fieldRows); // 字段名所在的行
@@ -247,6 +257,9 @@ public class MetadataTools {
         }
         if (!rules.isEmpty()) {
             metadata.setRules(rules); // 字段与转换规则的映射表
+        }
+        if (copyConcatFields != null && !copyConcatFields.isEmpty()) {
+            metadata.setCopyConcatFields(copyConcatFields); // 字段复制合并参数
         }
         return metadata;
     }
@@ -321,13 +334,122 @@ public class MetadataTools {
     }
 
     /**
+     * 解析单元格值的判断条件
+     * 
+     * @param jsonString JSON字符串: { A:"NULL" }, { B:"小计", H:"元" }, { B:"总计", H:"元" }
+     * @return 条件对象
+     */
+    public static List<List<Item>> parseCellValueCondition(String jsonString) {
+        if (VerifyTools.isBlank(jsonString)) {
+            return null;
+        }
+        if (!jsonString.startsWith("[")) {
+            jsonString = "[" + jsonString + "]";
+        }
+        // 转换为JSON数组
+        JSONArray array;
+        try {
+            array = JSON.parseArray(jsonString);
+        } catch (Exception e) {
+            log.warn("ContainsTextConditionError, json string format error: " + jsonString, e);
+            return null;
+        }
+        // 逐一解析
+        List<List<Item>> conditions = new ArrayList<>();
+        for (Object i : array) {
+            if (!(i instanceof JSONObject)) {
+                continue;
+            }
+            JSONObject json = (JSONObject) i;
+            if (json.isEmpty()) {
+                continue;
+            }
+            List<Item> items = new ArrayList<>();
+            List<String> keys = new ArrayList<>();
+            Collections.sort(keys);
+            for (String key : keys) {
+                int index;
+                if (StringTools.isDigit(key)) { // 数字
+                    index = ConvertTools.toInteger(key);
+                } else { // A,B,AA,AB之类的列名
+                    index = ExcelTools.columnNameToIndex(key);
+                }
+                Object value = json.get(key);
+                String text = value == null ? null : value.toString();
+                items.add(new Item(index, text));
+            }
+            if (!items.isEmpty()) {
+                conditions.add(items);
+            }
+        }
+
+        return conditions;
+    }
+
+    // { keywords:"userName,nickName,deptName" }
+    public static List<CopyConcat> parseCopyConcatFields(String jsonString) {
+        if (VerifyTools.isBlank(jsonString)) {
+            return null;
+        }
+        if (!jsonString.startsWith("[")) {
+            jsonString = "[" + jsonString + "]";
+        }
+        // 转换为JSON数组
+        JSONArray array;
+        try {
+            array = JSON.parseArray(jsonString);
+        } catch (Exception e) {
+            log.warn("CopyConcatFieldsError, json string format error: " + jsonString, e);
+            return null;
+        }
+        // 逐一解析
+        List<CopyConcat> copyConcatFields = new ArrayList<>();
+        for (Object i : array) {
+            if (!(i instanceof JSONObject)) {
+                continue;
+            }
+            JSONObject json = (JSONObject) i;
+            if (json.isEmpty()) {
+                continue;
+            }
+            for (Entry<String, Object> entry : json.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (VerifyTools.isAnyBlank(key, value)) {
+                    continue;
+                }
+                CopyConcat copyConcatField = new CopyConcat();
+                copyConcatField.setTargetField(key);
+                if (value instanceof CharSequence) {
+                    String[] temp = StringTools.split(value.toString(), true, ',', '|');
+                    copyConcatField.addSourceFields(temp);
+                } else if (value.getClass().isArray()) {
+                    Object[] temp = (Object[]) value;
+                    for (Object o : temp) {
+                        copyConcatField.addSourceFields(o.toString());
+                    }
+                } else if (value instanceof Collection) {
+                    Object[] temp = ((Collection<?>) value).toArray();
+                    for (Object o : temp) {
+                        copyConcatField.addSourceFields(o.toString());
+                    }
+                } else {
+                    continue;
+                }
+                copyConcatFields.add(copyConcatField);
+            }
+        }
+        return copyConcatFields;
+    }
+
+    /**
      * 解析字段列表配置<br>
      * 星号开头或(*)结尾的字段为必填字段: [*name] or [name(*)]
      * 
      * @param text 配置内容
      * @return
      */
-    public static List<FieldInfo> parseFieldInfos(String text) {
+    public static List<FieldInfo> parseFieldInfoByText(String text) {
         if (VerifyTools.isBlank(text)) {
             return null;
         }
@@ -353,7 +475,7 @@ public class MetadataTools {
      * @param fieldRows 字段数据所在的行
      * @return
      */
-    public static List<FieldInfo> parseFields(Sheet sheet, IndexRangeCondition fieldRows) {
+    public static List<FieldInfo> parseFieldInfoByRows(Sheet sheet, IndexRangeCondition fieldRows) {
         if (sheet == null || fieldRows == null) {
             return new ArrayList<>();
         }

@@ -95,7 +95,7 @@ public class NameListCondition implements Serializable {
         if (all) {
             return "*";
         } else {
-            return (exclude ? "exclude " : "include ") + "[" + ConvertTools.joinToString(names) + "]";
+            return (exclude ? "exclude " : "include") + "[" + ConvertTools.joinToString(names) + "]";
         }
     }
 }

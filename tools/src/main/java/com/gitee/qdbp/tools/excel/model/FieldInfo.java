@@ -52,7 +52,7 @@ public class FieldInfo implements Serializable {
                 buffer.append(column).append(":");
             }
             if (field.trim().length() == 0) {
-                buffer.append("\"\"");
+                buffer.append("{EMPTY}");
             } else {
                 buffer.append(field);
             }

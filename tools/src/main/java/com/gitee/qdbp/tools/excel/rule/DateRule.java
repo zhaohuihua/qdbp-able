@@ -10,7 +10,6 @@ import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResultCode;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
-import com.gitee.qdbp.tools.utils.JsonTools;
 
 /**
  * 日期转换规则
@@ -81,7 +80,7 @@ public class DateRule extends BaseRule implements Serializable {
         if (this.getParent() != null) {
             buffer.append(this.getParent().toString()).append(", ");
         }
-        buffer.append("{pattern:").append(JsonTools.toJsonString(pattern)).append("}");
+        buffer.append("{pattern:").append(pattern).append("}");
         return buffer.toString();
     }
 

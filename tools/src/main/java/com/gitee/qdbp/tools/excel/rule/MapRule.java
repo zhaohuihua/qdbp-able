@@ -10,7 +10,6 @@ import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 import com.gitee.qdbp.tools.utils.ConvertTools;
-import com.gitee.qdbp.tools.utils.JsonTools;
 
 /**
  * 映射规则
@@ -125,8 +124,8 @@ public class MapRule extends BaseRule {
         if (this.getParent() != null) {
             buffer.append(this.getParent().toString()).append(", ");
         }
-        String keys = this.imports == null ? null : ConvertTools.joinToString(this.imports.keySet());
-        buffer.append("{map:").append(JsonTools.toJsonString(keys)).append("}");
+        String keys = this.exports == null ? null : ConvertTools.joinToString(this.exports.keySet());
+        buffer.append("{map:").append(keys).append("}");
         return buffer.toString();
     }
 

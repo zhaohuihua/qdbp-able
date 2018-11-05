@@ -12,6 +12,7 @@ import com.gitee.qdbp.tools.excel.condition.IndexListCondition;
 import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.condition.MatchesRowCondition;
 import com.gitee.qdbp.tools.excel.condition.NameListCondition;
+import com.gitee.qdbp.tools.excel.model.CopyConcat;
 import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.rule.CellRule;
 import com.gitee.qdbp.tools.excel.utils.MetadataTools;
@@ -50,11 +51,13 @@ public class XMetadata implements Serializable {
     private IndexRangeCondition footerRows;
     /** Sheet名称填充至哪个字段 **/
     private String sheetNameFillTo;
-
     /** Sheet序号配置, 默认读取第1个Sheet **/
     private IndexListCondition sheetIndexs = new IndexListCondition(0);
     /** Sheet名称配置, 默认全部匹配 **/
     private NameListCondition sheetNames = new NameListCondition();
+
+    /** 字段复制合并参数 **/
+    private List<CopyConcat> copyConcatFields;
 
     public XMetadata() {
         this.skipRows = 0;
@@ -244,6 +247,29 @@ public class XMetadata implements Serializable {
         return this.rules == null ? null : this.rules.get(column);
     }
 
+    /** 字段复制合并参数 **/
+    public List<CopyConcat> getCopyConcatFields() {
+        return copyConcatFields;
+    }
+
+    /** 字段复制合并参数 **/
+    public void setCopyConcatFields(List<CopyConcat> copyConcatFields) {
+        this.copyConcatFields = copyConcatFields;
+    }
+
+    /** 增加字段复制合并参数 **/
+    public void addCopyConcatFields(CopyConcat... copyConcatFields) {
+        if (copyConcatFields == null) {
+            return;
+        }
+        if (this.copyConcatFields == null) {
+            this.copyConcatFields = new ArrayList<>();
+        }
+        for (CopyConcat item : copyConcatFields) {
+            this.copyConcatFields.add(item);
+        }
+    }
+
     /**
      * 将当前对象转换为子类对象
      *
@@ -268,6 +294,7 @@ public class XMetadata implements Serializable {
         instance.setSheetNameFillTo(this.getSheetNameFillTo()); // Sheet名称填充至哪个字段
         instance.setSheetIndexs(this.getSheetIndexs()); // Sheet序号配置
         instance.setSheetNames(this.getSheetNames()); // Sheet名称配置
+        instance.setCopyConcatFields(this.getCopyConcatFields()); // 字段复制合并参数 
         return instance;
     }
     
