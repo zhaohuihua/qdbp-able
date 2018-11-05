@@ -1,15 +1,18 @@
 package com.gitee.qdbp.tools.excel;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import com.gitee.qdbp.able.model.paging.Paging;
 import com.gitee.qdbp.tools.excel.json.ExcelToJson;
 import com.gitee.qdbp.tools.excel.json.ToJsonMetadata;
 import com.gitee.qdbp.tools.excel.json.ToJsonProperties;
 import com.gitee.qdbp.tools.files.PathTools;
 import com.gitee.qdbp.tools.utils.JsonTools;
 import com.gitee.qdbp.tools.utils.PropertyTools;
+import com.gitee.qdbp.tools.utils.QueryTools;
 
 public class ExcelToJsonTest {
 
@@ -21,15 +24,55 @@ public class ExcelToJsonTest {
         List<ToJsonMetadata> metadata = ToJsonProperties.parseMetadata(properties);
         {
             long start = System.currentTimeMillis();
-            Map<String, Object> users = ExcelToJson.convert(folder, metadata);
-            System.out.println(JsonTools.toJsonString(users));
+            Map<String, ?> result = ExcelToJson.convert(folder, metadata);
+            System.out.println(JsonTools.toJsonString(result));
             System.out.println(System.currentTimeMillis() - start);
         }
         {
             long start = System.currentTimeMillis();
-            Map<String, Object> users = ExcelToJson.convert(folder, metadata);
-            System.out.println(JsonTools.toJsonString(users));
+            Map<String, List<Map<String, Object>>> result = ExcelToJson.convert(folder, metadata);
+            System.out.println(JsonTools.toJsonString(result));
             System.out.println(System.currentTimeMillis() - start);
+
+            {
+                System.out.println("paging: 5");
+                List<Map<String, Object>> users = result.get("users");
+                List<Map<String, Object>> list = QueryTools.filter(users, null, Paging.of(1, 5));
+                System.out.println("users.size=" + users.size() + ", paged.size=" + list.size());
+                System.out.println(JsonTools.toJsonString(list));
+            }
+            {
+                System.out.println("nameLike:路人");
+                List<Map<String, Object>> users = result.get("users");
+                Map<String, Object> where = new HashMap<>();
+                where.put("nameLike", "路人");
+                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                System.out.println(JsonTools.toJsonString(list));
+            }
+            {
+                System.out.println("heightBetween:170");
+                List<Map<String, Object>> users = result.get("users");
+                Map<String, Object> where = new HashMap<>();
+                where.put("heightBetween", "170");
+                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                System.out.println(JsonTools.toJsonString(list));
+            }
+            {
+                System.out.println("heightBetween:160,170");
+                List<Map<String, Object>> users = result.get("users");
+                Map<String, Object> where = new HashMap<>();
+                where.put("heightBetween", "160,170");
+                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                System.out.println(JsonTools.toJsonString(list));
+            }
+            {
+                System.out.println("skillsExists:jQuery");
+                List<Map<String, Object>> users = result.get("users");
+                Map<String, Object> where = new HashMap<>();
+                where.put("skillsExists", "jQuery");
+                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                System.out.println(JsonTools.toJsonString(list));
+            }
         }
     }
 }

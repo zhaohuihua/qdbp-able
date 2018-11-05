@@ -116,11 +116,12 @@ public class ExcelToJson {
      * @return JSON数据列表
      * @throws ServiceException
      */
-    public static Map<String, Object> convert(String folder, List<ToJsonMetadata> metadata) throws ServiceException {
+    public static Map<String, List<Map<String, Object>>> convert(String folder, List<ToJsonMetadata> metadata)
+            throws ServiceException {
         if (VerifyTools.isBlank(metadata)) {
             return null;
         }
-        Map<String, Object> map = new HashMap<>();
+        Map<String, List<Map<String, Object>>> map = new HashMap<>();
         for (int i = 0; i < metadata.size(); i++) {
             ToJsonMetadata item = metadata.get(i);
             // fileName为必填参数, idField如果为空就不合并子数据, selfName如果为空就用index作为自身字段名称
@@ -129,7 +130,7 @@ public class ExcelToJson {
                 continue;
             }
 
-            List<?> result = loadAndMergeData(folder, item);
+            List<Map<String, Object>> result = loadAndMergeData(folder, item);
             if (result != null) {
                 String selfName = VerifyTools.nvl(item.getSelfName(), String.valueOf(i));
                 map.put(selfName, result);

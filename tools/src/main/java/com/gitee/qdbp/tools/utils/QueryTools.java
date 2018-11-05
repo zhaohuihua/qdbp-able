@@ -92,7 +92,7 @@ public class QueryTools {
                     return false;
                 }
                 // Between只支持Number和Date
-                Object realActualValue = null;
+                Object realActualValue = actualValue;
                 if (actualValue instanceof CharSequence) {
                     try {
                         if (NUMBER.matcher(actualValue.toString()).matches()) {
