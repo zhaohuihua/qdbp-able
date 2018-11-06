@@ -88,27 +88,7 @@ public class ExcelToJson {
 
     /**
      * 执行数据转换 <br>
-     * ToJsonMetadata metadata = ExcelToJson.parseMetadata(ToJsonParams params)<br>
-     * List&lt;Map<String, Object>&gt; result = ExcelToJson.convert(folder, metadata);<br>
-     * 
-     * @param folder 文件夹路径
-     * @param metadata 数据转换参数
-     * @return JSON数据列表
-     * @throws ServiceException
-     */
-    public static List<Map<String, Object>> convert(String folder, ToJsonMetadata metadata) throws ServiceException {
-        // fileName为必填参数, idField如果为空就不合并子数据
-        if (VerifyTools.isBlank(metadata.getFileName())) {
-            log.warn("Failed to load excel rows. ToJsonMetadata fileName is null");
-            return null;
-        }
-
-        return loadAndMergeData(folder, metadata);
-    }
-
-    /**
-     * 执行数据转换 <br>
-     * List&lt;ToJsonMetadata&gt; metadata = ExcelToJson.parseParams(List&lt;ToJsonParams&gt; params);<br>
+     * List<ToJsonMetadata> metadata = ToJsonProperties.parseMetadata(Properties)<br>
      * Map<String, Object> result = ExcelToJson.convert(folder, metadata);<br>
      * 
      * @param folder 文件夹路径
@@ -137,6 +117,25 @@ public class ExcelToJson {
             }
         }
         return map;
+    }
+
+    /**
+     * 执行数据转换 <br>
+     * List&lt;Map<String, Object>&gt; result = ExcelToJson.convert(folder, metadata);<br>
+     * 
+     * @param folder 文件夹路径
+     * @param metadata 数据转换参数
+     * @return JSON数据列表
+     * @throws ServiceException
+     */
+    public static List<Map<String, Object>> convert(String folder, ToJsonMetadata metadata) throws ServiceException {
+        // fileName为必填参数, idField如果为空就不合并子数据
+        if (VerifyTools.isBlank(metadata.getFileName())) {
+            log.warn("Failed to load excel rows. ToJsonMetadata fileName is null");
+            return null;
+        }
+
+        return loadAndMergeData(folder, metadata);
     }
 
     /** 导入及合并Excel数据 **/

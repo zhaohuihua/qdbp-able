@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResultCode;
@@ -47,31 +46,27 @@ public class DateRule extends BaseRule implements Serializable {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+    public void doImports(CellInfo cellInfo)
             throws ServiceException {
-        if (value instanceof String) {
+        if (cellInfo.getValue() instanceof String) {
             try {
-                map.put(field, new SimpleDateFormat(pattern).parse((String) value));
+                cellInfo.setValue(new SimpleDateFormat(pattern).parse((String) cellInfo.getValue()));
             } catch (ParseException e) {
                 throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR, e);
             }
-        } else if (value instanceof Date) {
-            map.put(field, value);
-        } else {
-            map.put(field, value);
         }
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+    public void doExports(CellInfo cellInfo)
             throws ServiceException {
-        if (VerifyTools.isBlank(value)) {
-            map.put(field, null);
-        } else if (value instanceof Date) {
-            map.put(field, new SimpleDateFormat(pattern).format((Date) value));
+        if (VerifyTools.isBlank(cellInfo.getValue())) {
+            cellInfo.setValue(null);
+        } else if (cellInfo.getValue() instanceof Date) {
+            cellInfo.setValue(new SimpleDateFormat(pattern).format((Date) cellInfo.getValue()));
         } else {
-            Date date = TypeUtils.castToDate(value);
-            map.put(field, new SimpleDateFormat(pattern).format(date));
+            Date date = TypeUtils.castToDate(cellInfo.getValue());
+            cellInfo.setValue(new SimpleDateFormat(pattern).format(date));
         }
     }
 

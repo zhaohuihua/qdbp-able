@@ -26,14 +26,11 @@ public class BaseRule implements CellRule, Serializable {
         if (parent != null) {
             parent.imports(map, cellInfo);
         }
-        String field = cellInfo.getField();
-        Object value = cellInfo.getValue();
-        this.doImports(map, cellInfo, field, value);
+        this.doImports(cellInfo);
+        map.put(cellInfo.getField(), cellInfo.getValue());
     }
 
-    protected void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        map.put(field, value);
+    protected void doImports(CellInfo cellInfo) throws ServiceException {
     }
 
     @Override
@@ -41,14 +38,11 @@ public class BaseRule implements CellRule, Serializable {
         if (parent != null) {
             parent.exports(map, cellInfo);
         }
-        String field = cellInfo.getField();
-        Object value = cellInfo.getValue();
-        this.doExports(map, cellInfo, field, value);
+        this.doExports(cellInfo);
+        map.put(cellInfo.getField(), cellInfo.getValue());
     }
 
-    protected void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        map.put(field, value);
+    protected void doExports(CellInfo cellInfo) throws ServiceException {
     }
 
     /** 上级规则 **/

@@ -31,6 +31,7 @@ public class IgnoreIllegalValue implements CellRule, Serializable {
             try {
                 parent.imports(map, cellInfo);
             } catch (Exception e) {
+                cellInfo.setValue(null);
                 map.put(cellInfo.getField(), null);
             }
         }
@@ -44,6 +45,7 @@ public class IgnoreIllegalValue implements CellRule, Serializable {
             try {
                 parent.exports(map, cellInfo);
             } catch (Exception e) {
+                cellInfo.setValue(null);
                 map.put(cellInfo.getField(), null);
             }
         }

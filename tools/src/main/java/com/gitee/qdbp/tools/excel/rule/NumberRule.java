@@ -1,6 +1,5 @@
 package com.gitee.qdbp.tools.excel.rule;
 
-import java.util.Map;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.utils.VerifyTools;
@@ -29,22 +28,22 @@ public class NumberRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+    public void doImports(CellInfo cellInfo)
             throws ServiceException {
-        if (VerifyTools.isBlank(value)) {
-            map.put(field, null);
+        if (VerifyTools.isBlank(cellInfo.getValue())) {
+            cellInfo.setValue(null);
         } else {
-            map.put(field, toNumber(value, type));
+            cellInfo.setValue(toNumber(cellInfo.getValue(), type));
         }
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
+    public void doExports(CellInfo cellInfo)
             throws ServiceException {
-        if (VerifyTools.isBlank(value)) {
-            map.put(field, null);
+        if (VerifyTools.isBlank(cellInfo.getValue())) {
+            cellInfo.setValue(null);
         } else {
-            map.put(field, toNumber(value, type));
+            cellInfo.setValue(toNumber(cellInfo.getValue(), type));
         }
     }
 

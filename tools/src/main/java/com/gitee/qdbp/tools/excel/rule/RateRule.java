@@ -1,6 +1,5 @@
 package com.gitee.qdbp.tools.excel.rule;
 
-import java.util.Map;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResultCode;
@@ -24,31 +23,29 @@ public class RateRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        if (VerifyTools.isBlank(value)) {
-            map.put(field, null);
-        } else if (value instanceof String) {
-            Double number = TypeUtils.castToDouble(value);
-            map.put(field, number == null ? null : number.doubleValue() * rate);
-        } else if (value instanceof Number) {
-            Number number = (Number) value;
-            map.put(field, number.doubleValue() * rate);
+    public void doImports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isBlank(cellInfo.getValue())) {
+            cellInfo.setValue(null);
+        } else if (cellInfo.getValue() instanceof String) {
+            Double number = TypeUtils.castToDouble(cellInfo.getValue());
+            cellInfo.setValue(number == null ? null : number.doubleValue() * rate);
+        } else if (cellInfo.getValue() instanceof Number) {
+            Number number = (Number) cellInfo.getValue();
+            cellInfo.setValue(number.doubleValue() * rate);
         } else {
             throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
         }
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        if (VerifyTools.isBlank(value)) {
-            map.put(field, null);
-        } else if (value instanceof Number) {
-            map.put(field, ((Number) value).doubleValue() / rate);
+    public void doExports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isBlank(cellInfo.getValue())) {
+            cellInfo.setValue(null);
+        } else if (cellInfo.getValue() instanceof Number) {
+            cellInfo.setValue(((Number) cellInfo.getValue()).doubleValue() / rate);
         } else {
-            Double number = TypeUtils.castToDouble(value);
-            map.put(field, number == null ? null : number.doubleValue() / rate);
+            Double number = TypeUtils.castToDouble(cellInfo.getValue());
+            cellInfo.setValue(number == null ? null : number.doubleValue() / rate);
         }
     }
 

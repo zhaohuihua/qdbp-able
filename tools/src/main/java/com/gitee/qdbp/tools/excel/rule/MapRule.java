@@ -89,14 +89,13 @@ public class MapRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        if (VerifyTools.isBlank(value)) {
-            map.put(field, null);
+    public void doImports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isBlank(cellInfo.getValue())) {
+            cellInfo.setValue(null);
         } else {
-            String string = value.toString();
+            String string = cellInfo.getValue().toString();
             if (imports.containsKey(string)) {
-                map.put(field, imports.get(string));
+                cellInfo.setValue(imports.get(string));
             } else {
                 throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
             }
@@ -104,15 +103,14 @@ public class MapRule extends BaseRule {
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        if (VerifyTools.isBlank(value)) {
-            map.put(field, null);
+    public void doExports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isBlank(cellInfo.getValue())) {
+            cellInfo.setValue(null);
         } else {
-            String string = value.toString();
+            String string = cellInfo.getValue().toString();
 
             if (exports.containsKey(string)) {
-                map.put(field, exports.get(string));
+                cellInfo.setValue(exports.get(string));
             } else {
                 throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
             }

@@ -74,7 +74,7 @@ public class ToJsonProperties implements Serializable {
                     merge = StringTools.concat('.', keys[0], keys[1], keys[2], keys[3], "."); // exceltojson.a.merge.b.
                 } else if (keys.length > 2 && keys[1].equals("merge")) { // exceltojson.merge.b
                     main = StringTools.concat('.', keys[0], "main", "."); // exceltojson.main.
-                    merge = StringTools.concat('.', keys[0], keys[2], keys[3], "."); // exceltojson.merge.b.
+                    merge = StringTools.concat('.', keys[0], keys[1], keys[2], keys[3], "."); // exceltojson.merge.b.
                 } else if (keys.length > 1 && keys[1].equals("main")) { // exceltojson.main
                     main = StringTools.concat('.', keys[0], keys[1], "."); // exceltojson.main.
                 } else if (keys.length > 2 && keys[2].equals("main")) { // exceltojson.a.main

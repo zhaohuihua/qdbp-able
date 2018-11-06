@@ -2,7 +2,6 @@ package com.gitee.qdbp.tools.excel.rule;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
@@ -32,25 +31,19 @@ public class SplitRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        if (value instanceof String) {
-            String string = (String) value;
+    public void doImports(CellInfo cellInfo) throws ServiceException {
+        if (cellInfo.getValue() instanceof String) {
+            String string = (String) cellInfo.getValue();
             List<String> result = ConvertTools.toList(regexp.split(string));
-            map.put(field, result);
-        } else {
-            map.put(field, value);
+            cellInfo.setValue(result);
         }
     }
 
     @Override
-    public void doExports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        if (value instanceof Collection) {
-            Collection<?> collection = (Collection<?>) value;
-            map.put(field, ConvertTools.joinToString(collection, separator));
-        } else {
-            map.put(field, value);
+    public void doExports(CellInfo cellInfo) throws ServiceException {
+        if (cellInfo.getValue() instanceof Collection) {
+            Collection<?> collection = (Collection<?>) cellInfo.getValue();
+            cellInfo.setValue(ConvertTools.joinToString(collection, separator));
         }
     }
 

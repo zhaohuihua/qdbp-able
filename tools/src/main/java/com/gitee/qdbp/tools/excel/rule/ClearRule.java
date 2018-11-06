@@ -1,6 +1,5 @@
 package com.gitee.qdbp.tools.excel.rule;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
@@ -28,12 +27,9 @@ public class ClearRule extends BaseRule {
     }
 
     @Override
-    public void doImports(Map<String, Object> map, CellInfo cellInfo, String field, Object value)
-            throws ServiceException {
-        if (value instanceof String) {
-            map.put(field, clear.matcher((String) value).replaceAll(""));
-        } else {
-            map.put(field, value);
+    public void doImports(CellInfo cellInfo) throws ServiceException {
+        if (cellInfo.getValue() instanceof String) {
+            cellInfo.setValue(clear.matcher((String) cellInfo.getValue()).replaceAll(""));
         }
     }
 
