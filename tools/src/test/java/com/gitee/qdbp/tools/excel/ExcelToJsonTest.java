@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import com.gitee.qdbp.able.model.paging.PageList;
 import com.gitee.qdbp.able.model.paging.Paging;
 import com.gitee.qdbp.tools.excel.json.ExcelToJson;
 import com.gitee.qdbp.tools.excel.json.ToJsonMetadata;
@@ -37,7 +38,7 @@ public class ExcelToJsonTest {
             {
                 System.out.println("paging: 5");
                 List<Map<String, Object>> users = result.get("users");
-                List<Map<String, Object>> list = QueryTools.filter(users, null, Paging.of(1, 5));
+                PageList<Map<String, Object>> list = QueryTools.filter(users, null, Paging.of(1, 5));
                 System.out.println("users.size=" + users.size() + ", paged.size=" + list.size());
                 System.out.println(JsonTools.toJsonString(list));
             }
@@ -46,7 +47,7 @@ public class ExcelToJsonTest {
                 List<Map<String, Object>> users = result.get("users");
                 Map<String, Object> where = new HashMap<>();
                 where.put("nameLike", "路人");
-                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                PageList<Map<String, Object>> list = QueryTools.filter(users, where, null);
                 System.out.println(JsonTools.toJsonString(list));
             }
             {
@@ -54,7 +55,7 @@ public class ExcelToJsonTest {
                 List<Map<String, Object>> users = result.get("users");
                 Map<String, Object> where = new HashMap<>();
                 where.put("heightBetween", "170");
-                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                PageList<Map<String, Object>> list = QueryTools.filter(users, where, null);
                 System.out.println(JsonTools.toJsonString(list));
             }
             {
@@ -62,7 +63,7 @@ public class ExcelToJsonTest {
                 List<Map<String, Object>> users = result.get("users");
                 Map<String, Object> where = new HashMap<>();
                 where.put("heightBetween", "160,170");
-                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                PageList<Map<String, Object>> list = QueryTools.filter(users, where, null);
                 System.out.println(JsonTools.toJsonString(list));
             }
             {
@@ -70,7 +71,7 @@ public class ExcelToJsonTest {
                 List<Map<String, Object>> users = result.get("users");
                 Map<String, Object> where = new HashMap<>();
                 where.put("skillsExists", "jQuery");
-                List<Map<String, Object>> list = QueryTools.filter(users, where, null);
+                PageList<Map<String, Object>> list = QueryTools.filter(users, where, null);
                 System.out.println(JsonTools.toJsonString(list));
             }
         }
