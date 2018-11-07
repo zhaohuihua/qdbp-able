@@ -41,8 +41,8 @@ public abstract class ImportCallback implements IBatchResult, ConvertRule, Seria
     }
 
     /** 具体某一列失败 **/
-    public void addFailed(String sheetName, int row, String field, IResultMessage result) {
-        failed.add(new FailedInfo(sheetName, row, field, result));
+    public void addFailed(String sheetName, int row, String field, Object value, IResultMessage result) {
+        failed.add(new FailedInfo(sheetName, row, field, value, result));
     }
 
     /** 失败列表 **/

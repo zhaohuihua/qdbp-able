@@ -133,7 +133,7 @@ public class ExcelHelper {
 
             // 检查必填字段
             if (info.isRequired() && VerifyTools.isBlank(object)) {
-                cb.addFailed(sheetName, index + 1, info.getHeader(), ResultCode.PARAMETER_IS_REQUIRED);
+                cb.addFailed(sheetName, index + 1, info.getHeader(), object, ResultCode.PARAMETER_IS_REQUIRED);
                 return;
             }
 
@@ -149,7 +149,7 @@ public class ExcelHelper {
                         header = info.getHeader() + "(" + object.toString() + ")";
                     }
                 }
-                cb.addFailed(sheetName, index + 1, header, e);
+                cb.addFailed(sheetName, index + 1, header, object, e);
                 return;
             }
         }

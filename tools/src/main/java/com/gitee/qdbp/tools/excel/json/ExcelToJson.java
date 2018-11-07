@@ -207,6 +207,9 @@ public class ExcelToJson {
         try (InputStream is = new FileInputStream(excelFile)) {
             Callback callback = new Callback();
             parser.parse(is, callback);
+            if (VerifyTools.isNotBlank(callback.getFailed())) {
+                log.warn("Parse excel fail data: {}", JsonTools.toJsonString(callback.getFailed()));
+            }
             List<Map<String, Object>> rows = callback.rows;
             EXCEL_ROWS_CACHE.put(cacheKey, new ExcelRowsItem(lastModified, rows));
             return rows;

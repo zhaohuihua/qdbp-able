@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.gitee.qdbp.able.model.paging.PageList;
 import com.gitee.qdbp.able.model.paging.Paging;
 import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
@@ -27,13 +28,43 @@ public class QueryTools {
      * 
      * @param list 原始数据
      * @param where 查询条件
+     * @return 过滤后的结果集
+     */
+    public static List<Map<String, Object>> filter(List<Map<String, Object>> list, Map<String, Object> where) {
+        if (list == null || list.isEmpty()) {
+            return list;
+        }
+        if (where == null || where.isEmpty()) {
+            return list;
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> data : list) {
+            if (matches(data, where)) {
+                result.add(data); // 只有能匹配所有条件才加入结果集
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 根据查询条件过滤, 分页<br>
+     * list = [ { userId:"10001", nickName:"我是老大", scoreBetween:150, tags:["T01", "T06", "T08"] } ]<br>
+     * where = { userIdEquals:"10001", nickNameLike:"大", scoreBetween:"100|200", tagsExists:"T06" }<br>
+     * 
+     * @param list 原始数据
+     * @param where 查询条件
      * @param paging 分页条件
      * @return 过滤后的结果集
      */
-    public static List<Map<String, Object>> filter(List<Map<String, Object>> list, Map<String, Object> where,
+    public static PageList<Map<String, Object>> filter(List<Map<String, Object>> list, Map<String, Object> where,
             Paging paging) {
-        if (list == null || list.isEmpty()) {
-            return list;
+        if (list == null) {
+            return null;
+        }
+        if (list.isEmpty()) {
+            return new PageList<>();
         }
         if (where == null || where.isEmpty()) {
             return paginate(list, paging);
@@ -46,7 +77,7 @@ public class QueryTools {
             }
         }
 
-        return paging == null ? result : paginate(result, paging);
+        return paging == null ? PageList.of(result) : paginate(result, paging);
     }
 
     private static Pattern NUMBER = Pattern.compile("^[\\+\\-]?[\\d,]*(\\.\\d+)?$");
@@ -145,17 +176,17 @@ public class QueryTools {
                 }
                 // Exists的actualValue需要解析为数组
                 Collection<?> actualValues = null;
-                if (expectValue instanceof CharSequence) {
-                    String[] array = StringTools.split(expectValue.toString(), true, ',', '|');
+                if (actualValue instanceof CharSequence) {
+                    String[] array = StringTools.split(actualValue.toString(), true, ',', '|');
                     actualValues = ConvertTools.toList(array);
-                } else if (expectValue.getClass().isArray()) {
-                    Object[] array = (Object[]) expectValue;
+                } else if (actualValue.getClass().isArray()) {
+                    Object[] array = (Object[]) actualValue;
                     actualValues = ConvertTools.toList(array);
-                } else if (expectValue instanceof Map) {
-                    Map<?, ?> map = (Map<?, ?>) expectValue;
+                } else if (actualValue instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) actualValue;
                     actualValues = map.values();
-                } else if (expectValue instanceof Collection) {
-                    actualValues = (Collection<?>) expectValue;
+                } else if (actualValue instanceof Collection) {
+                    actualValues = (Collection<?>) actualValue;
                 } else {
                     return false;
                 }
@@ -174,9 +205,12 @@ public class QueryTools {
      * @param paging 分页参数
      * @return 分页后的数据列表
      */
-    public static <T> List<T> paginate(List<T> list, Paging paging) {
-        if (list == null || list.isEmpty() || paging == null) {
-            return list;
+    public static <T> PageList<T> paginate(List<T> list, Paging paging) {
+        if (list == null) {
+            return null;
+        }
+        if (list.isEmpty()) {
+            return new PageList<>();
         }
         int start = paging.getStart();
         int end = paging.getEnd();
@@ -184,7 +218,7 @@ public class QueryTools {
         for (int i = start; i < end && i < list.size(); i++) {
             result.add(list.get(i));
         }
-        return result;
+        return new PageList<>(result, list.size());
     }
 
     /**

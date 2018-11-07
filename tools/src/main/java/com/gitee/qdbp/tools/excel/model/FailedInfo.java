@@ -24,6 +24,9 @@ public class FailedInfo implements Failed, Serializable {
     /** 字段名称 **/
     private String field;
 
+    /** 字段值 **/
+    private Object value;
+
     /** 错误代码 **/
     private String code;
 
@@ -35,13 +38,14 @@ public class FailedInfo implements Failed, Serializable {
     }
 
     public FailedInfo(String sheetName, Integer index, IResultMessage result) {
-        this(sheetName, index, null, result);
+        this(sheetName, index, null, null, result);
     }
 
-    public FailedInfo(String sheetName, Integer index, String field, IResultMessage result) {
+    public FailedInfo(String sheetName, Integer index, String field, Object value, IResultMessage result) {
         this.sheetName = sheetName;
         this.index = index;
         this.field = field;
+        this.value = value;
         this.code = result.getCode();
         this.message = result.getMessage();
     }
@@ -75,6 +79,16 @@ public class FailedInfo implements Failed, Serializable {
     /** 设置字段名称 **/
     public void setField(String field) {
         this.field = field;
+    }
+
+    /** 获取字段值 **/
+    public Object getValue() {
+        return value;
+    }
+
+    /** 设置字段值 **/
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     /** 错误代码 **/
