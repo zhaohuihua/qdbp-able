@@ -27,7 +27,7 @@ public class MapFieldComparator<K, V> implements Comparator<Map<K, V>> {
      * @param fieldName 字段名
      */
     public MapFieldComparator(String fieldName) {
-        this(fieldName, true, true, null);
+        this(fieldName, true, false, null);
     }
 
     /**
@@ -37,7 +37,7 @@ public class MapFieldComparator<K, V> implements Comparator<Map<K, V>> {
      * @param ascending 升序降序: true=升序, false=降序
      */
     public MapFieldComparator(String fieldName, boolean ascending) {
-        this(fieldName, ascending, true, null);
+        this(fieldName, ascending, false, null);
     }
 
     /**
@@ -45,7 +45,7 @@ public class MapFieldComparator<K, V> implements Comparator<Map<K, V>> {
      * 
      * @param fieldName 字段名
      * @param ascending 升序降序: true=升序, false=降序
-     * @param nullsLow 空值优先级: true=空值排最后, false=空值排最前
+     * @param nullsLow 空值优先级: true=空值排最前, false=空值排最后
      */
     public MapFieldComparator(String fieldName, boolean ascending, boolean nullsLow) {
         this(fieldName, ascending, nullsLow, null);
@@ -58,7 +58,7 @@ public class MapFieldComparator<K, V> implements Comparator<Map<K, V>> {
      * @param valueComparator FieldValue比较器
      */
     public MapFieldComparator(String fieldName, Comparator<V> valueComparator) {
-        this(fieldName, true, true, valueComparator);
+        this(fieldName, true, false, valueComparator);
     }
 
     /**
@@ -69,7 +69,7 @@ public class MapFieldComparator<K, V> implements Comparator<Map<K, V>> {
      * @param valueComparator FieldValue比较器
      */
     public MapFieldComparator(String fieldName, boolean ascending, Comparator<V> valueComparator) {
-        this(fieldName, ascending, true, valueComparator);
+        this(fieldName, ascending, false, valueComparator);
     }
 
     /**
@@ -77,7 +77,7 @@ public class MapFieldComparator<K, V> implements Comparator<Map<K, V>> {
      * 
      * @param fieldName 字段名
      * @param ascending 升序降序: true=升序, false=降序
-     * @param nullsLow 空值优先级: true=空值排最后, false=空值排最前
+     * @param nullsLow 空值优先级: true=空值排最前, false=空值排最后
      * @param valueComparator FieldValue比较器
      */
     public MapFieldComparator(String fieldName, boolean ascending, boolean nullsLow, Comparator<V> valueComparator) {

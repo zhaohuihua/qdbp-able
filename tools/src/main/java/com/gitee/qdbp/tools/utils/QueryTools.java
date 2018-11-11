@@ -2,12 +2,18 @@ package com.gitee.qdbp.tools.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.gitee.qdbp.able.instance.ComplexComparator;
+import com.gitee.qdbp.able.instance.MapFieldComparator;
+import com.gitee.qdbp.able.model.ordering.OrderType;
+import com.gitee.qdbp.able.model.ordering.Ordering;
+import com.gitee.qdbp.able.model.ordering.Orderings;
 import com.gitee.qdbp.able.model.paging.PageList;
 import com.gitee.qdbp.able.model.paging.Paging;
 import com.gitee.qdbp.able.utils.StringTools;
@@ -23,7 +29,7 @@ public class QueryTools {
 
     /**
      * 根据查询条件过滤, 分页<br>
-     * list = [ { userId:"10001", nickName:"我是老大", scoreBetween:150, tags:["T01", "T06", "T08"] } ]<br>
+     * list = [ { userId:"10001", nickName:"我是老大", score:150, tags:["T01", "T06", "T08"] } ]<br>
      * where = { userIdEquals:"10001", nickNameLike:"大", scoreBetween:"100|200", tagsExists:"T06" }<br>
      * 
      * @param list 原始数据
@@ -31,15 +37,32 @@ public class QueryTools {
      * @return 过滤后的结果集
      */
     public static List<Map<String, Object>> filter(List<Map<String, Object>> list, Map<String, Object> where) {
+        return filter(list, null, where);
+    }
+
+    /**
+     * 根据查询条件过滤, 分页<br>
+     * list = [ { userId:"10001", nickName:"我是老大", score:150, tags:["T01", "T06", "T08"] } ]<br>
+     * orderings = new Orderings("score desc, userId asc");<br>
+     * where = { userIdEquals:"10001", nickNameLike:"大", scoreBetween:"100|200", tagsExists:"T06" }<br>
+     * 
+     * @param list 原始数据
+     * @param orderings 排序参数
+     * @param where 查询条件
+     * @return 过滤后的结果集
+     */
+    public static List<Map<String, Object>> filter(List<Map<String, Object>> list, Orderings orderings,
+            Map<String, Object> where) {
         if (list == null || list.isEmpty()) {
             return list;
         }
+        List<Map<String, Object>> sorted = copyAndSort(list, orderings);
         if (where == null || where.isEmpty()) {
-            return list;
+            return sorted;
         }
 
         List<Map<String, Object>> result = new ArrayList<>();
-        for (Map<String, Object> data : list) {
+        for (Map<String, Object> data : sorted) {
             if (matches(data, where)) {
                 result.add(data); // 只有能匹配所有条件才加入结果集
             }
@@ -50,7 +73,7 @@ public class QueryTools {
 
     /**
      * 根据查询条件过滤, 分页<br>
-     * list = [ { userId:"10001", nickName:"我是老大", scoreBetween:150, tags:["T01", "T06", "T08"] } ]<br>
+     * list = [ { userId:"10001", nickName:"我是老大", score:150, tags:["T01", "T06", "T08"] } ]<br>
      * where = { userIdEquals:"10001", nickNameLike:"大", scoreBetween:"100|200", tagsExists:"T06" }<br>
      * 
      * @param list 原始数据
@@ -60,18 +83,36 @@ public class QueryTools {
      */
     public static PageList<Map<String, Object>> filter(List<Map<String, Object>> list, Map<String, Object> where,
             Paging paging) {
+        return filter(list, null, where, paging);
+    }
+
+    /**
+     * 根据查询条件过滤, 分页<br>
+     * list = [ { userId:"10001", nickName:"我是老大", score:150, tags:["T01", "T06", "T08"] } ]<br>
+     * orderings = new Orderings("score desc, userId asc");<br>
+     * where = { userIdEquals:"10001", nickNameLike:"大", scoreBetween:"100|200", tagsExists:"T06" }<br>
+     * 
+     * @param list 原始数据
+     * @param orderings 排序参数
+     * @param where 查询条件
+     * @param paging 分页条件
+     * @return 过滤后的结果集
+     */
+    public static PageList<Map<String, Object>> filter(List<Map<String, Object>> list, Orderings orderings,
+            Map<String, Object> where, Paging paging) {
         if (list == null) {
             return null;
         }
         if (list.isEmpty()) {
             return new PageList<>();
         }
+        List<Map<String, Object>> sorted = copyAndSort(list, orderings);
         if (where == null || where.isEmpty()) {
-            return paginate(list, paging);
+            return paginate(sorted, paging);
         }
 
         List<Map<String, Object>> result = new ArrayList<>();
-        for (Map<String, Object> data : list) {
+        for (Map<String, Object> data : sorted) {
             if (matches(data, where)) {
                 result.add(data); // 只有能匹配所有条件才加入结果集
             }
@@ -196,6 +237,49 @@ public class QueryTools {
             }
         }
         return true;
+    }
+
+    /**
+     * 排序
+     * 
+     * @param list 数据列表
+     * @param orderings 排序参数: new Orderings("score desc, userId asc");
+     */
+    public static void sort(List<Map<String, Object>> list, Orderings orderings) {
+        if (list == null || list.isEmpty() || orderings == null || orderings.getOrderings() == null) {
+            return;
+        }
+        ComplexComparator<Map<String, Object>> comparator = new ComplexComparator<>();
+        for (Ordering ordering : orderings.getOrderings()) {
+            String fieldName = ordering.getOrderBy();
+            boolean ascending = !OrderType.DESC.equals(ordering.getOrderType());
+            comparator.addComparator(new MapFieldComparator<>(fieldName, ascending));
+        }
+        if (comparator.getComparatorCount() > 0) {
+            Collections.sort(list, comparator);
+        }
+    }
+
+    /** 复制后排序, 如果排序条件为空则返回原列表(不会复制) **/
+    private static List<Map<String, Object>> copyAndSort(List<Map<String, Object>> list, Orderings orderings) {
+
+        if (list == null || list.isEmpty() || orderings == null || orderings.getOrderings() == null) {
+            return list;
+        }
+        ComplexComparator<Map<String, Object>> comparator = new ComplexComparator<>();
+        for (Ordering ordering : orderings.getOrderings()) {
+            String fieldName = ordering.getOrderBy();
+            boolean ascending = !OrderType.DESC.equals(ordering.getOrderType());
+            comparator.addComparator(new MapFieldComparator<>(fieldName, ascending));
+        }
+        if (comparator.getComparatorCount() > 0) {
+            List<Map<String, Object>> temp = new ArrayList<>();
+            temp.addAll(list);
+            Collections.sort(temp, comparator);
+            return temp;
+        } else {
+            return list;
+        }
     }
 
     /**
