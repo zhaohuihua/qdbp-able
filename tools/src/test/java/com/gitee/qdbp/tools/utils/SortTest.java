@@ -7,6 +7,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.gitee.qdbp.able.instance.ComplexComparator;
 import com.gitee.qdbp.able.instance.MapFieldComparator;
+import com.gitee.qdbp.able.model.ordering.Orderings;
 import com.gitee.qdbp.able.utils.DateTools;
 
 public class SortTest {
@@ -60,6 +61,13 @@ public class SortTest {
             comparator.addComparator(new MapFieldComparator<>("name", false));
 
             Collections.sort(temp, comparator);
+            System.out.println(JsonTools.toJsonString(temp));
+        }
+        {
+            List<Map<String, Object>> temp = new ArrayList<>();
+            temp.addAll(list);
+
+            QueryTools.sort(temp, new Orderings("dept desc, birthday asc, name desc"));
             System.out.println(JsonTools.toJsonString(temp));
         }
     }

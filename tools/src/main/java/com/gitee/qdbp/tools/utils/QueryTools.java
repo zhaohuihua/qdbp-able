@@ -243,7 +243,7 @@ public class QueryTools {
      * 排序
      * 
      * @param list 数据列表
-     * @param orderings 排序参数: new Orderings("score desc, userId asc");
+     * @param orderings 排序参数, e.g. new Orderings("score desc, userId asc");
      */
     public static void sort(List<Map<String, Object>> list, Orderings orderings) {
         if (list == null || list.isEmpty() || orderings == null || orderings.getOrderings() == null) {
