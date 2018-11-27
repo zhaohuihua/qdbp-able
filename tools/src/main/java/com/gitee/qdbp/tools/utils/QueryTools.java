@@ -16,6 +16,7 @@ import com.gitee.qdbp.able.model.ordering.Ordering;
 import com.gitee.qdbp.able.model.ordering.Orderings;
 import com.gitee.qdbp.able.model.paging.PageList;
 import com.gitee.qdbp.able.model.paging.Paging;
+import com.gitee.qdbp.able.utils.DateTools;
 import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
 
@@ -169,15 +170,13 @@ public class QueryTools {
                 } catch (Exception e) {
                     continue;
                 }
-                if (realActualValue instanceof Number || realActualValue instanceof Date) {
-                    if (realActualValue instanceof Number) {
-                        if (!greaterEqualThen((Number) realActualValue, realActualValue)) {
-                            return false;
-                        }
-                    } else if (realActualValue instanceof Date) {
-                        if (!greaterEqualThen((Date) realActualValue, realActualValue)) {
-                            return false;
-                        }
+                if (realActualValue instanceof Number) {
+                    if (!greaterEqualThen((Number) realActualValue, expectValue)) {
+                        return false;
+                    }
+                } else if (realActualValue instanceof Date) {
+                    if (!greaterEqualThen((Date) realActualValue, expectValue)) {
+                        return false;
                     }
                 }
             } else if (key.endsWith(type = "Max")) {
@@ -192,15 +191,51 @@ public class QueryTools {
                 } catch (Exception e) {
                     continue;
                 }
-                if (realActualValue instanceof Number || realActualValue instanceof Date) {
-                    if (realActualValue instanceof Number) {
-                        if (!lessThen((Number) realActualValue, realActualValue)) {
-                            return false;
-                        }
-                    } else if (realActualValue instanceof Date) {
-                        if (!lessThen((Date) realActualValue, realActualValue)) {
-                            return false;
-                        }
+                if (realActualValue instanceof Number) {
+                    if (!lessThen((Number) realActualValue, expectValue)) {
+                        return false;
+                    }
+                } else if (realActualValue instanceof Date) {
+                    if (!lessThen((Date) realActualValue, expectValue)) {
+                        return false;
+                    }
+                }
+            } else if (key.endsWith(type = "MinWithDay")) {
+                String field = StringTools.removeSuffix(key, type);
+                Object actualValue = data.get(field);
+                if (VerifyTools.isBlank(actualValue)) {
+                    return false;
+                }
+                Object realActualValue = actualValue; // 只支持Date
+                try {
+                    if (actualValue instanceof CharSequence && DATE.matcher(actualValue.toString()).matches()) {
+                        realActualValue = TypeUtils.castToDate(actualValue);
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+                if (realActualValue instanceof Date) {
+                    if (!greaterEqualThenWithDay((Date) realActualValue, expectValue)) {
+                        return false;
+                    }
+                }
+            } else if (key.endsWith(type = "MaxWithDay")) {
+                String field = StringTools.removeSuffix(key, type);
+                Object actualValue = data.get(field);
+                if (VerifyTools.isBlank(actualValue)) {
+                    return false;
+                }
+                Object realActualValue = actualValue; // 只支持Date
+                try {
+                    if (actualValue instanceof CharSequence && DATE.matcher(actualValue.toString()).matches()) {
+                        realActualValue = TypeUtils.castToDate(actualValue);
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+                if (realActualValue instanceof Date) {
+                    if (!lessThenWithDay((Date) realActualValue, expectValue)) {
+                        return false;
                     }
                 }
             } else if (key.endsWith(type = "Between")) {
@@ -463,7 +498,7 @@ public class QueryTools {
      * @return 是否符合(&gt;= expectValue)
      */
     public static boolean greaterEqualThen(Number actualValue, Object expectValue) {
-        return judge(actualValue, ">=", expectValue);
+        return judgeNumber(actualValue, ">=", expectValue);
     }
 
     /**
@@ -474,7 +509,7 @@ public class QueryTools {
      * @return 是否符合(&lt;= expectValue)
      */
     public static boolean lessEqualThen(Number actualValue, Object expectValue) {
-        return judge(actualValue, "<=", expectValue);
+        return judgeNumber(actualValue, "<=", expectValue);
     }
 
     /**
@@ -485,7 +520,7 @@ public class QueryTools {
      * @return 是否符合(&gt; expectValue)
      */
     public static boolean greaterThen(Number actualValue, Object expectValue) {
-        return judge(actualValue, ">", expectValue);
+        return judgeNumber(actualValue, ">", expectValue);
     }
 
     /**
@@ -496,7 +531,7 @@ public class QueryTools {
      * @return 是否符合(&lt; expectValue)
      */
     public static boolean lessThen(Number actualValue, Object expectValue) {
-        return judge(actualValue, "<", expectValue);
+        return judgeNumber(actualValue, "<", expectValue);
     }
 
     /**
@@ -507,7 +542,7 @@ public class QueryTools {
      * @return 是否符合(&gt;= expectValue)
      */
     public static boolean greaterEqualThen(Date actualValue, Object expectValue) {
-        return judge(actualValue, ">=", expectValue);
+        return judgeDate(actualValue, ">=", expectValue);
     }
 
     /**
@@ -518,7 +553,7 @@ public class QueryTools {
      * @return 是否符合(&lt;= expectValue)
      */
     public static boolean lessEqualThen(Date actualValue, Object expectValue) {
-        return judge(actualValue, "<=", expectValue);
+        return judgeDate(actualValue, "<=", expectValue);
     }
 
     /**
@@ -529,7 +564,7 @@ public class QueryTools {
      * @return 是否符合(&gt; expectValue)
      */
     public static boolean greaterThen(Date actualValue, Object expectValue) {
-        return judge(actualValue, ">", expectValue);
+        return judgeDate(actualValue, ">", expectValue);
     }
 
     /**
@@ -540,17 +575,61 @@ public class QueryTools {
      * @return 是否符合(&lt; expectValue)
      */
     public static boolean lessThen(Date actualValue, Object expectValue) {
-        return judge(actualValue, "<", expectValue);
+        return judgeDate(actualValue, "<", expectValue);
     }
 
     /**
-     * 数值比较
+     * 大于等于判断, 期望值的时间部分会设置为00:00:00
+     * 
+     * @param actualValue 实际值
+     * @param expectValue 期望值
+     * @return 是否符合(&gt;= expectValue)
+     */
+    public static boolean greaterEqualThenWithDay(Date actualValue, Object expectValue) {
+        return judgeDateWithStart(actualValue, ">=", expectValue);
+    }
+
+    /**
+     * 小于等于判断, 期望值的时间部分会设置为23:59:59
+     * 
+     * @param actualValue 实际值
+     * @param expectValue 期望值
+     * @return 是否符合(&lt;= expectValue)
+     */
+    public static boolean lessEqualThenWithDay(Date actualValue, Object expectValue) {
+        return judgeDateWithEnd(actualValue, "<=", expectValue);
+    }
+
+    /**
+     * 大于判断, 期望值的时间部分会设置为00:00:00
+     * 
+     * @param actualValue 实际值
+     * @param expectValue 期望值
+     * @return 是否符合(&gt; expectValue)
+     */
+    public static boolean greaterThenWithDay(Date actualValue, Object expectValue) {
+        return judgeDateWithStart(actualValue, ">", expectValue);
+    }
+
+    /**
+     * 小于判断, 期望值的时间部分会设置为23:59:59
+     * 
+     * @param actualValue 实际值
+     * @param expectValue 期望值
+     * @return 是否符合(&lt; expectValue)
+     */
+    public static boolean lessThenWithDay(Date actualValue, Object expectValue) {
+        return judgeDateWithEnd(actualValue, "<", expectValue);
+    }
+
+    /**
+     * 日期比较
      * 
      * @param actualValue 实际值
      * @param expectValue 期望值
      * @return 是否符合条件
      */
-    private static boolean judge(Date actualValue, String flag, Object expectValue) {
+    private static boolean judgeDate(Date actualValue, String flag, Object expectValue) {
         if (VerifyTools.isBlank(expectValue)) {
             return true;
         } else if (VerifyTools.isBlank(actualValue)) {
@@ -558,7 +637,47 @@ public class QueryTools {
         } else {
             double actuvalNumber = actualValue.getTime();
             double expectNumber = TypeUtils.castToDate(expectValue).getTime();
-            return judge(actuvalNumber, flag, expectNumber);
+            return judgeValue(actuvalNumber, flag, expectNumber);
+        }
+    }
+
+    /**
+     * 日期比较, 期望值的时间部分会设置为00:00:00
+     * 
+     * @param actualValue 实际值
+     * @param expectValue 期望值
+     * @return 是否符合条件
+     */
+    private static boolean judgeDateWithStart(Date actualValue, String flag, Object expectValue) {
+        if (VerifyTools.isBlank(expectValue)) {
+            return true;
+        } else if (VerifyTools.isBlank(actualValue)) {
+            return false;
+        } else {
+            double actuvalNumber = actualValue.getTime();
+            Date expectDate = TypeUtils.castToDate(expectValue);
+            double expectNumber = DateTools.toStartTime(expectDate).getTime();
+            return judgeValue(actuvalNumber, flag, expectNumber);
+        }
+    }
+
+    /**
+     * 日期比较, 期望值的时间部分会设置为23:59:59
+     * 
+     * @param actualValue 实际值
+     * @param expectValue 期望值
+     * @return 是否符合条件
+     */
+    private static boolean judgeDateWithEnd(Date actualValue, String flag, Object expectValue) {
+        if (VerifyTools.isBlank(expectValue)) {
+            return true;
+        } else if (VerifyTools.isBlank(actualValue)) {
+            return false;
+        } else {
+            double actuvalNumber = actualValue.getTime();
+            Date expectDate = TypeUtils.castToDate(expectValue);
+            double expectNumber = DateTools.toEndTime(expectDate).getTime();
+            return judgeValue(actuvalNumber, flag, expectNumber);
         }
     }
 
@@ -569,7 +688,7 @@ public class QueryTools {
      * @param expectValue 期望值
      * @return 是否符合条件
      */
-    private static boolean judge(Number actualValue, String flag, Object expectValue) {
+    private static boolean judgeNumber(Number actualValue, String flag, Object expectValue) {
         if (VerifyTools.isBlank(expectValue)) {
             return true;
         } else if (VerifyTools.isBlank(actualValue)) {
@@ -577,11 +696,11 @@ public class QueryTools {
         } else {
             double actuvalNumber = actualValue.doubleValue();
             double expectNumber = TypeUtils.castToDouble(expectValue);
-            return judge(actuvalNumber, flag, expectNumber);
+            return judgeValue(actuvalNumber, flag, expectNumber);
         }
     }
 
-    private static boolean judge(double actuvalNumber, String flag, double expectNumber) {
+    private static boolean judgeValue(double actuvalNumber, String flag, double expectNumber) {
         try {
             switch (flag) {
             case ">":
