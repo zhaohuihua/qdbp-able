@@ -53,7 +53,7 @@ public class Config implements Serializable {
     /**
      * 构造函数
      *
-     * @param filePath 配置文件路径
+     * @param path 配置文件路径
      */
     public Config(String path) {
         this(new String[] { path }, null);
@@ -62,7 +62,7 @@ public class Config implements Serializable {
     /**
      * 构造函数
      *
-     * @param filePath 配置文件路径
+     * @param path 配置文件路径
      * @param options 选项
      */
     public Config(String path, Options options) {
@@ -83,7 +83,6 @@ public class Config implements Serializable {
      *
      * @param paths 配置文件路径列表
      * @param encoding 编码格式
-     * @param filter 过滤器
      */
     public Config(String[] paths, Options options) {
         this.properties = PropertyTools.load(paths, options);
@@ -112,7 +111,6 @@ public class Config implements Serializable {
      * 构造函数
      *
      * @param urls 配置文件路径列表
-     * @param filter 过滤器
      */
     public Config(URL[] urls) {
         this(urls, null);
