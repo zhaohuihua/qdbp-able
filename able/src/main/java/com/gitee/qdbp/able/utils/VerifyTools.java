@@ -3,7 +3,6 @@ package com.gitee.qdbp.able.utils;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * 校验工具类
@@ -12,9 +11,6 @@ import java.util.regex.Pattern;
  * @version 150916
  */
 public abstract class VerifyTools {
-
-    /** 数字正则表达式 **/
-    private static final Pattern DIGIT = Pattern.compile("([0-9]*)");
 
     /** 返回第一个非空的参数; 如果全都为空, 返回最后一个参数 **/
     @SuppressWarnings("unchecked")
@@ -27,19 +23,6 @@ public abstract class VerifyTools {
             }
         }
         return last;
-    }
-
-    /**
-     * 判断字符串是不是数字
-     *
-     * @param str 字符串
-     * @return 是不是数字, 如果字符串等于null或空字符串, 返回false
-     */
-    public static boolean isDigit(String str) {
-        if (str == null || str.length() == 0) {
-            return false;
-        }
-        return DIGIT.matcher(str).matches();
     }
 
     /**

@@ -62,13 +62,13 @@ public class KeyValue<V> implements Comparable<KeyValue<V>> {
      * @param list KeyValue列表
      * @return Map
      */
-    public static <V> Map<String, V> toMap(List<KeyValue<V>> list) {
+    public static <V, C extends V, KV extends KeyValue<C>> Map<String, V> toMap(List<KV> list) {
         if (list == null) {
             return null;
         }
 
         Map<String, V> map = new HashMap<String, V>();
-        for (KeyValue<V> i : list) {
+        for (KeyValue<C> i : list) {
             map.put(i.key, i.value);
         }
         return map;
@@ -81,14 +81,38 @@ public class KeyValue<V> implements Comparable<KeyValue<V>> {
      * @param map Map对象
      * @return List
      */
-    public static <V> List<KeyValue<V>> toList(Map<String, V> map) {
-        List<KeyValue<V>> entries = new ArrayList<KeyValue<V>>();
+    public static <V, C extends V> List<KeyValue<V>> toList(Map<String, C> map) {
+        List<KeyValue<V>> entries = new ArrayList<>();
 
-        Set<Map.Entry<String, V>> original = map.entrySet();
-        for (Map.Entry<String, V> entry : original) {
+        Set<Map.Entry<String, C>> original = map.entrySet();
+        for (Map.Entry<String, C> entry : original) {
             String key = entry.getKey();
             V value = entry.getValue();
             entries.add(new KeyValue<V>(key, value));
+        }
+        return entries;
+    }
+
+    /**
+     * Map转换为List
+     *
+     * @author zhaohuihua
+     * @param map Map对象
+     * @return List
+     */
+    public static <V, C extends V, KV extends KeyValue<C>> List<KV> toList(Map<String, C> map, Class<KV> clazz) {
+        List<KV> entries = new ArrayList<>();
+
+        Set<Map.Entry<String, C>> original = map.entrySet();
+        try {
+            for (Map.Entry<String, C> entry : original) {
+                KV kv = clazz.newInstance();
+                kv.setKey(entry.getKey());
+                kv.setValue(entry.getValue());
+                entries.add(kv);
+            }
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("Failed to clazz.newInstance()", e);
         }
         return entries;
     }
