@@ -32,7 +32,7 @@ public abstract class StringTools {
     private static final Pattern URL = Pattern.compile("^https?://.*");
 
     /** 正则表达式转义字符 **/
-    private static final Pattern REG_CHAR = Pattern.compile("([\\{\\}\\[\\]\\(\\)\\^\\$\\.\\*\\?\\-\\+\\\\])");
+    private static final Pattern REG_CHAR = Pattern.compile("([\\{\\}\\[\\]\\(\\)\\^\\$\\.\\*\\?\\-\\+\\|\\\\])");
 
     // \\uD800\\uDC00-\\uDBFF\\uDFFF\\uD800-\\uDFFF
     private static final Pattern UTF8MB4 = Pattern.compile("[\\uD800\\uDC00-\\uDBFF\\uDFFF]");
