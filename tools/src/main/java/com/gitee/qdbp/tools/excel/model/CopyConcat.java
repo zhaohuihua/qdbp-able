@@ -3,7 +3,7 @@ package com.gitee.qdbp.tools.excel.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import com.gitee.qdbp.tools.utils.ConvertTools;
+import com.gitee.qdbp.able.utils.ConvertTools;
 
 /**
  * 字段复制合并参数<br>

@@ -15,22 +15,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.beans.KeyString;
 import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
-import ognl.Ognl;
-import ognl.OgnlException;
 
 /**
- * 格式转换工个
+ * 格式转换工具类
  *
  * @author zhaohuihua
  * @version 151221
+ * @deprecated 拆分为ConvertTools/ExpressionTools/JsonTools
+ * @see com.gitee.qdbp.able.utils.ConvertTools
+ * @see com.gitee.qdbp.tools.utils.ExpressionTools
+ * @see com.gitee.qdbp.tools.utils.JsonTools
  */
+@Deprecated
 public abstract class ConvertTools {
 
     /**
@@ -786,228 +785,19 @@ public abstract class ConvertTools {
      * @return KeyString对象
      */
     public static KeyString toKeyString(String text) {
-        if (VerifyTools.isBlank(text)) {
-            return null;
-        }
-        JSONObject json = JSON.parseObject(text);
-        return toKeyString(json);
+        return JsonTools.toKeyString(text);
     }
 
     /**
      * 将字符串转换为KeyString对象数组<br>
-     * listOf("[{'key':1,'value':'冷水'},{'key':2,'value':'热水'}]")<br>
-     * 或: listOf("{'1':'冷水','2':'热水','3':'直饮水'}")<br>
+     * toKeyStrings("[{'key':1,'value':'冷水'},{'key':2,'value':'热水'}]")<br>
+     * 或: toKeyStrings("{'1':'冷水','2':'热水','3':'直饮水'}")<br>
      * --&gt; List&lt;KeyString&gt;
      *
      * @param text 字符串
      * @return List&lt;KeyString&gt; 对象数组
      */
     public static List<KeyString> toKeyStrings(String text) {
-        if (VerifyTools.isBlank(text)) {
-            return null;
-        }
-        List<KeyString> list = new ArrayList<>();
-
-        Object object = JSON.parse(text);
-        if (object instanceof JSONArray) {
-            JSONArray array = (JSONArray) object;
-            for (Object i : array) {
-                list.add(toKeyString((JSONObject) i));
-            }
-        } else if (object instanceof JSONObject) {
-            JSONObject json = (JSONObject) object;
-            for (Map.Entry<String, Object> entry : json.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                String string = TypeUtils.castToJavaBean(value, String.class);
-                list.add(new KeyString(key, string));
-            }
-        }
-
-        Collections.sort(list);
-        return list;
-
-    }
-
-    private static KeyString toKeyString(JSONObject json) {
-        if (json.containsKey("key")) {
-            return JSON.toJavaObject(json, KeyString.class);
-        } else {
-            for (Map.Entry<String, Object> entry : json.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                String string = TypeUtils.castToJavaBean(value, String.class);
-                return new KeyString(key, string);
-            }
-            throw new IllegalArgumentException("json is empty.");
-        }
-    }
-}
-
-/**
- * Ognl相关方法单独放在一个类中, 否则调用ConvertTools不涉及Ognl的方法也需要引用ognl.jar
- *
- * @author zhaohuihua
- * @version 180611
- */
-class ExpressionTools {
-
-    /**
-     * 解析数字表达式
-     * 
-     * @param expression 数学表达式, 支持数学运算符
-     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
-     * @return 解析结果
-     */
-    public static Integer parseIntegerExpression(String expression, Integer defaults) {
-        if (VerifyTools.isBlank(expression)) {
-            return defaults;
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Integer.parseInt(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).intValue();
-            } else {
-                return defaults;
-            }
-        }
-    }
-
-    /**
-     * 解析数字表达式
-     * 
-     * @param expression 数学表达式, 支持数学运算符
-     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
-     * @return 解析结果
-     */
-    public static Long parseLongExpression(String expression, Long defaults) {
-        if (VerifyTools.isBlank(expression)) {
-            return defaults;
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Long.parseLong(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).longValue();
-            } else {
-                return defaults;
-            }
-        }
-    }
-
-    /**
-     * 解析数字表达式
-     * 
-     * @param expression 数学表达式, 支持数学运算符
-     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
-     * @return 解析结果
-     */
-    public static Float parseFloatExpression(String expression, Float defaults) {
-        if (VerifyTools.isBlank(expression)) {
-            return defaults;
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Float.parseFloat(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).floatValue();
-            } else {
-                return defaults;
-            }
-        }
-    }
-
-    /**
-     * 解析数字表达式
-     * 
-     * @param expression 数学表达式, 支持数学运算符
-     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
-     * @return 解析结果
-     */
-    public static Double parseDoubleExpression(String expression, Double defaults) {
-        if (VerifyTools.isBlank(expression)) {
-            return defaults;
-        }
-
-        expression = expression.trim();
-
-        try {
-            return Double.parseDouble(expression);
-        } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).doubleValue();
-            } else {
-                return defaults;
-            }
-        }
-    }
-
-    /**
-     * 解析Boolean表达式
-     * 
-     * @param expression 表达式, 支持运算符
-     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
-     * @return 解析结果
-     */
-    public static Boolean parseBooleanExpression(String expression, Boolean defaults) {
-        if (VerifyTools.isBlank(expression)) {
-            return defaults;
-        }
-
-        expression = expression.trim();
-
-        if (StringTools.isPositive(expression, false)) {
-            return true;
-        } else if (StringTools.isNegative(expression, false)) {
-            return false;
-        } else {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Boolean) {
-                return (Boolean) result;
-            } else if (result instanceof Number) {
-                return ((Number) result).doubleValue() != 0;
-            } else {
-                return defaults;
-            }
-        }
+        return JsonTools.toKeyStrings(text);
     }
 }

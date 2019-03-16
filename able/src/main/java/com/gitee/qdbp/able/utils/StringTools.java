@@ -290,102 +290,6 @@ public abstract class StringTools {
         return text.substring(0, prefix) + flag + text.substring(end);
     }
 
-    private static Pattern LOWER_CASE = Pattern.compile("[a-z]");
-
-    /** 如果全是大写字母, 则转换为小写字母 **/
-    public static String toLowerCaseIfAllUpperCase(String string) {
-        if (string == null || string.length() == 0) {
-            return string;
-        }
-        if (LOWER_CASE.matcher(string).find()) {
-            return string; // 有小写字母, 不处理, 直接返回
-        } else {
-            return string.toLowerCase(); // 整个字符串都没有小写字母则转换为小写字母
-        }
-    }
-
-    /**
-     * 转换为驼峰命名法格式<br>
-     * 如: user_name = userName, iuser_service = iuserService, i_user_service = iUserService
-     *
-     * @author zhaohuihua
-     * @param name
-     * @return
-     */
-    public static String toCamelNaming(String name) {
-        return toCamelNaming(name, false);
-    }
-
-    /**
-     * 转换为驼峰命名法格式<br>
-     * 如startsWithUpperCase=true时:<br>
-     * user_name = UserName, iuser_service = IuserService, i_user_service = IUserService
-     *
-     * @author zhaohuihua
-     * @param name
-     * @param startsWithUpperCase 是否以大写字母开头
-     * @return
-     */
-    public static String toCamelNaming(String name, boolean startsWithUpperCase) {
-        if (name == null || name.length() == 0) {
-            return name;
-        }
-        char[] chars = toLowerCaseIfAllUpperCase(name.trim()).toCharArray();
-
-        StringBuilder buffer = new StringBuilder();
-        boolean underline = startsWithUpperCase;
-        for (char c : chars) {
-            if (c == '_') {
-                underline = true;
-            } else {
-                if (underline) {
-                    buffer.append(Character.toUpperCase(c));
-                } else {
-                    buffer.append(c);
-                }
-                underline = false;
-            }
-        }
-        return buffer.toString();
-    }
-
-    /**
-     * 转换为下划线命名法格式<br>
-     * 如: userName = user_name, SiteURL = site_url, IUserService = iuser_service<br>
-     * user$Name = user$name, user_Name = user_name, user name = user_name, md5String = md5_string
-     *
-     * @author zhaohuihua
-     * @param name
-     * @return
-     */
-    public static String toUnderlineNaming(String name) {
-        if (name == null || name.length() == 0) {
-            return name;
-        }
-        char[] chars = name.trim().toCharArray();
-
-        boolean lastLowerCase = false;
-        StringBuilder buffer = new StringBuilder();
-        for (char c : chars) {
-            if (Character.isWhitespace(c)) {
-                if (lastLowerCase) {
-                    buffer.append("_");
-                }
-                lastLowerCase = false;
-            } else if (Character.isUpperCase(c)) {
-                if (lastLowerCase) {
-                    buffer.append("_");
-                }
-                buffer.append(Character.toLowerCase(c));
-                lastLowerCase = false;
-            } else {
-                buffer.append(c);
-                lastLowerCase = Character.isLowerCase(c) || Character.isDigit(c);
-            }
-        }
-        return buffer.toString();
-    }
-
     public static String concat(char c, String... paths) {
         return concat(c, null, paths, 0, paths.length);
     }
@@ -424,44 +328,6 @@ public abstract class StringTools {
 
     public static boolean startsWithChar(CharSequence string, char c) {
         return string.length() > 0 && c == string.charAt(0);
-    }
-
-    /**
-     * <p>
-     * Capitalizes a String changing the first letter to title case as per {@link Character#toTitleCase(char)}. No other
-     * letters are changed.
-     * </p>
-     *
-     * <p>
-     * For a word based algorithm, see {@link org.apache.commons.lang3.text.WordUtils#capitalize(String)}. A
-     * {@code null} input String returns {@code null}.
-     * </p>
-     *
-     * <pre>
-     * StringTools.capitalize(null)  = null
-     * StringTools.capitalize("")    = ""
-     * StringTools.capitalize("cat") = "Cat"
-     * StringTools.capitalize("cAt") = "CAt"
-     * </pre>
-     *
-     * @param str the String to capitalize, may be null
-     * @return the capitalized String, {@code null} if null String input
-     * @see org.apache.commons.lang3.text.WordUtils#capitalize(String)
-     * @since 2.0
-     */
-    public static String capitalize(final String str) {
-        int strLen;
-        if (str == null || (strLen = str.length()) == 0) {
-            return str;
-        }
-
-        char firstChar = str.charAt(0);
-        if (Character.isTitleCase(firstChar)) {
-            // already capitalized
-            return str;
-        }
-
-        return new StringBuilder(strLen).append(Character.toTitleCase(firstChar)).append(str.substring(1)).toString();
     }
 
     public static String trim(String text) {
@@ -727,5 +593,91 @@ public abstract class StringTools {
         } else {
             return string + hide + string;
         }
+    }
+
+    /**
+     * 如果全是大写字母, 则转换为小写字母
+     * 
+     * @param name 待转换的名称
+     * @return 转换后的名称
+     * @deprecated 改为{@linkplain NamingTools#toLowerCaseIfAllUpperCase(String)}
+     */
+    @Deprecated
+    public static String toLowerCaseIfAllUpperCase(String name) {
+        return NamingTools.toLowerCaseIfAllUpperCase(name);
+    }
+
+    /**
+     * 转换为驼峰命名法格式<br>
+     * 如: user_name = userName, iuser_service = iuserService, i_user_service = iUserService
+     *
+     * @author zhaohuihua
+     * @param name 待转换的名称
+     * @return 驼峰命名法名称
+     * @deprecated 改为{@linkplain NamingTools#toCamelString(String)}
+     */
+    @Deprecated
+    public static String toCamelNaming(String name) {
+        return NamingTools.toCamelString(name);
+    }
+
+    /**
+     * 转换为驼峰命名法格式<br>
+     * 如startsWithUpperCase=true时:<br>
+     * user_name = UserName, iuser_service = IuserService, i_user_service = IUserService
+     *
+     * @author zhaohuihua
+     * @param name 待转换的名称
+     * @param startsWithUpperCase 是否以大写字母开头
+     * @return 驼峰命名法名称
+     * @deprecated 改为{@linkplain NamingTools#toCamelString(String, boolean)}
+     */
+    @Deprecated
+    public static String toCamelNaming(String name, boolean startsWithUpperCase) {
+        return NamingTools.toCamelString(name, startsWithUpperCase);
+    }
+
+    /**
+     * 转换为下划线命名法格式<br>
+     * 如: userName = user_name, SiteURL = site_url, IUserService = iuser_service<br>
+     * user$Name = user$name, user_Name = user_name, user name = user_name, md5String = md5_string
+     *
+     * @author zhaohuihua
+     * @param name 待转换的名称
+     * @return 下划线命名法名称
+     * @deprecated 改为{@linkplain NamingTools#toUnderlineNaming(String)}
+     */
+    @Deprecated
+    public static String toUnderlineNaming(String name) {
+        return NamingTools.toUnderlineString(name);
+    }
+
+    /**
+     * <p>
+     * Capitalizes a String changing the first letter to title case as per {@link Character#toTitleCase(char)}. No other
+     * letters are changed.
+     * </p>
+     *
+     * <p>
+     * For a word based algorithm, see {@link org.apache.commons.lang3.text.WordUtils#capitalize(String)}. A
+     * {@code null} input String returns {@code null}.
+     * </p>
+     *
+     * <pre>
+     * StringTools.capitalize(null)  = null
+     * StringTools.capitalize("")    = ""
+     * StringTools.capitalize("cat") = "Cat"
+     * StringTools.capitalize("cAt") = "CAt"
+     * </pre>
+     *
+     * @param string the String to capitalize, may be null
+     * @return the capitalized String, {@code null} if null String input
+     * @see org.apache.commons.lang3.text.WordUtils#capitalize(String)
+     * @since 2.0
+     * @deprecated 改为{@linkplain NamingTools#capitalize(String)}
+     */
+    @Deprecated
+    public static String capitalize(final String string) {
+        return NamingTools.capitalize(string);
     }
 }

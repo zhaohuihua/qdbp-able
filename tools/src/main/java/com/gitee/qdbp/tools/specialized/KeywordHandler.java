@@ -14,9 +14,9 @@ import org.lionsoul.jcseg.tokenizer.core.IWord;
 import org.lionsoul.jcseg.tokenizer.core.JcsegException;
 import org.lionsoul.jcseg.tokenizer.core.JcsegTaskConfig;
 import org.lionsoul.jcseg.tokenizer.core.SegmentFactory;
+import com.gitee.qdbp.able.utils.ConvertTools;
 import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
-import com.gitee.qdbp.tools.utils.ConvertTools;
 
 /**
  * 关键字收集
