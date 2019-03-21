@@ -1,5 +1,6 @@
 package com.gitee.qdbp.tools.excel.rule;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,7 +18,7 @@ import com.gitee.qdbp.tools.excel.model.CellInfo;
  * @author zhaohuihua
  * @version 160302
  */
-public class MapRule extends BaseRule {
+public class MapRule implements CellRule, Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -29,45 +30,23 @@ public class MapRule extends BaseRule {
     /**
      * 构造函数
      *
-     * @param rule 映射规则, 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
+     * @param rule 映射规则 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
      */
     public MapRule(String rule) {
-        this(null, rule);
+        this(JSON.parseObject(rule));
     }
 
     /**
      * 构造函数
      *
-     * @param parent 上级规则
      * @param rule 映射规则 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
      */
-    public MapRule(CellRule parent, String rule) {
-        this(parent, JSON.parseObject(rule));
-    }
-
-    /**
-     * 构造函数
-     *
-     * @param parent 上级规则
-     * @param rule 映射规则 如 { "PROVINCE":"1|省", "CITY":"2|市", "DISTRICT":"3|区|县|区/县" }
-     */
-    public MapRule(CellRule parent, Map<String, Object> rule) {
-        super(parent);
+    public MapRule(Map<String, Object> rule) {
         for (Entry<String, Object> entry : rule.entrySet()) {
             if (VerifyTools.isNoneBlank(entry.getKey(), entry.getValue())) {
                 addRule(entry.getKey(), StringTools.split(entry.getValue().toString()));
             }
         }
-    }
-
-    /**
-     * 构造函数
-     *
-     * @param map 映射规则<br>
-     *            如 { "PROVINCE":["省","1"], "CITY":["市","2"], "DISTRICT":["区/县", "区", "县", "3"] }
-     */
-    public MapRule(Map<String, String[]> map) {
-        addRules(map);
     }
 
     protected void addRules(Map<String, String[]> map) {
@@ -89,10 +68,8 @@ public class MapRule extends BaseRule {
     }
 
     @Override
-    public void doImports(CellInfo cellInfo) throws ServiceException {
-        if (VerifyTools.isBlank(cellInfo.getValue())) {
-            cellInfo.setValue(null);
-        } else {
+    public Map<String, Object> imports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isNotBlank(cellInfo.getValue())) {
             String string = cellInfo.getValue().toString();
             if (imports.containsKey(string)) {
                 cellInfo.setValue(imports.get(string));
@@ -100,13 +77,12 @@ public class MapRule extends BaseRule {
                 throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
             }
         }
+        return null;
     }
 
     @Override
-    public void doExports(CellInfo cellInfo) throws ServiceException {
-        if (VerifyTools.isBlank(cellInfo.getValue())) {
-            cellInfo.setValue(null);
-        } else {
+    public Map<String, Object> exports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isNotBlank(cellInfo.getValue())) {
             String string = cellInfo.getValue().toString();
 
             if (exports.containsKey(string)) {
@@ -115,13 +91,11 @@ public class MapRule extends BaseRule {
                 throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
             }
         }
+        return null;
     }
 
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        if (this.getParent() != null) {
-            buffer.append(this.getParent().toString()).append(", ");
-        }
         String keys = this.exports == null ? null : ConvertTools.joinToString(this.exports.keySet());
         buffer.append("{map:").append(keys).append("}");
         return buffer.toString();

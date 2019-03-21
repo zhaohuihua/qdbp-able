@@ -13,6 +13,9 @@ public enum ExcelErrorCode implements IResultMessage {
     /** 数据格式错误 **/
     EXCEL_DATA_FORMAT_ERROR("数据格式错误"),
 
+    /** Sheet不存在 **/
+    EXCEL_SHEET_NOT_FOUND("Sheet不存在"),
+
     /** 文件不存在 **/
     FILE_NOT_FOUND("文件不存在"),
 

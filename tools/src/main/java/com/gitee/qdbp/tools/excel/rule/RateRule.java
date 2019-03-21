@@ -1,59 +1,63 @@
 package com.gitee.qdbp.tools.excel.rule;
 
+import java.io.Serializable;
+import java.util.Map;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResultCode;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
 
-public class RateRule extends BaseRule {
+public class RateRule implements CellRule, Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
     private double rate;
 
-    public RateRule(double rate) {
-        this(null, rate);
+    public RateRule() {
+        this.rate = 1;
     }
 
-    public RateRule(CellRule parent, double rate) {
-        super(parent);
+    public RateRule(double rate) {
         this.rate = rate;
     }
 
     @Override
-    public void doImports(CellInfo cellInfo) throws ServiceException {
-        if (VerifyTools.isBlank(cellInfo.getValue())) {
-            cellInfo.setValue(null);
-        } else if (cellInfo.getValue() instanceof String) {
-            Double number = TypeUtils.castToDouble(cellInfo.getValue());
+    public Map<String, Object> imports(CellInfo cellInfo) throws ServiceException {
+        Object value = cellInfo.getValue();
+        if (VerifyTools.isBlank(value)) {
+            return null;
+        }
+        if (value instanceof String) {
+            Double number = TypeUtils.castToDouble(value);
             cellInfo.setValue(number == null ? null : number.doubleValue() * rate);
-        } else if (cellInfo.getValue() instanceof Number) {
-            Number number = (Number) cellInfo.getValue();
+        } else if (value instanceof Number) {
+            Number number = (Number) value;
             cellInfo.setValue(number.doubleValue() * rate);
         } else {
             throw new ServiceException(ResultCode.PARAMETER_VALUE_ERROR);
         }
+        return null;
     }
 
     @Override
-    public void doExports(CellInfo cellInfo) throws ServiceException {
-        if (VerifyTools.isBlank(cellInfo.getValue())) {
-            cellInfo.setValue(null);
-        } else if (cellInfo.getValue() instanceof Number) {
-            cellInfo.setValue(((Number) cellInfo.getValue()).doubleValue() / rate);
+    public Map<String, Object> exports(CellInfo cellInfo) throws ServiceException {
+        Object value = cellInfo.getValue();
+        if (VerifyTools.isBlank(value)) {
+            return null;
+        }
+        if (value instanceof Number) {
+            cellInfo.setValue(((Number) value).doubleValue() / rate);
         } else {
-            Double number = TypeUtils.castToDouble(cellInfo.getValue());
+            Double number = TypeUtils.castToDouble(value);
             cellInfo.setValue(number == null ? null : number.doubleValue() / rate);
         }
+        return null;
     }
 
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        if (this.getParent() != null) {
-            buffer.append(this.getParent().toString()).append(", ");
-        }
         buffer.append("{rate:").append(rate).append("}");
         return buffer.toString();
     }

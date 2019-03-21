@@ -1,7 +1,7 @@
 package com.gitee.qdbp.tools.excel.model;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 import com.gitee.qdbp.tools.excel.XMetadata;
 
 /**
@@ -18,11 +18,11 @@ public class RowInfo implements Serializable {
     /** Sheet页签的名称 **/
     private final String sheetName;
 
-    /** 第几行, 从1开始 **/
+    /** 行序号, 从1开始 **/
     private final Integer row;
 
     /** 所有单元格信息 **/
-    private Map<String, CellInfo> cells;
+    private List<CellInfo> cells;
 
     /** 配置元数据 **/
     private XMetadata metadata;
@@ -37,18 +37,18 @@ public class RowInfo implements Serializable {
         return sheetName;
     }
 
-    /** 获取第几行, 从1开始 **/
+    /** 获取行序号, 从1开始 **/
     public Integer getRow() {
         return row;
     }
 
     /** 获取所有单元格信息 **/
-    public Map<String, CellInfo> getCells() {
+    public List<CellInfo> getCells() {
         return cells;
     }
 
     /** 设置所有单元格信息 **/
-    public void setCells(Map<String, CellInfo> cells) {
+    public void setCells(List<CellInfo> cells) {
         this.cells = cells;
     }
 

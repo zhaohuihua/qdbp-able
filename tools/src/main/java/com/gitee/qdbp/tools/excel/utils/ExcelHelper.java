@@ -1,9 +1,9 @@
 package com.gitee.qdbp.tools.excel.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,11 +13,12 @@ import org.slf4j.LoggerFactory;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResultCode;
 import com.gitee.qdbp.able.utils.VerifyTools;
-import com.gitee.qdbp.tools.excel.ExportCallback;
-import com.gitee.qdbp.tools.excel.ImportCallback;
+import com.gitee.qdbp.tools.excel.SheetFillCallback;
+import com.gitee.qdbp.tools.excel.SheetParseCallback;
 import com.gitee.qdbp.tools.excel.XMetadata;
 import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.excel.model.ColumnInfo;
 import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
 
@@ -33,7 +34,7 @@ public class ExcelHelper {
 
     private static final Pattern IGNORE_SHEET_NAME = Pattern.compile("sheet\\d*", Pattern.CASE_INSENSITIVE);
 
-    public static void parse(Sheet sheet, XMetadata metadata, ImportCallback cb) {
+    public static void parse(Sheet sheet, XMetadata metadata, SheetParseCallback cb) {
 
         String sheetName = sheet.getSheetName();
         List<FieldInfo> fieldInfos = metadata.getFieldInfos();
@@ -44,18 +45,15 @@ public class ExcelHelper {
             }
         }
 
-        // 读取标题信息, 生成单元格数据
-        Map<String, CellInfo> cellInfos = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), fieldInfos);
-        for (Entry<String, CellInfo> entry : cellInfos.entrySet()) {
-            entry.getValue().setMetadata(metadata);
-        }
+        // 读取标题信息, 生成列数据
+        List<ColumnInfo> columnInfos = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), fieldInfos);
 
         int skipRows = metadata.getSkipRows();
         int totalSize = sheet.getPhysicalNumberOfRows();
         for (int i = skipRows; i <= totalSize; i++) {
             if (metadata.isHeaderRow(i)) {
                 // 是表头则跳过
-                // 导入时每个excel的页脚位置有可能不一样, 所以导入不能指定页脚行, 只能在导入之前把页脚删掉
+                // 导入时每个excel的页脚位置有可能不一样, 所以导入不能指定页脚行, 只能设置skip.row.when
                 continue;
             }
             Row row = sheet.getRow(i);
@@ -67,11 +65,11 @@ public class ExcelHelper {
                 continue;
             }
             try {
-                parse(sheetName, row, i, fieldInfos, cellInfos, metadata, cb);
+                parse(sheetName, row, i + 1, columnInfos, metadata, cb);
             } catch (ServiceException e) {
                 cb.addFailed(sheetName, i + 1, e);
                 if (e.getCause() != null) {
-                    log.error("excel parse error, " + e.getMessage() + ", " + e.getCause().getMessage());
+                    log.error("excel parse error, {}, {}", e.getMessage(), e.getCause().getMessage(), e);
                 }
             } catch (NumberFormatException e) {
                 cb.addFailed(sheetName, i + 1, ResultCode.PARAMETER_FORMAT_ERROR);
@@ -84,21 +82,19 @@ public class ExcelHelper {
         }
     }
 
-    private static void parse(String sheetName, Row row, int index, List<FieldInfo> fieldInfos,
-            Map<String, CellInfo> cellInfos, XMetadata metadata, ImportCallback cb) throws ServiceException {
+    // 1.先读取整行数据, 2.将数据值填入cellInfo.value, 3.调用规则将值转换后填入data
+    private static void parse(String sheetName, Row row, int rowIndex, List<ColumnInfo> columnInfos, XMetadata metadata,
+            SheetParseCallback cb) throws ServiceException {
+        // 读取Excel整行数据
         Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < fieldInfos.size() && i < row.getLastCellNum(); i++) {
-            FieldInfo fieldInfo = fieldInfos.get(i);
-            if (fieldInfo == null) {
+        for (int i = 0; i < columnInfos.size() && i < row.getLastCellNum(); i++) {
+            FieldInfo fieldInfo = columnInfos.get(i);
+            if (fieldInfo == null || fieldInfo.getColumn() == null) {
                 continue;
             }
             Cell cell = row.getCell(i);
 
             Object value = cb.getCellValue(cell, fieldInfo);
-
-            if (value instanceof String && VerifyTools.isNotBlank(value)) {
-                value = value.toString().trim();
-            }
 
             if (VerifyTools.isNotBlank(value)) {
                 map.put(fieldInfo.getField(), value);
@@ -119,54 +115,56 @@ public class ExcelHelper {
             }
         }
 
-        for (FieldInfo fieldInfo : fieldInfos) {
-            if (fieldInfo == null) {
+        // 生成单元格信息
+        Map<String, Object> data = new HashMap<>();
+        List<CellInfo> cellInfos = newCellInfos(columnInfos, metadata);
+        for (CellInfo info : cellInfos) {
+            if (info == null) {
                 continue;
             }
-
-            String field = fieldInfo.getField();
-
-            Object object = map.get(field);
-            CellInfo info = cellInfos.get(field);
-            info.setRow(index + 1);
-            info.setValue(object);
-
-            // 检查必填字段
-            if (info.isRequired() && VerifyTools.isBlank(object)) {
-                cb.addFailed(sheetName, index + 1, info.getHeader(), object, ResultCode.PARAMETER_IS_REQUIRED);
-                return;
-            }
-
+            Object original = map.get(info.getField());
+            // 填充行号和value
+            fillCellInfo(cellInfos, rowIndex, map);
             try {
                 // 调用转换规则
-                cb.convert(map, info);
+                cb.convert(info, data);
             } catch (ServiceException e) {
-                // 拼接字段名和单元格的值, 如年龄(100)
-                String header = info.getHeader();
-                if (VerifyTools.isNotBlank(object)) {
+                // 拼接[列序号]字段名(单元格的值), 如[D:年龄]100Kg
+                String title = '[' + info.getTitle() + ']';
+                if (info.getColumn() != null) {
+                    title = '[' + ExcelTools.columnIndexToName(info.getColumn()) + ':' + info.getTitle() + ']';
+                }
+                if (VerifyTools.isNotBlank(original)) {
                     // 不知道怎么取Excel单元格的原始文本, 因此日期,时间就不好提示了
-                    if (object instanceof String || object instanceof Boolean || object instanceof Number) {
-                        header = info.getHeader() + "(" + object.toString() + ")";
+                    if (original instanceof String || original instanceof Boolean || original instanceof Number) {
+                        title += original.toString();
                     }
                 }
-                cb.addFailed(sheetName, index + 1, header, object, e);
+                cb.addFailed(sheetName, rowIndex, title, original, e);
                 return;
+            }
+            { // 检查必填字段
+                Object value = info.getValue();
+                if (info.isRequired() && VerifyTools.isBlank(value)) {
+                    cb.addFailed(sheetName, rowIndex, info.getTitle(), value, ResultCode.PARAMETER_IS_REQUIRED);
+                    return;
+                }
             }
         }
 
         // 字段复制合并
         if (VerifyTools.isNotBlank(metadata.getCopyConcatFields())) {
-            ExcelTools.copyConcat(map, metadata.getCopyConcatFields());
+            ExcelTools.copyConcat(data, metadata.getCopyConcatFields());
         }
 
         // 回调具体的业务处理方法
-        RowInfo rowInfo = new RowInfo(sheetName, index + 1);
+        RowInfo rowInfo = new RowInfo(sheetName, rowIndex);
         rowInfo.setCells(cellInfos);
         rowInfo.setMetadata(metadata);
-        cb.callback(map, rowInfo);
+        cb.callback(data, rowInfo);
     }
 
-    public static void export(List<?> data, Sheet sheet, XMetadata metadata, ExportCallback cb) {
+    public static void fill(List<?> list, Sheet sheet, XMetadata metadata, SheetFillCallback cb) {
 
         List<FieldInfo> fieldInfos = metadata.getFieldInfos();
         if (fieldInfos == null && metadata.getFieldRows() != null) {
@@ -178,12 +176,7 @@ public class ExcelHelper {
         }
 
         // 读取标题信息, 生成单元格数据
-        Map<String, CellInfo> cellInfos = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), fieldInfos);
-        for (Entry<String, CellInfo> entry : cellInfos.entrySet()) {
-            entry.getValue().setMetadata(metadata);
-        }
-
-        cb.onSheetStart(sheet, metadata, data);
+        List<ColumnInfo> columnInfos = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), fieldInfos);
 
         int begin = metadata.getSkipRows();
         // 从第一行复制样式
@@ -200,7 +193,7 @@ public class ExcelHelper {
             } else {
                 int footerMin = Math.max(footerRows.getMin(), begin + 1);
                 // 计算需要插入多少行, = 需要多少行 - (footer至begin之间已有多少行)
-                int insert = data.size() - (footerMin - begin);
+                int insert = list.size() - (footerMin - begin);
                 if (insert > 0) {
                     // shiftRows会自动处理公式中引用的单元格
                     // 将页脚往下移
@@ -208,37 +201,47 @@ public class ExcelHelper {
                 }
             }
         }
-        for (int i = 0; i < data.size(); i++) {
-            int index = i + begin;
-            Row row = getOrCreateRow(sheet, index);
-            // 从第一行复制行高, i > 0 是因为第一行不用复制
-            if (i > 0 && first != null) {
-                ExcelTools.copyRow(first, row, true);
-            }
+        // 生成单元格信息, 重复利用, 每次循环更新rowIndex和value
+        List<CellInfo> cellInfos = newCellInfos(columnInfos, metadata);
+        for (int i = 0; i < list.size(); i++) {
+            int rowIndex = i + begin + 1;
+            Row row = getOrCreateRow(sheet, i + begin);
+
+            Map<String, Object> map = cb.toMap(list.get(i));
+            // 填充rowIndex和value
+            fillCellInfo(cellInfos, rowIndex, map);
 
             RowInfo rowInfo;
             { // RowInfo
-                rowInfo = new RowInfo(sheet.getSheetName(), index + 1);
+                rowInfo = new RowInfo(sheet.getSheetName(), rowIndex);
                 rowInfo.setCells(cellInfos);
                 rowInfo.setMetadata(metadata);
             }
 
-            Map<String, Object> json = cb.convert(data.get(i));
-            cb.onRowStart(row, rowInfo, json);
-
-            int cellCount = Math.max(fieldInfos.size(), row.getPhysicalNumberOfCells());
-            for (int c = 0; c < cellCount; c++) {
-                Cell cell = row.getCell(c, Row.CREATE_NULL_AS_BLANK);
-                // 设置值
-                if (c < fieldInfos.size()) {
-                    setValue(cell, fieldInfos.get(c), index, cellInfos, json, cb);
-                }
+            if (!cb.onRowStart(row, rowInfo, map)) {
+                continue;
             }
 
-            cb.onRowFinished(row, rowInfo, json);
+            // 从第一行复制样式, i > 0 是因为第一行不用复制
+            if (i > 0 && first != null) {
+                ExcelTools.copyRow(first, row, true);
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            for (CellInfo info : cellInfos) {
+                if (info == null || info.getColumn() == null) {
+                    continue;
+                }
+                Cell cell = row.getCell(info.getColumn() - 1, Row.CREATE_NULL_AS_BLANK);
+                // 设置值
+                setValue(cell, info, data, cb);
+            }
+
+            if (!cb.onRowFinished(row, rowInfo, data)) {
+                break;
+            }
         }
 
-        cb.onSheetFinished(sheet, metadata, data);
     }
 
     private static Row getOrCreateRow(Sheet sheet, int index) {
@@ -250,25 +253,42 @@ public class ExcelHelper {
         }
     }
 
-    private static void setValue(Cell cell, FieldInfo fieldInfo, int index, Map<String, CellInfo> cellInfos,
-            Map<String, Object> json, ExportCallback cb) {
-        if (fieldInfo == null) {
-            return;
-        }
+    private static void setValue(Cell cell, CellInfo cellInfo, Map<String, Object> data, SheetFillCallback cb) {
 
-        String field = fieldInfo.getField();
-        Object object = json.get(field);
-        CellInfo info = cellInfos.get(field);
-        info.setRow(index + 1);
-        info.setValue(object);
         try {
             // 调用转换规则
-            cb.convert(json, cellInfos.get(field));
+            cb.convert(cellInfo, data);
         } catch (ServiceException ignore) {
             // 转换失败则输出原内容
         }
 
-        Object value = json.get(field);
-        cb.setCellValue(cell, value, fieldInfo);
+        String field = cellInfo.getField();
+        Object value = data.get(field);
+        cb.setCellValue(cell, value, data);
+    }
+
+    private static List<CellInfo> newCellInfos(List<ColumnInfo> columnInfos, XMetadata metadata) {
+        List<CellInfo> cellInfos = new ArrayList<>();
+        for (ColumnInfo columnInfo : columnInfos) {
+            if (columnInfo == null) {
+                cellInfos.add(null);
+            } else {
+                CellInfo info = columnInfo.to(CellInfo.class);
+                info.setCells(cellInfos);
+                info.setMetadata(metadata);
+                info.setRules(metadata.getRule(columnInfo.getField()));
+                cellInfos.add(info);
+            }
+        }
+        return cellInfos;
+    }
+
+    private static void fillCellInfo(List<CellInfo> cellInfos, int rowIndex, Map<String, Object> map) {
+        for (CellInfo cellInfo : cellInfos) {
+            if (cellInfo != null) {
+                cellInfo.setRow(rowIndex);
+                cellInfo.setValue(map.get(cellInfo.getField()));
+            }
+        }
     }
 }

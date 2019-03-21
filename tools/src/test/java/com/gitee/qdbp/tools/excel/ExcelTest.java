@@ -48,9 +48,8 @@ public class ExcelTest {
             } catch (JSONException e) {
                 throw new ServiceException(ExcelErrorCode.EXCEL_DATA_FORMAT_ERROR, e);
             }
-            System.out.println(index + "\timport: " + JsonTools.toJsonString(model));
+            System.out.println(index + "\timport: " + JsonTools.toLogString(model));
         }
-
     }
 
     public static void main(String[] args) {
@@ -75,9 +74,15 @@ public class ExcelTest {
         try (InputStream is = xlsx.openStream()) {
             Callback callback = new Callback(index);
             parser.parse(is, callback);
-            System.out.println(index + "\t" + JSON.toJSONString(callback));
+            int fail = callback.getFailed().size();
+            int succ = callback.getTotal() - fail;
+            String m = String.format("%s\tfinished: succ=%s, fail=%s", index, succ, fail);
+            System.out.println(m + JsonTools.newlineLogs(callback));
             employees = callback.employees;
-        } catch (IOException | ServiceException e) {
+            if (succ != 8 || fail != 2) {
+                throw new Exception("不符合预期结果: index=" + index + ", succ!=8, fail!=2");
+            }
+        } catch (Exception e) {
             e.printStackTrace();
             return;
         }

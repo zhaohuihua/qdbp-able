@@ -18,11 +18,13 @@ common.footer.rows = 7-9
 # common.skip.row.when = { A:"NULL" }, { B:"小计", H:"元" }, { B:"总计", H:"元" }
 
 
+## 按索引号配置Sheet页
 ## 配置规则: * 表示全部
 ## 配置规则: 1|2|5-8|12
 ## 配置规则: !1 表示排除第1个
 ## 配置规则: !1|3|5 表示排除第1/3/5个
 # common.sheet.index = !1
+## 按索名称配置Sheet页(sheet1这种未命名的sheet是默认排除的)
 ## 配置规则: * 表示全部
 ## 配置规则: 开发|测试
 ## 配置规则: !说明|描述 表示排除
@@ -30,8 +32,15 @@ common.sheet.name = !说明
 ## 页签名称填充至哪个字段
 common.sheet.name.fill.to = dept
 
-common.rule.map.positive = { true:"已转正|是|Y", false:"未转正|否|N" }
-common.rule.map.gender = { UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" }
+## 转换规则
 common.rule.date.birthday = yyyy/MM/dd
-
+common.rule.map.positive = { true:"已转正|是|Y", false:"未转正|否|N" }
+# 多个规则
+common.rules.height = { number:"int" }, { ignoreIllegalValue:true }
+# 简写规则
+# common.rule.map.gender = { UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" }
+# common.rule.map.gender = UNKNOWN:未知|0, MALE:男|1, FEMALE:女|2
+# common.rules.gender = { map:{ UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" } }, { ignoreIllegalValue:true }
+# common.rules.gender = { map:"UNKNOWN:未知|0, MALE:男|1, FEMALE:女|2" }, { ignoreIllegalValue:true }
+common.rules.gender = { map:"UNKNOWN:未知|0, MALE:男|1, FEMALE:女|2" }
 

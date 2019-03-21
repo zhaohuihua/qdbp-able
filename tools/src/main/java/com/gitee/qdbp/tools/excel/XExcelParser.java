@@ -30,6 +30,21 @@ public class XExcelParser {
 
     public void parse(InputStream is, ImportCallback cb) throws ServiceException {
         try (Workbook wb = WorkbookFactory.create(is)) {
+            this.parse(wb, cb);
+        } catch (IOException e) {
+            log.error("read excel error.", e);
+            throw new ServiceException(ExcelErrorCode.FILE_READ_ERROR);
+        } catch (POIXMLException e) {
+            log.error("read excel error.", e);
+            throw new ServiceException(ExcelErrorCode.FILE_TEMPLATE_ERROR);
+        } catch (InvalidFormatException e) {
+            log.error("read excel error.", e);
+            throw new ServiceException(ExcelErrorCode.FILE_FORMAT_ERROR);
+        }
+    }
+
+    public void parse(Workbook wb, ImportCallback cb) {
+        try {
             cb.init(wb, metadata);
             for (int i = 0, total = wb.getNumberOfSheets(); i < total; i++) {
                 if (metadata.isEnableSheet(i, wb.getSheetName(i))) {
@@ -47,16 +62,9 @@ public class XExcelParser {
                 }
             }
             cb.finish(wb, metadata);
-        } catch (IOException e) {
-            log.error("read excel error.", e);
-            throw new ServiceException(ExcelErrorCode.FILE_READ_ERROR);
         } catch (POIXMLException e) {
             log.error("read excel error.", e);
             throw new ServiceException(ExcelErrorCode.FILE_TEMPLATE_ERROR);
-        } catch (InvalidFormatException e) {
-            log.error("read excel error.", e);
-            throw new ServiceException(ExcelErrorCode.FILE_FORMAT_ERROR);
         }
     }
-
 }

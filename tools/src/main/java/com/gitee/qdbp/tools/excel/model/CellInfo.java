@@ -1,7 +1,7 @@
 package com.gitee.qdbp.tools.excel.model;
 
-import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
+import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.XMetadata;
 
 /**
@@ -10,70 +10,38 @@ import com.gitee.qdbp.tools.excel.XMetadata;
  * @author zhaohuihua
  * @version 160302
  */
-public class CellInfo implements Serializable {
+public class CellInfo extends ColumnInfo {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    /** 字段名 **/
-    private final String field;
-
-    /** 是不是必填字段 **/
-    private final boolean required;
-
-    /** 标题文本 **/
-    private final String header;
-
-    /** 第几列, 从1开始 **/
-    private final Integer column;
-
-    /** 第几行, 从1开始 **/
+    /** 行序号, 从1开始 **/
     private Integer row;
 
     /** 内容 **/
     private Object value;
 
     /** 所有单元格信息 **/
-    private Map<String, CellInfo> cells;
+    private List<CellInfo> cells;
 
     /** 配置元数据 **/
     private XMetadata metadata;
 
-    public CellInfo(Integer column, String field, String header, boolean required) {
-        this.column = column;
-        this.field = field;
-        this.header = header;
-        this.required = required;
+    public CellInfo() {
     }
 
-    /** 获取字段名 **/
-    public String getField() {
-        return field;
+    public CellInfo(Integer column, String field, String title, boolean required) {
+        super(column, field, title, required);
     }
 
-    /** 是不是必填字段 **/
-    public boolean isRequired() {
-        return required;
-    }
-
-    /** 获取标题文本 **/
-    public String getHeader() {
-        return header;
-    }
-
-    /** 获取第几行, 从1开始 **/
+    /** 获取行序号, 从1开始 **/
     public Integer getRow() {
         return row;
     }
 
-    /** 设置第几行, 从1开始 **/
+    /** 设置行序号, 从1开始 **/
     public void setRow(Integer row) {
         this.row = row;
-    }
-
-    /** 获取第几列, 从1开始 **/
-    public Integer getColumn() {
-        return column;
     }
 
     /** 获取内容 **/
@@ -87,12 +55,12 @@ public class CellInfo implements Serializable {
     }
 
     /** 获取所有单元格信息 **/
-    public Map<String, CellInfo> getCells() {
+    public List<CellInfo> getCells() {
         return cells;
     }
 
     /** 设置所有单元格信息 **/
-    public void setCells(Map<String, CellInfo> cells) {
+    public void setCells(List<CellInfo> cells) {
         this.cells = cells;
     }
 
@@ -104,6 +72,61 @@ public class CellInfo implements Serializable {
     /** 设置配置元数据 **/
     public void setMetadata(XMetadata metadata) {
         this.metadata = metadata;
+    }
+
+    /**
+     * 将当前对象转换为子类对象
+     *
+     * @param clazz 目标类型
+     * @return 目标对象
+     */
+    public <T extends FieldInfo> T to(Class<T> clazz) {
+        T instance = super.to(clazz);
+
+        if (instance instanceof CellInfo) {
+            CellInfo real = (CellInfo) instance;
+            real.setRow(this.getRow()); // 行列号
+            real.setValue(this.getValue()); // 内容
+            real.setMetadata(this.getMetadata()); // 配置元数据
+            real.setCells(this.getCells()); // 所有单元格信息
+        }
+        return instance;
+    }
+
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        if (VerifyTools.isNotBlank(this.getTitle())) {
+            buffer.append(this.getTitle()).append(':');
+        }
+        if (VerifyTools.isBlank(this.getField())) {
+            buffer.append("{UNKNOWN}");
+        } else {
+            buffer.append(this.getField());
+        }
+
+        buffer.append('[');
+        if (this.getRow() == null) {
+            buffer.append('?');
+        } else {
+            buffer.append(this.getRow());
+        }
+        buffer.append(',');
+        if (this.getColumn() == null) {
+            buffer.append('?');
+        } else {
+            buffer.append(this.getColumn());
+        }
+        buffer.append("]");
+
+        if (this.isRequired()) {
+            buffer.append("(*)");
+        }
+        if (VerifyTools.isBlank(this.getValue())) {
+            buffer.append(':').append("{NULL}");
+        } else {
+            buffer.append(':').append(this.getValue());
+        }
+        return buffer.toString();
     }
 
 }

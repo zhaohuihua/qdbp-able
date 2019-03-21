@@ -7,19 +7,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.util.TypeUtils;
+import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.utils.ConvertTools;
 import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.excel.ImportCallback;
+import com.gitee.qdbp.tools.excel.XExcelParser;
 import com.gitee.qdbp.tools.excel.XMetadata;
 import com.gitee.qdbp.tools.excel.condition.CellValueCondition.Item;
 import com.gitee.qdbp.tools.excel.condition.CellValueContainsTextCondition;
@@ -29,17 +33,13 @@ import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.condition.MatchesRowCondition;
 import com.gitee.qdbp.tools.excel.condition.NameListCondition;
 import com.gitee.qdbp.tools.excel.condition.Required;
-import com.gitee.qdbp.tools.excel.model.CellInfo;
+import com.gitee.qdbp.tools.excel.model.ColumnInfo;
 import com.gitee.qdbp.tools.excel.model.CopyConcat;
 import com.gitee.qdbp.tools.excel.model.FieldInfo;
+import com.gitee.qdbp.tools.excel.model.RowInfo;
 import com.gitee.qdbp.tools.excel.rule.CellRule;
-import com.gitee.qdbp.tools.excel.rule.ClearRule;
-import com.gitee.qdbp.tools.excel.rule.DateRule;
-import com.gitee.qdbp.tools.excel.rule.IgnoreIllegalValue;
-import com.gitee.qdbp.tools.excel.rule.MapRule;
-import com.gitee.qdbp.tools.excel.rule.NumberRule;
-import com.gitee.qdbp.tools.excel.rule.RateRule;
-import com.gitee.qdbp.tools.excel.rule.SplitRule;
+import com.gitee.qdbp.tools.excel.rule.RuleFactory;
+import com.gitee.qdbp.tools.utils.JsonTools;
 import com.gitee.qdbp.tools.utils.PropertyTools;
 
 /**
@@ -192,7 +192,7 @@ public class MetadataTools {
         }
 
         // 解析转换规则
-        Map<String, CellRule> rules = new HashMap<>();
+        Map<String, List<CellRule>> rules = new HashMap<>();
         for (Entry<Object, Object> entry : properties.entrySet()) {
             if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
                 String key = (String) entry.getKey();
@@ -219,8 +219,8 @@ public class MetadataTools {
                     } else {
                         jsonString = "{" + type + ":\"" + value + "\"}";
                     }
-                    CellRule rule = parseCellRules(jsonString);
-                    if (rule != null) {
+                    List<CellRule> rule = parseCellRules(jsonString);
+                    if (rule != null && !rule.isEmpty()) {
                         rules.put(field, rule);
                     }
                 } else if (key.startsWith("rules.")) { // 新版本
@@ -228,8 +228,8 @@ public class MetadataTools {
                     // rules.gender = { map:{ UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" } }
                     // rules.birthday = { date:"yyyy/MM/dd" }
                     String field = key.substring("rules.".length());
-                    CellRule rule = parseCellRules(value);
-                    if (rule != null) {
+                    List<CellRule> rule = parseCellRules(value);
+                    if (rule != null && !rule.isEmpty()) {
                         rules.put(field, rule);
                     }
                 }
@@ -274,7 +274,7 @@ public class MetadataTools {
     // rules.positive = { map:{ true:"已转正|是|Y", false:"未转正|否|N" } }
     // rules.gender = { map:{ UNKNOWN:"未知|0", MALE:"男|1", FEMALE:"女|2" } }
     // rules.birthday = { date:"yyyy/MM/dd" }
-    public static CellRule parseCellRules(String jsonString) {
+    public static List<CellRule> parseCellRules(String jsonString) {
         if (VerifyTools.isBlank(jsonString)) {
             return null;
         }
@@ -290,7 +290,7 @@ public class MetadataTools {
             return null;
         }
         // 逐一解析
-        CellRule rule = null;
+        List<CellRule> rules = new ArrayList<>();
         for (Object i : array) {
             if (!(i instanceof JSONObject)) {
                 continue;
@@ -298,39 +298,21 @@ public class MetadataTools {
             JSONObject json = (JSONObject) i;
             for (Entry<String, Object> entry : json.entrySet()) {
                 String key = entry.getKey();
-                Object value = entry.getValue();
-                if (VerifyTools.isAnyBlank(key, value)) {
+                if (VerifyTools.isBlank(key)) {
                     continue;
                 }
-                String type = null;
+                Object value = entry.getValue();
                 try {
-                    if (key.equals(type = "clear")) {
-                        rule = new ClearRule(rule, value.toString());
-                    } else if (key.equals(type = "split")) {
-                        rule = new SplitRule(rule, value.toString().toCharArray());
-                    } else if (key.equals(type = "rate")) {
-                        rule = new RateRule(rule, TypeUtils.castToDouble(value));
-                    } else if (key.equals(type = "number")) {
-                        rule = new NumberRule(rule, value.toString());
-                    } else if (key.equals(type = "date")) {
-                        rule = new DateRule(rule, value.toString());
-                    } else if (key.equals(type = "map")) {
-                        if (value instanceof JSONObject) {
-                            rule = new MapRule(rule, (JSONObject) value);
-                        } else {
-                            log.warn("CellRuleError, type = {}, json string format error: {}", type, value);
-                        }
-                    } else if (key.equals(type = "ignoreIllegalValue")) {
-                        if (value.toString().equals("true")) {
-                            rule = new IgnoreIllegalValue(rule);
-                        }
+                    CellRule rule = RuleFactory.global.build(key, value);
+                    if (rule != null) {
+                        rules.add(rule);
                     }
                 } catch (Exception e) {
-                    log.warn("CellRuleError, type = {}, json string format error: {}", type, value, e);
+                    log.warn("CellRuleError, type={}, options={}", key, value, e);
                 }
             }
         }
-        return rule;
+        return rules.isEmpty() ? null : rules;
     }
 
     /**
@@ -526,23 +508,23 @@ public class MetadataTools {
      * @param fieldInfos 字段数据
      * @return
      */
-    public static Map<String, CellInfo> parseHeaders(Sheet sheet, IndexRangeCondition headerRows,
+    public static List<ColumnInfo> parseHeaders(Sheet sheet, IndexRangeCondition headerRows,
             List<FieldInfo> fieldInfos) {
         // 生成单元格信息
-        Map<String, CellInfo> cells = new HashMap<>();
+        List<ColumnInfo> columns = new ArrayList<>();
         // 读取标题文本
         for (FieldInfo fieldInfo : fieldInfos) {
             if (fieldInfo == null) {
-                continue;
+                columns.add(null);
+            } else {
+                ColumnInfo columnInfo = parseHeader(sheet, fieldInfo, headerRows);
+                columns.add(columnInfo);
             }
-            CellInfo cellInfo = parseHeader(sheet, fieldInfo, headerRows);
-            cellInfo.setCells(cells);
-            cells.put(fieldInfo.getField(), cellInfo);
         }
-        return cells;
+        return columns;
     }
 
-    private static CellInfo parseHeader(Sheet sheet, FieldInfo fieldInfo, IndexRangeCondition headerRows) {
+    private static ColumnInfo parseHeader(Sheet sheet, FieldInfo fieldInfo, IndexRangeCondition headerRows) {
         int column = fieldInfo.getColumn();
         String fieldName = fieldInfo.getField();
         String fieldHead = ExcelTools.columnIndexToName(column);
@@ -568,7 +550,89 @@ public class MetadataTools {
                 required = fieldInfo.isRequired() || result.isRequired();
             }
         }
-        return new CellInfo(column, fieldName, fieldHead, required);
+        return new ColumnInfo(column, fieldName, fieldHead, required);
     }
 
+    /**
+     * 从excel中读取转换规则<br>
+     * 4列, 顺序为: 名称|KEY|类型|规则, 例如:<br>
+     * <pre>
+        名称    KEY     类型    规则
+        整数    int     number  int
+        长整数  long    number  long
+        浮点数  double  number  double
+        布尔值  boolean map     true:是|Y|1, false:否|N|0
+        日期    date    date    yyyy-MM-dd
+        时间    time    date    HH:mm:ss
+        时分    hhmm    date    HH:mm
+        性别    gender  map     0:未知, 1:男, 2:女
+     * </pre>
+     * 
+     * @param wb Excel文件对象
+     * @param sheetName Sheet名称
+     * @return 转换规则
+     */
+    public static Map<String, CellRule> parseRules(Workbook wb, String sheetName) {
+        String columnFields = "name|*key|*type|*options";
+        return parseRules(wb, sheetName, columnFields, 1);
+    }
+
+    /**
+     * 从excel中读取转换规则
+     * 
+     * @param wb Excel文件对象
+     * @param sheetName Sheet名称
+     * @param columnFields 列字段顺序, 其中key|type|options三列必不可少
+     * @param skipRows 跳过多少行
+     * @return 转换规则
+     */
+    public static Map<String, CellRule> parseRules(Workbook wb, String sheetName, String columnFields, int skipRows) {
+        Objects.requireNonNull(sheetName, "sheetName");
+        if (wb.getSheet(sheetName) == null) {
+            log.warn("Failed to parse convert rule, sheet not found. sheet={}", sheetName);
+            return null;
+        }
+
+        CellRuleCallback cb = new CellRuleCallback();
+        XMetadata metadata = newRuleMetadata(sheetName, columnFields, skipRows);
+        XExcelParser parser = new XExcelParser(metadata);
+        parser.parse(wb, cb);
+        return cb.rules;
+    }
+
+    private static XMetadata newRuleMetadata(String sheetName, String columnFields, int skipRows) {
+        Objects.requireNonNull(sheetName, "sheetName");
+        Properties config = new Properties();
+        config.put("field.names", columnFields);
+        config.put("skip.rows", skipRows);
+        config.put("sheet.name", sheetName);
+        return parseProperties(config);
+    }
+
+    private static class CellRuleCallback extends ImportCallback {
+
+        /** serialVersionUID **/
+        private static final long serialVersionUID = 1L;
+
+        private Map<String, CellRule> rules = new HashMap<>();
+
+        @Override
+        public void callback(Map<String, Object> map, RowInfo row) throws ServiceException {
+            String[] fieldNames = StringTools.split("key|type|options");
+            for (String fieldName : fieldNames) {
+                if (VerifyTools.isBlank(map.get(fieldName))) {
+                    String m = "Failed to parse convert rule, {} is required. sheet={}, row={}, data={}";
+                    log.warn(m, fieldName, row.getSheetName(), row.getRow(), JsonTools.toLogString(map));
+                    return;
+                }
+            }
+
+            Object key = map.get("key");
+            Object type = map.get("type");
+            Object options = map.get("options");
+            CellRule rule = RuleFactory.global.build(type.toString(), options);
+            rules.put(key.toString(), rule);
+        }
+
+    }
 }

@@ -1,5 +1,7 @@
 package com.gitee.qdbp.tools.excel.rule;
 
+import java.io.Serializable;
+import java.util.Map;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.utils.VerifyTools;
@@ -11,40 +13,34 @@ import com.gitee.qdbp.tools.excel.model.CellInfo;
  * @author zhaohuihua
  * @version 181104
  */
-public class NumberRule extends BaseRule {
+public class NumberRule implements CellRule, Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
     private String type;
 
-    public NumberRule(String type) {
-        this(null, type);
+    public NumberRule() {
     }
 
-    public NumberRule(CellRule parent, String type) {
-        super(parent);
+    public NumberRule(String type) {
         this.type = type;
     }
 
     @Override
-    public void doImports(CellInfo cellInfo)
-            throws ServiceException {
-        if (VerifyTools.isBlank(cellInfo.getValue())) {
-            cellInfo.setValue(null);
-        } else {
+    public Map<String, Object> imports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isNotBlank(cellInfo.getValue())) {
             cellInfo.setValue(toNumber(cellInfo.getValue(), type));
         }
+        return null;
     }
 
     @Override
-    public void doExports(CellInfo cellInfo)
-            throws ServiceException {
-        if (VerifyTools.isBlank(cellInfo.getValue())) {
-            cellInfo.setValue(null);
-        } else {
+    public Map<String, Object> exports(CellInfo cellInfo) throws ServiceException {
+        if (VerifyTools.isNotBlank(cellInfo.getValue())) {
             cellInfo.setValue(toNumber(cellInfo.getValue(), type));
         }
+        return null;
     }
 
     private static Number toNumber(Object value, String type) {
@@ -68,9 +64,6 @@ public class NumberRule extends BaseRule {
 
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        if (this.getParent() != null) {
-            buffer.append(this.getParent().toString()).append(", ");
-        }
         buffer.append("{number:").append(type).append("}");
         return buffer.toString();
     }

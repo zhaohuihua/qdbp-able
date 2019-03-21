@@ -111,6 +111,20 @@ public abstract class StringTools {
     }
 
     /**
+     * 判断字符串是不是英文字符
+     *
+     * @author zhaohuihua
+     * @param str 字符串
+     * @return 是不是英文字符, 如果字符串等于null或空字符串, 返回false
+     */
+    public static boolean isAscii(String str) {
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+        return ASCII.matcher(str).matches();
+    }
+
+    /**
      * 格式化, 实现参数替换<br>
      * 1. 占位符具有语义性<br>
      * 2. params可以直接由JSON转换而来<br>

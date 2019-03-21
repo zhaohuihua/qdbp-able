@@ -23,13 +23,13 @@ import com.gitee.qdbp.able.utils.VerifyTools;
 public abstract class JsonTools {
 
     /**
-     * 将对象转换为日志文本<br>
-     * 如 toLogs(params, operator) 返回 \n\t{paramsJson} \n\t{operatorJson}<br>
+     * 将对象转换为以换行符分隔的日志文本<br>
+     * 如 newlineLogs(params, operator) 返回 \n\t{paramsJson}\n\t{operatorJson}<br>
      * 
-     * @param objects
-     * @return
+     * @param objects 对象
+     * @return 日志文本
      */
-    public static String toLogString(Object... objects) {
+    public static String newlineLogs(Object... objects) {
         StringBuilder buffer = new StringBuilder();
         for (Object object : objects) {
             buffer.append("\n\t");
@@ -39,10 +39,23 @@ public abstract class JsonTools {
                 buffer.append(object);
             } else {
                 buffer.append(object.getClass().getSimpleName()).append(": ");
-                buffer.append(toJsonString(object));
+                buffer.append(toLogString(object));
             }
         }
         return buffer.toString();
+    }
+
+    public static String toLogString(Object object) {
+        if (object == null) {
+            return "null";
+        }
+        try (SerializeWriter out = new SerializeWriter()) {
+            JSONSerializer serializer = new JSONSerializer(out);
+            serializer.config(SerializerFeature.QuoteFieldNames, false);
+            serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
+            serializer.write(object);
+            return out.toString();
+        }
     }
 
     public static String toJsonString(Object object) {
@@ -51,7 +64,7 @@ public abstract class JsonTools {
         }
         try (SerializeWriter out = new SerializeWriter()) {
             JSONSerializer serializer = new JSONSerializer(out);
-            serializer.config(SerializerFeature.QuoteFieldNames, false);
+            serializer.config(SerializerFeature.QuoteFieldNames, true);
             serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
             serializer.write(object);
             return out.toString();

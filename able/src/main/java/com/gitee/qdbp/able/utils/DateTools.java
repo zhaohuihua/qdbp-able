@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -622,5 +623,89 @@ public abstract class DateTools {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+    /** 计算表达式 **/
+    private static Pattern CALC_EXP = Pattern.compile("([+\\-]?\\d+)\\s*([a-zA-Z])");
+
+    /**
+     * 计算相对日期<br>
+     * DateTools.calculate("2016-03-01", "-1d"); = 2016-02-29<br>
+     * DateTools.calculate("2016-03-01", "-2M"); = 2016-01-01<br>
+     * DateTools.calculate("2016-03-01", "-3y"); = 2013-03-01<br>
+     * DateTools.calculate("2016-03-01", "+2d"); = 2016-03-03<br>
+     * DateTools.calculate("2016-03-01", "-2M+3d"); = 2016-01-04<br>
+     * 
+     * @param date 日期
+     * @param expression 表达式
+     * @return 计算结果
+     */
+    public static Date calculate(Date date, String expression) {
+        if (date == null || VerifyTools.isBlank(expression) || VerifyTools.isBlank(expression.trim())) {
+            return date;
+        }
+        String exp = expression.trim();
+        if (StringTools.isDigit(exp)) {
+            int value = ConvertTools.toInteger(exp);
+            return addDay(date, value);
+        } else {
+            // "-3d"/"-2M"/"+1y"之类的相对日期
+            Matcher matcher = CALC_EXP.matcher(exp);
+            int lastIndex = 0;
+            Calendar d = Calendar.getInstance();
+            d.setTime(date);
+            while (matcher.find()) {
+                if (matcher.start() > lastIndex) {
+                    String temp = exp.substring(lastIndex, matcher.start());
+                    if (temp.trim().length() > 0) {
+                        String m = "Format error '" + temp + "' in expression '" + exp + "'";
+                        throw new IllegalArgumentException(m);
+                    }
+                }
+                int number = ConvertTools.toInteger(matcher.group(1));
+                String type = matcher.group(2);
+                switch (type) {
+                case "y":
+                case "Y":
+                    d.set(Calendar.YEAR, d.get(Calendar.YEAR) + number);
+                    break;
+                case "M":
+                    d.set(Calendar.MONTH, d.get(Calendar.MONTH) + number);
+                    break;
+                case "d":
+                    d.set(Calendar.DAY_OF_MONTH, d.get(Calendar.DAY_OF_MONTH) + number);
+                    break;
+                case "h":
+                case "H":
+                    d.set(Calendar.HOUR_OF_DAY, d.get(Calendar.HOUR_OF_DAY) + number);
+                    break;
+                case "m":
+                    d.set(Calendar.MINUTE, d.get(Calendar.MINUTE) + number);
+                    break;
+                case "s":
+                    d.set(Calendar.SECOND, d.get(Calendar.SECOND) + number);
+                    break;
+                case "S":
+                    d.set(Calendar.MILLISECOND, d.get(Calendar.MILLISECOND) + number);
+                    break;
+                default:
+                    String m = "Unsupported type '" + type + "' in expression '" + exp + "'";
+                    throw new IllegalArgumentException(m);
+                }
+                lastIndex = matcher.end();
+            }
+            if (lastIndex < exp.length()) {
+                if (lastIndex == 0) {
+                    throw new IllegalArgumentException("Unsupported expression '" + exp + "'");
+                } else {
+                    String temp = exp.substring(lastIndex);
+                    if (temp.trim().length() > 0) {
+                        String m = "Format error '" + temp + "' in expression '" + exp + "'";
+                        throw new IllegalArgumentException(m);
+                    }
+                }
+            }
+            return d.getTime();
+        }
     }
 }

@@ -16,7 +16,10 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.utils.ConvertTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.excel.model.CellInfo;
 import com.gitee.qdbp.tools.excel.model.CopyConcat;
+import com.gitee.qdbp.tools.excel.rule.CellRule;
+import com.gitee.qdbp.tools.utils.JsonTools;
 
 /**
  * Excel工具类
@@ -184,7 +187,6 @@ public abstract class ExcelTools {
                 target.setCellComment(comment);
             }
         }
-
     }
 
     public static Object getCellValue(Cell cell) {
@@ -228,7 +230,7 @@ public abstract class ExcelTools {
                     // 比如id=10001, 就会变成10001.0
                     // 那么, 如果数字没有小数部分, 就统一转换为long型
                     double number = cell.getNumericCellValue();
-                    long integer = new Double(number).longValue();
+                    long integer = (long) number;
                     if (number == integer) {
                         object = integer;
                     } else {
@@ -240,6 +242,9 @@ public abstract class ExcelTools {
             break;
         default:
             break;
+        }
+        if (object instanceof String) {
+            object = ((String) object).trim();
         }
         return object;
     }
@@ -308,4 +313,10 @@ public abstract class ExcelTools {
         }
     }
 
+    public static String newConvertErrorMessage(CellInfo cell, CellRule rule) {
+        String fmt = "Cell[%s,%s], value:%s, failed to execute convert rule:%s";
+        String columnName = ExcelTools.columnIndexToName(cell.getColumn());
+        String valueString = JsonTools.toLogString(cell.getValue());
+        return String.format(fmt, cell.getRow(), columnName, valueString, rule.toString());
+    }
 }

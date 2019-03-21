@@ -18,7 +18,6 @@ public class ServiceException extends EditableRuntimeException implements IResul
 
     /** 错误返回码 **/
     private String code;
-
     /** 错误描述 **/
     private String message;
 

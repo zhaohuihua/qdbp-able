@@ -49,17 +49,8 @@ public abstract class ExpressionTools {
         try {
             return Integer.parseInt(expression);
         } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).intValue();
-            } else {
-                return defaults;
-            }
+            Number value = calculateNumberOgnlExpression(expression, defaults);
+            return value == null ? null : (int) Math.round(value.doubleValue());
         }
     }
 
@@ -99,17 +90,8 @@ public abstract class ExpressionTools {
         try {
             return Long.parseLong(expression);
         } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).longValue();
-            } else {
-                return defaults;
-            }
+            Number value = calculateNumberOgnlExpression(expression, defaults);
+            return value == null ? null : Math.round(value.doubleValue());
         }
     }
 
@@ -149,17 +131,8 @@ public abstract class ExpressionTools {
         try {
             return Float.parseFloat(expression);
         } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).floatValue();
-            } else {
-                return defaults;
-            }
+            Number value = calculateNumberOgnlExpression(expression, defaults);
+            return value == null ? null : value.floatValue();
         }
     }
 
@@ -199,17 +172,8 @@ public abstract class ExpressionTools {
         try {
             return Double.parseDouble(expression);
         } catch (NumberFormatException nfe) {
-            Object result;
-            try {
-                result = Ognl.getValue(expression, null);
-            } catch (OgnlException e) {
-                return defaults;
-            }
-            if (result instanceof Number) {
-                return ((Number) result).doubleValue();
-            } else {
-                return defaults;
-            }
+            Number value = calculateNumberOgnlExpression(expression, defaults);
+            return value == null ? null : value.doubleValue();
         }
     }
 
@@ -255,14 +219,58 @@ public abstract class ExpressionTools {
             try {
                 result = Ognl.getValue(expression, null);
             } catch (OgnlException e) {
-                return defaults;
+                if (defaults != null) {
+                    return defaults;
+                } else {
+                    throw new IllegalArgumentException(expression + ", " + e.getMessage());
+                }
             }
             if (result instanceof Boolean) {
                 return (Boolean) result;
             } else if (result instanceof Number) {
                 return ((Number) result).doubleValue() != 0;
             } else {
+                if (defaults != null) {
+                    return defaults;
+                } else {
+                    throw new IllegalArgumentException(expression);
+                }
+            }
+        }
+    }
+
+    /**
+     * 解析表达式
+     * 
+     * @param expression 表达式, 支持运算符
+     * @return 解析结果
+     */
+    public static Object parseExpression(String expression) {
+        try {
+            return Ognl.getValue(expression, null);
+        } catch (OgnlException e) {
+            throw new IllegalArgumentException(expression + ", " + e.getMessage());
+        }
+    }
+
+    private static Number calculateNumberOgnlExpression(String expression, Number defaults) {
+        Object result;
+        try {
+            result = Ognl.getValue(expression, null);
+        } catch (OgnlException e) {
+            if (defaults != null) {
                 return defaults;
+            } else {
+                throw new NumberFormatException(expression + ", " + e.getMessage());
+            }
+        }
+        if (result instanceof Number) {
+            return ((Number) result).doubleValue();
+        } else {
+            if (defaults != null) {
+                return defaults;
+            } else {
+                throw new NumberFormatException(expression);
             }
         }
     }

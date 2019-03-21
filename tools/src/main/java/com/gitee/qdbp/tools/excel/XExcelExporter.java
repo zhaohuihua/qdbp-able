@@ -72,7 +72,10 @@ public class XExcelExporter {
             cb.init(wb, metadata);
             Sheet sheet = wb.getSheetAt(0);
 
-            ExcelHelper.export(data, sheet, metadata, cb);
+            if (cb.onSheetStart(sheet, metadata, data)) {
+                ExcelHelper.fill(data, sheet, metadata, cb);
+                cb.onSheetFinished(sheet, metadata, data);
+            }
 
             // 计算所有公式
             // sheet.setForceFormulaRecalculation(true); // 设置Excel打开的时候计算

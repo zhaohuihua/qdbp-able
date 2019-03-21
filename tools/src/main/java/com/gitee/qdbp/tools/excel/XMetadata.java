@@ -36,7 +36,7 @@ public class XMetadata implements Serializable {
     /** 字段名所在的行 **/
     private IndexRangeCondition fieldRows;
     /** 字段与转换规则的映射表(配置规则) **/
-    private Map<String, CellRule> rules;
+    private Map<String, List<CellRule>> rules;
     /** 跳过几行 **/
     private Integer skipRows;
     /** 包含指定关键字时跳过此行 **/
@@ -87,7 +87,15 @@ public class XMetadata implements Serializable {
 
     /** 判断指定页签是否有效 **/
     public boolean isEnableSheet(int sheetIndex, String sheetName) {
-        return sheetIndexs.isEnable(sheetIndex) && sheetNames.isEnable(sheetName);
+        if (sheetIndexs == null && sheetNames == null) {
+            return false;
+        } else if (sheetIndexs == null) {
+            return sheetNames.isEnable(sheetName);
+        } else if (sheetNames == null) {
+            return sheetIndexs.isEnable(sheetIndex);
+        } else {
+            return sheetIndexs.isEnable(sheetIndex) && sheetNames.isEnable(sheetName);
+        }
     }
 
     /** 判断指定行是否为字段行 **/
@@ -225,17 +233,17 @@ public class XMetadata implements Serializable {
     }
 
     /** 字段与转换规则的映射表 **/
-    public Map<String, CellRule> getRules() {
+    public Map<String, List<CellRule>> getRules() {
         return rules;
     }
 
     /** 字段与转换规则的映射表 **/
-    public void setRules(Map<String, CellRule> rules) {
+    public void setRules(Map<String, List<CellRule>> rules) {
         this.rules = rules;
     }
 
     /** 增加转换规则 **/
-    public void addRule(String column, CellRule rule) {
+    public void addRule(String column, List<CellRule> rule) {
         if (this.rules == null) {
             this.rules = new HashMap<>();
         }
@@ -243,7 +251,7 @@ public class XMetadata implements Serializable {
     }
 
     /** 获取指定列的转换规则 **/
-    public CellRule getRule(String column) {
+    public List<CellRule> getRule(String column) {
         return this.rules == null ? null : this.rules.get(column);
     }
 
@@ -297,5 +305,5 @@ public class XMetadata implements Serializable {
         instance.setCopyConcatFields(this.getCopyConcatFields()); // 字段复制合并参数 
         return instance;
     }
-    
+
 }
