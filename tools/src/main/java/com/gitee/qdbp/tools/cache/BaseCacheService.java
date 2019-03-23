@@ -18,7 +18,7 @@ import com.gitee.qdbp.able.utils.VerifyTools;
  * @author zhaohuihua
  * @version 170606
  */
-public abstract class BaseCacheService implements ICacheService {
+public abstract class BaseCacheService extends AbstractCacheService {
 
     private static final Logger log = LoggerFactory.getLogger(BaseCacheService.class);
 

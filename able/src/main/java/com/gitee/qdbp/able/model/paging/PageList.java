@@ -103,7 +103,10 @@ public class PageList<T> implements Iterable<T>, Serializable {
         if (list == null) {
             this.list = new ArrayList<>();
         } else {
-            this.list = new ArrayList<>(list);
+            // JDK1.7必须强转, JDK1.8不需要
+            @SuppressWarnings("unchecked")
+            List<T> temp = (List<T>) new ArrayList<>(list);
+            this.list = temp;
         }
     }
 

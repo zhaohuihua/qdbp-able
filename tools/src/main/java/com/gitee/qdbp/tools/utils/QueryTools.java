@@ -120,7 +120,13 @@ public class QueryTools {
             }
         }
 
-        return paging == null ? PageList.of(result) : paginate(result, paging);
+        // JDK1.7改造, 这么maven编译无法通过
+        // return paging == null ? PageList.of(result) : paginate(result, paging);
+        if (paging == null) {
+            return PageList.of(result);
+        } else {
+            return paginate(result, paging);
+        }
     }
 
     private static Pattern NUMBER = Pattern.compile("^[\\+\\-]?[\\d,]*(\\.\\d+)?$");
@@ -339,33 +345,36 @@ public class QueryTools {
         for (Ordering ordering : orderings.getOrderings()) {
             String fieldName = ordering.getOrderBy();
             boolean ascending = !OrderType.DESC.equals(ordering.getOrderType());
-            comparator.addComparator(new MapFieldComparator<>(fieldName, ascending));
+            comparator.addComparator(new MapFieldComparator<String, Object>(fieldName, ascending));
         }
         if (comparator.getComparatorCount() > 0) {
             Collections.sort(list, comparator);
         }
     }
 
-    /** 复制后排序, 如果排序条件为空则返回原列表(不会复制) **/
+    /** 复制后排序 **/
     private static List<Map<String, Object>> copyAndSort(List<Map<String, Object>> list, Orderings orderings) {
 
-        if (list == null || list.isEmpty() || orderings == null || orderings.getOrderings() == null) {
-            return list;
+        if (list == null) {
+            return null;
+        }
+        List<Map<String, Object>> copied = new ArrayList<>();
+        if (!list.isEmpty()) {
+            copied.addAll(list);
+        }
+        if (list.isEmpty() || orderings == null || orderings.getOrderings() == null) {
+            return copied;
         }
         ComplexComparator<Map<String, Object>> comparator = new ComplexComparator<>();
         for (Ordering ordering : orderings.getOrderings()) {
             String fieldName = ordering.getOrderBy();
             boolean ascending = !OrderType.DESC.equals(ordering.getOrderType());
-            comparator.addComparator(new MapFieldComparator<>(fieldName, ascending));
+            comparator.addComparator(new MapFieldComparator<String, Object>(fieldName, ascending));
         }
         if (comparator.getComparatorCount() > 0) {
-            List<Map<String, Object>> temp = new ArrayList<>();
-            temp.addAll(list);
-            Collections.sort(temp, comparator);
-            return temp;
-        } else {
-            return list;
+            Collections.sort(copied, comparator);
         }
+        return copied;
     }
 
     /**

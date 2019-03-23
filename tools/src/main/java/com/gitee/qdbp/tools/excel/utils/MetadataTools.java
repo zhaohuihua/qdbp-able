@@ -496,7 +496,7 @@ public class MetadataTools {
                 isEmpty = false;
             }
         }
-        return isEmpty ? new ArrayList<>() : fieldInfos;
+        return isEmpty ? new ArrayList<FieldInfo>() : fieldInfos;
     }
 
     /**

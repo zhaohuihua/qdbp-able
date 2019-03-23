@@ -13,9 +13,11 @@ import com.gitee.qdbp.able.result.ResponseMessage;
 public interface IHttpHandler {
 
     /** 获取全部header参数 **/
-    default Header[] getAllHeaders() {
-        return null;
-    }
+    Header[] getAllHeaders();
+    // /** 获取全部header参数 **/
+    // default Header[] getAllHeaders() {
+    //     return null;
+    // }
 
     /**
      * 填充基础参数, 如填充配置信息在的公共参数/计算摘要等操作

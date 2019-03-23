@@ -32,21 +32,21 @@ public class SortTest {
         {
             List<Map<String, Object>> temp = new ArrayList<>();
             temp.addAll(list);
-            Collections.sort(temp, new MapFieldComparator<>("id"));
+            Collections.sort(temp, new MapFieldComparator<String, Object>("id"));
             System.out.println(JsonTools.toJsonString(temp));
         }
 
         {
             List<Map<String, Object>> temp = new ArrayList<>();
             temp.addAll(list);
-            Collections.sort(temp, new MapFieldComparator<>("birthday"));
+            Collections.sort(temp, new MapFieldComparator<String, Object>("birthday"));
             System.out.println(JsonTools.toJsonString(temp));
         }
 
         {
             List<Map<String, Object>> temp = new ArrayList<>();
             temp.addAll(list);
-            Collections.sort(temp, new MapFieldComparator<>("birthday", false));
+            Collections.sort(temp, new MapFieldComparator<String, Object>("birthday", false));
             System.out.println(JsonTools.toJsonString(temp));
         }
 
@@ -56,9 +56,9 @@ public class SortTest {
 
             // dept desc, birthday asc, name desc
             ComplexComparator<Map<String, Object>> comparator = new ComplexComparator<>();
-            comparator.addComparator(new MapFieldComparator<>("dept", false));
-            comparator.addComparator(new MapFieldComparator<>("birthday"));
-            comparator.addComparator(new MapFieldComparator<>("name", false));
+            comparator.addComparator(new MapFieldComparator<String, Object>("dept", false));
+            comparator.addComparator(new MapFieldComparator<String, Object>("birthday"));
+            comparator.addComparator(new MapFieldComparator<String, Object>("name", false));
 
             Collections.sort(temp, comparator);
             System.out.println(JsonTools.toJsonString(temp));

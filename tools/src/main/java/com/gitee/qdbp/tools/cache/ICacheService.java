@@ -14,9 +14,7 @@ import com.gitee.qdbp.able.beans.Duration;
 public interface ICacheService {
 
     /** 是否可持久化 **/
-    default boolean storable() {
-        return false;
-    }
+    boolean storable();
 
     /**
      * 保存对象
@@ -24,9 +22,7 @@ public interface ICacheService {
      * @param key 关键字
      * @param value 值
      */
-    default <T> void set(String key, T value) {
-        this.set(key, null, value);
-    }
+    <T> void set(String key, T value);
 
     /**
      * 保存对象
@@ -44,9 +40,7 @@ public interface ICacheService {
      * @param value 值
      * @param expire 过期时间
      */
-    default <T> void set(String key, T value, Duration expire) {
-        this.set(key, null, value, expire);
-    }
+    <T> void set(String key, T value, Duration expire);
 
     /**
      * 保存对象
@@ -65,9 +59,7 @@ public interface ICacheService {
      * @param clazz 对象类型
      * @return 缓存对象
      */
-    default <T> T get(String key, Class<T> clazz) {
-        return this.get(key, null, clazz);
-    }
+    <T> T get(String key, Class<T> clazz);
 
     /**
      * 从缓存中取出对象
@@ -86,9 +78,7 @@ public interface ICacheService {
      * @param clazz 对象类型
      * @return 缓存对象
      */
-    default <T> List<T> list(String key, Class<T> clazz) {
-        return this.list(key, null, clazz);
-    }
+    <T> List<T> list(String key, Class<T> clazz);
 
     /**
      * 从缓存中取出对象
@@ -105,9 +95,7 @@ public interface ICacheService {
      *
      * @param key 关键字
      */
-    default boolean exist(String key) {
-        return this.exist(key, null);
-    }
+    boolean exist(String key);
 
     /**
      * KEY是否存在
@@ -123,9 +111,7 @@ public interface ICacheService {
      *
      * @param key 关键字
      */
-    default void del(String key) {
-        this.del(key, null);
-    }
+    void del(String key);
 
     /**
      * 删除KEY
@@ -142,9 +128,7 @@ public interface ICacheService {
      * @param key 关键字
      * @param time 过期时间
      */
-    default void expire(String key, Duration time) {
-        this.expire(key, null, time);
-    }
+    void expire(String key, Duration time);
 
     /**
      * 设置过期时间
@@ -160,9 +144,7 @@ public interface ICacheService {
      *
      * @param key 关键字
      */
-    default void persist(String key) {
-        this.persist(key, null);
-    }
+    void persist(String key);
 
     /**
      * 移除过期时间
@@ -179,9 +161,7 @@ public interface ICacheService {
      * @param field 字段
      * @param value 值
      */
-    default <T> void hset(String key, String field, T value) {
-        this.hset(key, null, field, value);
-    }
+    <T> void hset(String key, String field, T value);
 
     /**
      * 保存哈希表指定字段值
@@ -201,9 +181,7 @@ public interface ICacheService {
      * @param clazz 对象类型
      * @return 缓存对象
      */
-    default <T> T hget(String key, String field, Class<T> clazz) {
-        return this.hget(key, null, field, clazz);
-    }
+    <T> T hget(String key, String field, Class<T> clazz);
 
     /**
      * 从哈希表取出指定字段值
@@ -224,9 +202,7 @@ public interface ICacheService {
      * @param clazz 对象类型
      * @return 缓存对象
      */
-    default <T> List<T> hlist(String key, String field, Class<T> clazz) {
-        return this.hlist(key, null, field, clazz);
-    }
+    <T> List<T> hlist(String key, String field, Class<T> clazz);
 
     /**
      * 从哈希表取出指定字段值
@@ -247,9 +223,7 @@ public interface ICacheService {
      * @param clazz 对象类型
      * @return 是否存在
      */
-    default boolean hexist(String key, String field) {
-        return this.hexist(key, null, field);
-    }
+    boolean hexist(String key, String field);
 
     /**
      * 判断哈希表是否存在field
@@ -269,9 +243,7 @@ public interface ICacheService {
      * @param subkey 子关键字
      * @param field 字段
      */
-    default void hdel(String key, String field) {
-        this.hdel(key, null, field);
-    }
+    void hdel(String key, String field);
 
     /**
      * 删除哈希表指定字段
@@ -288,9 +260,7 @@ public interface ICacheService {
      * @param key 关键字
      * @param map 同时设置多个字段
      */
-    default <T> void hmset(String key, Map<String, T> map) {
-        this.hmset(key, null, map);
-    }
+    <T> void hmset(String key, Map<String, T> map);
 
     /**
      * 保存哈希表指定字段值
@@ -308,9 +278,7 @@ public interface ICacheService {
      * @param fields 同时获取多个字段, 如果不指定将获取全部字段
      * @return 字段KeValue, value=JSON字符串
      */
-    default Map<String, String> hmget(String key, List<String> fields) {
-        return this.hmget(key, null, fields);
-    }
+    Map<String, String> hmget(String key, List<String> fields);
 
     /**
      * 从哈希表取出指定字段值
@@ -330,9 +298,7 @@ public interface ICacheService {
      * @param clazz 字段值类型
      * @return 字段KeValue
      */
-    default <T> Map<String, T> hmget(String key, List<String> fields, Class<T> clazz) {
-        return this.hmget(key, null, fields, clazz);
-    }
+    <T> Map<String, T> hmget(String key, List<String> fields, Class<T> clazz);
 
     /**
      * 从哈希表取出指定字段值
@@ -353,9 +319,7 @@ public interface ICacheService {
      * @param fields 同时删除多个字段
      * @return 成功删除的数量
      */
-    default long hmdel(String key, List<String> fields) {
-        return this.hmdel(key, null, fields);
-    }
+    long hmdel(String key, List<String> fields);
 
     /**
      * 删除哈希表指定字段值
@@ -375,9 +339,7 @@ public interface ICacheService {
      * @param clazz 对象类型
      * @return 全部KeyValue
      */
-    default <T> Map<String, T> haget(String key, Class<T> clazz) {
-        return this.haget(key, null, clazz);
-    }
+    <T> Map<String, T> haget(String key, Class<T> clazz);
 
     /**
      * 整个哈希表的value类型相同, 一次性全部取出来
@@ -395,9 +357,7 @@ public interface ICacheService {
      * @param key 关键字
      * @return 全部KeyValue, value=JSON字符串
      */
-    default Map<String, String> haget(String key) {
-        return this.haget(key, (String) null);
-    }
+    Map<String, String> haget(String key);
 
     /**
      * 整个哈希表的value类型相同, 一次性全部取出来
@@ -414,9 +374,7 @@ public interface ICacheService {
      * @param key 关键字
      * @param value 值
      */
-    default <T> void hoset(String key, T object) {
-        this.hoset(key, null, object);
-    }
+    <T> void hoset(String key, T object);
 
     /**
      * 保存哈希表对象(将整个对象按字段分别存储到缓存中, 之后以hget/hset/hdel的方式分别对字段操作)
@@ -434,9 +392,7 @@ public interface ICacheService {
      * @param clazz 对象类型
      * @return Map还原后的对象
      */
-    default <T> T hoget(String key, Class<T> clazz) {
-        return this.hoget(key, null, clazz);
-    }
+    <T> T hoget(String key, Class<T> clazz);
 
     /**
      * 将整个哈希表还原为对象
@@ -454,9 +410,7 @@ public interface ICacheService {
      * @param key 关键字
      * @return KEY列表
      */
-    default Set<String> hkeys(String key) {
-        return this.hkeys(key, null);
-    }
+    Set<String> hkeys(String key);
 
     /**
      * 获取所有的KEY
@@ -473,9 +427,7 @@ public interface ICacheService {
      * @param key 关键字
      * @return 数量
      */
-    default int hlen(String key) {
-        return this.hlen(key, null);
-    }
+    int hlen(String key);
 
     /**
      * 获取哈希表的field数量

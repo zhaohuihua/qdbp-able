@@ -2,8 +2,6 @@ package com.gitee.qdbp.able.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -479,13 +477,13 @@ public abstract class DateTools {
         return calendar.getTime();
     }
 
-    /** 日期设置月 **/
-    public static Date setMonth(Date date, Month month) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.MONTH, month.ordinal());
-        return calendar.getTime();
-    }
+    // /** 日期设置月 **/
+    // public static Date setMonth(Date date, Month month) {
+    //     Calendar calendar = Calendar.getInstance();
+    //     calendar.setTime(date);
+    //     calendar.set(Calendar.MONTH, month.ordinal());
+    //     return calendar.getTime();
+    // }
 
     /** 日期设置日 **/
     public static Date setDay(Date date, int day) {
@@ -555,13 +553,6 @@ public abstract class DateTools {
         return calendar.get(Calendar.WEEK_OF_YEAR);
     }
 
-    /** 获取当天是星期几(从0开始) **/
-    public static DayOfWeek getDayOfWeek(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return DayOfWeek.of(calendar.get(Calendar.DAY_OF_WEEK));
-    }
-
     /** 获取日期的时 **/
     public static int getHour(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -602,8 +593,8 @@ public abstract class DateTools {
      * @see Calendar#FRIDAY
      * @see Calendar#SATURDAY
      */
-    public static int getWeekOfDate() {
-        return getWeekOfDate(new Date());
+    public static int getDayOfWeek() {
+        return getDayOfWeek(new Date());
     }
 
     /**
@@ -619,7 +610,7 @@ public abstract class DateTools {
      * @see Calendar#FRIDAY
      * @see Calendar#SATURDAY
      */
-    public static int getWeekOfDate(Date date) {
+    public static int getDayOfWeek(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_WEEK);
@@ -657,7 +648,7 @@ public abstract class DateTools {
             while (matcher.find()) {
                 if (matcher.start() > lastIndex) {
                     String temp = exp.substring(lastIndex, matcher.start());
-                    if (temp.trim().length() > 0) {
+                    if (temp.trim().length() > 0) { // 两个表达式之间有非空字符串
                         String m = "Format error '" + temp + "' in expression '" + exp + "'";
                         throw new IllegalArgumentException(m);
                     }

@@ -30,7 +30,7 @@ public class BeanContainer implements Serializable {
     }
 
     public List<BeanGroup> getGroups() {
-        return this.groups != null ? this.groups : new ArrayList<>();
+        return this.groups != null ? this.groups : new ArrayList<BeanGroup>();
     }
 
     public BeanGroup findGroup(String name) {

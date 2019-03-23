@@ -69,10 +69,15 @@ public abstract class ConvertTools {
      * @return 转换后的List, 如果array=null则返回null
      */
     @SafeVarargs
-    @SuppressWarnings("unchecked")
     public static <T, C extends T> List<T> toList(C... array) {
-        // JDK1.7必须强转, JDK1.8不需要
-        return array == null ? null : (List<T>) new ArrayList<>(Arrays.asList(array));
+        if (array == null) {
+            return null;
+        } else {
+            // JDK1.7必须强转, JDK1.8不需要
+            @SuppressWarnings("unchecked")
+            List<T> temp = (List<T>) new ArrayList<>(Arrays.asList(array));
+            return temp;
+        }
     }
 
     /**
@@ -105,7 +110,7 @@ public abstract class ConvertTools {
             return null;
         } else {
             Set<C> list = new HashSet<>();
-            for (C field: array) {
+            for (C field : array) {
                 list.add(field);
             }
             // JDK1.7必须强转, JDK1.8不需要
@@ -128,7 +133,7 @@ public abstract class ConvertTools {
             return Collections.emptySet();
         } else {
             Set<C> list = new HashSet<>();
-            for (C field: array) {
+            for (C field : array) {
                 list.add(field);
             }
             // JDK1.7必须强转, JDK1.8不需要
@@ -158,7 +163,7 @@ public abstract class ConvertTools {
         if (VerifyTools.isBlank(value)) {
             throw new NumberFormatException("null");
         }
-        Long number = toLong(value, 0L);
+        Long number = toLong(value, null);
         if (number == null) {
             throw new NumberFormatException(value);
         } else {
@@ -174,7 +179,7 @@ public abstract class ConvertTools {
      * @return 数字
      */
     public static Integer toInteger(String value, Integer defaults) {
-        Long number = toLong(value, 0L);
+        Long number = toLong(value, defaults == null ? null : Long.valueOf(defaults.intValue()));
         return number == null ? null : number.intValue();
     }
 
@@ -667,4 +672,3 @@ public abstract class ConvertTools {
     }
 
 }
-

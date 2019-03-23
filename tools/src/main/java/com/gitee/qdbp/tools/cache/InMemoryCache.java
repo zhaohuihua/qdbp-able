@@ -371,7 +371,7 @@ public class InMemoryCache extends BaseCacheService {
                 }
                 mi = (MapItem) item;
                 if (mi == null || mi.expired() || mi.getValue() == null) {
-                    mi = new MapItem(new ConcurrentHashMap<>());
+                    mi = new MapItem(new ConcurrentHashMap<String, String>());
                     this.container.put(k, mi);
                 }
             }

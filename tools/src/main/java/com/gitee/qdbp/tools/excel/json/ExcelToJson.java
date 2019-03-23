@@ -338,7 +338,7 @@ public class ExcelToJson {
             Object id = item.get(merge.getIdField());
             if (VerifyTools.isNotBlank(id)) {
                 if (!subData.containsKey(id.toString())) {
-                    subData.put(id.toString(), new ArrayList<>());
+                    subData.put(id.toString(), new ArrayList<Map<String, Object>>());
                 }
                 subData.get(id.toString()).add(item);
             }
@@ -373,7 +373,7 @@ public class ExcelToJson {
                 Object id = item.get(merge.getIdField());
                 if (VerifyTools.isNotBlank(id)) {
                     if (!subData.containsKey(id.toString())) {
-                        subData.put(id.toString(), new ArrayList<>());
+                        subData.put(id.toString(), new ArrayList<Map<String, Object>>());
                     }
                     subData.get(id.toString()).add(item);
                 }

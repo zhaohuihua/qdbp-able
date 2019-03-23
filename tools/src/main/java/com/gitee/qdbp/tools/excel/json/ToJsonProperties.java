@@ -82,14 +82,14 @@ public class ToJsonProperties implements Serializable {
                 }
                 if (merge != null && main != null) {
                     if (!prefixes.containsKey(main)) {
-                        prefixes.put(main, new HashMap<>());
+                        prefixes.put(main, new HashMap<String, Object>());
                     }
                     if (!prefixes.get(main).containsKey(merge)) {
                         prefixes.get(main).put(merge, true);
                     }
                 } else if (main != null) {
                     if (!prefixes.containsKey(main)) {
-                        prefixes.put(main, new HashMap<>());
+                        prefixes.put(main, new HashMap<String, Object>());
                     }
                 }
             }
