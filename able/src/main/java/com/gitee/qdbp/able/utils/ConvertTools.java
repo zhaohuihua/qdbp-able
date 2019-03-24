@@ -627,6 +627,36 @@ public abstract class ConvertTools {
     }
 
     /**
+     * 清除Map中的空值
+     * 
+     * @param map Map对象
+     * @return 清空后的Map对象
+     */
+    public static Map<String, Object> clearBlankValue(Map<String, Object> map) {
+        return clearBlankValue(map, false);
+    }
+
+    /**
+     * 清除Map中的空值
+     * 
+     * @param map Map对象
+     * @param emptyOnNull 如果map==null, 是否返回空Map. 如果是, 返回空Map, 否则返回null
+     * @return 清空后的Map对象
+     */
+    public static Map<String, Object> clearBlankValue(Map<String, Object> map, boolean emptyOnNull) {
+        if (map == null) {
+            return emptyOnNull ? new HashMap<String, Object>() : null;
+        }
+        Map<String, Object> result = new HashMap<String, Object>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (VerifyTools.isNotBlank(entry.getValue())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    /**
      * 压缩列表, 保留指定数目
      *
      * @author zhaohuihua
