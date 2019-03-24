@@ -247,7 +247,7 @@ public class BeanGroup implements Serializable {
         }
     }
 
-    private Map<String, String> newCompareDatasResources() {
+    private Map<String, String> newCompareResources() {
         Map<String, String> resources = new HashMap<>();
         resources.put("summary.single", "The item don't match.");
         resources.put("summary.multiple", "The are {total} items in total, {mismatch} of which don't match.");
@@ -264,19 +264,43 @@ public class BeanGroup implements Serializable {
      * @throws ResultSetMismatchException 不匹配
      */
     public <T> void compareDatasOf(List<T> sourceDatas) throws ResultSetMismatchException {
-        this.compareDatasOf(sourceDatas, newCompareDatasResources());
+        this.compareDatasOf(sourceDatas, null, null);
     }
 
     /**
      * 核对数据集, 入参是源数据集, 自己是期望数据集
      * 
      * @param sourceDatas 源数据集
-     * @param resources 提示消息
+     * @param resources 自定义提示消息
      * @throws ResultSetMismatchException 不匹配
      */
     public <T> void compareDatasOf(List<T> sourceDatas, Map<String, String> resources)
             throws ResultSetMismatchException {
-        Map<String, String> realres = newCompareDatasResources();
+        this.compareDatasOf(sourceDatas, null, resources);
+    }
+
+    /**
+     * 核对数据集, 入参是源数据集, 自己是期望数据集
+     * 
+     * @param sourceDatas 源数据集
+     * @param excludeFields 不需要比较的字段列表
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareDatasOf(List<T> sourceDatas, List<String> excludeFields) throws ResultSetMismatchException {
+        this.compareDatasOf(sourceDatas, excludeFields, null);
+    }
+
+    /**
+     * 核对数据集, 入参是源数据集, 自己是期望数据集
+     * 
+     * @param sourceDatas 源数据集
+     * @param excludeFields 不需要比较的字段列表
+     * @param resources 自定义提示消息
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareDatasOf(List<T> sourceDatas, List<String> excludeFields, Map<String, String> resources)
+            throws ResultSetMismatchException {
+        Map<String, String> realres = newCompareResources();
         if (VerifyTools.isNotBlank(resources)) {
             realres.putAll(resources);
         }
@@ -292,7 +316,7 @@ public class BeanGroup implements Serializable {
 
         // 逐一比较bean
         List<String> errors = new ArrayList<>();
-        List<Map<String, Object>> actualDatas = new ArrayList<>();
+        List<Map<String, Object>> actualDatas = new ArrayList<>(); // 记录下来, 省下bean转map的开销
         for (int i = 0; i < expectSize; i++) {
             Map<String, Object> actualData = JsonTools.beanToMap(sourceDatas.get(i));
             actualDatas.add(actualData);
@@ -304,6 +328,9 @@ public class BeanGroup implements Serializable {
                 String fieldName = entry.getKey();
                 if (VerifyTools.isBlank(fieldName)) {
                     continue; // 配置值没有字段名, 无法比较
+                }
+                if (excludeFields != null && excludeFields.contains(fieldName)) {
+                    continue; // 在排除列表中的字段, 不需要比较
                 }
                 Object expectValue = entry.getValue();
                 Object actualValue = actualData.get(fieldName);
@@ -321,6 +348,57 @@ public class BeanGroup implements Serializable {
         }
     }
 
+    /**
+     * 核对数据列表, 入参是源数据, 自己是期望数据
+     * 
+     * @param sourceValues 源数据列表
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareValuesOf(List<T> sourceValues) throws ResultSetMismatchException {
+        this.compareValuesOf(sourceValues, null);
+    }
+
+    /**
+     * 核对数据列表, 入参是源数据, 自己是期望数据
+     * 
+     * @param sourceValues 源数据列表
+     * @param resources 自定义提示消息
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareValuesOf(List<T> sourceValues, Map<String, String> resources)
+            throws ResultSetMismatchException {
+        Map<String, String> realres = newCompareResources();
+        if (VerifyTools.isNotBlank(resources)) {
+            realres.putAll(resources);
+        }
+
+        List<DataEntry> expectEntries = this.values;
+        List<Object> expectValues = this.getValues();
+        // 比较size
+        int actualSize = sourceValues == null ? 0 : sourceValues.size();
+        int expectSize = expectEntries == null ? 0 : expectEntries.size();
+        if (actualSize != expectSize) {
+            String summary = sizeMismatchSummary(realres, expectSize, actualSize);
+            throw new ResultSetMismatchException(summary + newlineResultMessage(expectValues, sourceValues));
+        }
+
+        // 逐一比较value
+        List<String> errors = new ArrayList<>();
+        for (int i = 0; i < expectSize; i++) {
+            Object actualValue = sourceValues.get(i);
+            DataEntry expectEntry = expectEntries.get(i);
+            Object expectValue = expectEntry.get("value");
+            String idx = expectEntry.getIndex();
+            if (!compareValue(expectValue, actualValue)) { // 比较字段值
+                errors.add(fieldMismatchMessage(realres, idx, expectValue, actualValue));
+            }
+        }
+        if (!errors.isEmpty()) {
+            String summary = finalMismatchSummary(realres, expectSize, errors);
+            throw new ResultSetMismatchException(summary + newlineResultMessage(expectValues, sourceValues));
+        }
+    }
+
     // 1. 一个值为空另一个不为空为不匹配
     // 2. 相同类型的直接比较
     // 3. 不同类型的转换为字符串比较
@@ -328,11 +406,8 @@ public class BeanGroup implements Serializable {
         if (VerifyTools.isAllBlank(expectValue, actualValue)) {
             return true; // 都为空, 判定为匹配
         }
-
         // 一个值为空另一个不为空为不匹配
-        if (VerifyTools.isBlank(actualValue) && VerifyTools.isNotBlank(actualValue)) {
-            return false;
-        } else if (VerifyTools.isNotBlank(actualValue) && VerifyTools.isBlank(actualValue)) {
+        if (VerifyTools.isBlank(actualValue) || VerifyTools.isBlank(actualValue)) {
             return false;
         }
 
@@ -367,7 +442,7 @@ public class BeanGroup implements Serializable {
     private String findFieldName(String fieldName) {
         String realFieldName = fieldName;
         for (ColumnInfo column : this.columns) {
-            if (fieldName.equals(column.getField())) {
+            if (column != null && fieldName.equals(column.getField())) {
                 if (VerifyTools.isNotBlank(column.getTitle())) {
                     realFieldName = column.getTitle();
                 }
@@ -402,6 +477,7 @@ public class BeanGroup implements Serializable {
     }
 
     private String beanMismatchMessage(Map<String, String> resources, String idx, List<String> fieldErrors) {
+        // bean.mismatch = [{index}]:
         String pattern = resources.get("bean.mismatch");
         Map<String, Object> params = new HashMap<>();
         params.put("index", idx);
@@ -411,6 +487,7 @@ public class BeanGroup implements Serializable {
     }
 
     private String fieldMismatchMessage(Map<String, String> resources, String field, Object expect, Object actual) {
+        // field.mismatch = [{field}], expect={expect}, actual={actual}
         String pattern = resources.get("field.mismatch");
         Map<String, Object> params = new HashMap<>();
         params.put("field", findFieldName(field));

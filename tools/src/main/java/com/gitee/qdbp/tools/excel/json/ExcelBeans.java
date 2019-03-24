@@ -216,7 +216,7 @@ public class ExcelBeans {
 
     private void doParseSheet(Sheet sheet, int skipRows) {
         this.container.setName(sheet.getSheetName());
-        int totalRows = sheet.getPhysicalNumberOfRows();
+        int totalRows = ExcelTools.getTotalRowsOfSheet(sheet);
         for (int i = skipRows; i <= totalRows; i++) {
             Row row = sheet.getRow(i);
             if (row == null) {
@@ -225,7 +225,7 @@ public class ExcelBeans {
             // 读取第一列的类型标识: start, rule, field, title, bean
             Cell firstCell = row.getCell(0);
             Object firstCellValue = ExcelTools.getCellValue(firstCell);
-            RowType rowType = parseRowType(firstCellValue);
+            RowType rowType = doParseRowType(firstCellValue);
             if (rowType == null) {
                 continue;
             }
@@ -317,7 +317,7 @@ public class ExcelBeans {
 
     // 解析field title rule
     private void doParseHeaderRow(Row row, RowType rowType) {
-        Map<Integer, String> map = parseHeaderValues(row);
+        Map<Integer, String> map = doParseHeaderValues(row);
         int rowIndex = row.getRowNum() + 1;
         if (map.isEmpty()) {
             if (rowType == RowType.field) {
@@ -623,9 +623,10 @@ public class ExcelBeans {
         return ExcelTools.getCellValue(cell);
     }
 
-    private static Map<Integer, String> parseHeaderValues(Row row) {
+    private static Map<Integer, String> doParseHeaderValues(Row row) {
         Map<Integer, String> map = new HashMap<>();
-        for (int i = 2; i < row.getLastCellNum(); i++) {
+        int totalSize = ExcelTools.getTotalColumnsOfRow(row);
+        for (int i = 2; i < totalSize; i++) {
             int columnIndex = i + 1;
             String value = getCellValueOfString(row.getCell(i));
             if (VerifyTools.isNotBlank(value)) {
@@ -635,7 +636,7 @@ public class ExcelBeans {
         return map;
     }
 
-    private static RowType parseRowType(Object value) {
+    private static RowType doParseRowType(Object value) {
         if (VerifyTools.isBlank(value)) {
             return null;
         }

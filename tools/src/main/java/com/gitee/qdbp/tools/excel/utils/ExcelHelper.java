@@ -49,7 +49,7 @@ public class ExcelHelper {
         List<ColumnInfo> columnInfos = MetadataTools.parseHeaders(sheet, metadata.getHeaderRows(), fieldInfos);
 
         int skipRows = metadata.getSkipRows();
-        int totalSize = sheet.getPhysicalNumberOfRows();
+        int totalSize = ExcelTools.getTotalRowsOfSheet(sheet);
         for (int i = skipRows; i <= totalSize; i++) {
             if (metadata.isHeaderRow(i)) {
                 // 是表头则跳过
@@ -89,7 +89,8 @@ public class ExcelHelper {
             SheetParseCallback cb) throws ServiceException {
         // 读取Excel整行数据
         Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < columnInfos.size() && i < row.getLastCellNum(); i++) {
+        int size = Math.min(columnInfos.size(), ExcelTools.getTotalColumnsOfRow(row));
+        for (int i = 0; i < size; i++) {
             FieldInfo fieldInfo = columnInfos.get(i);
             if (fieldInfo == null || fieldInfo.getColumn() == null) {
                 continue;
@@ -247,12 +248,8 @@ public class ExcelHelper {
     }
 
     private static Row getOrCreateRow(Sheet sheet, int index) {
-        if (index < sheet.getPhysicalNumberOfRows()) {
-            Row row = sheet.getRow(index);
-            return row != null ? row : sheet.createRow(index);
-        } else {
-            return sheet.createRow(index);
-        }
+        Row row = sheet.getRow(index);
+        return row != null ? row : sheet.createRow(index);
     }
 
     private static void setValue(Cell cell, CellInfo cellInfo, Map<String, Object> data, SheetFillCallback cb) {

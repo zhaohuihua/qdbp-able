@@ -3,6 +3,9 @@ package com.gitee.qdbp.tools.excel.beans;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +20,7 @@ import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.utils.DateTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.ExcelErrorCode;
+import com.gitee.qdbp.tools.excel.exception.ResultSetMismatchException;
 import com.gitee.qdbp.tools.excel.json.BeanContainer;
 import com.gitee.qdbp.tools.excel.json.BeanGroup;
 import com.gitee.qdbp.tools.excel.json.ExcelBeans;
@@ -54,6 +58,14 @@ public class ExcelBeansTest {
             BeanContainer container = tools.parse(wb, "到期还本");
             // 输出Sheet[到期还本]的内容
             outputContainer(container);
+
+            // 获取首次还本日
+            BeanGroup in = container.findGroup("还本付息入参");
+            Date firstRepayPrincipalDate = (Date) in.findData("1").get("firstRepayPrincipalDate");
+            // 比较节假日
+            compareHolidays(config);
+            // 比较还本计划
+            comparePrincipalSchedules(container, firstRepayPrincipalDate);
         } catch (IOException e) {
             log.error("read excel error.", e);
             throw new ServiceException(ExcelErrorCode.FILE_READ_ERROR);
@@ -63,6 +75,89 @@ public class ExcelBeansTest {
         } catch (InvalidFormatException e) {
             log.error("read excel error.", e);
             throw new ServiceException(ExcelErrorCode.FILE_FORMAT_ERROR);
+        }
+    }
+
+    private static void compareHolidays(BeanContainer container) {
+        try {
+            List<Date> holidays = new ArrayList<>();
+            holidays.add(DateTools.parse("2019-01-01"));
+            holidays.add(DateTools.parse("2019-02-04"));
+            holidays.add(DateTools.parse("2019-02-05"));
+            holidays.add(DateTools.parse("2019-02-06"));
+            holidays.add(DateTools.parse("2019-02-07"));
+            holidays.add(DateTools.parse("2019-02-08"));
+            holidays.add(DateTools.parse("2019-04-05"));
+            holidays.add(DateTools.parse("2019-05-01"));
+            holidays.add(DateTools.parse("2019-06-07"));
+            holidays.add(DateTools.parse("2019-09-13"));
+            holidays.add(DateTools.parse("2019-10-01"));
+            holidays.add(DateTools.parse("2019-10-02"));
+            holidays.add(DateTools.parse("2019-10-03"));
+            holidays.add(DateTools.parse("2019-10-04"));
+            holidays.add(DateTools.parse("2019-10-07"));
+            container.compareValues(holidays, "节假日列表");
+        } catch (ResultSetMismatchException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private static void comparePrincipalSchedules(BeanContainer container, Date firstRepayPrincipalDate) {
+        try {
+            // returnPrincipal  returnDate                  payDate
+            // 5000 0000        #in.firstRepayPrincipalDate #returnDate+1d
+            // 7000 0000        #returnDate+2M              #returnDate
+            // 7000 0000        #returnDate+2M              #returnDate
+            // 7000 0000        #returnDate+2M              #returnDate
+            // 7000 0000        #returnDate+2M              #returnDate
+            // 7000 0000        #returnDate+2M              #returnDate+5d
+            Date returnDate = null;
+            List<Map<String, Object>> schedules = new ArrayList<>();
+            {
+                Map<String, Object> item = new HashMap<>();
+                item.put("returnPrincipal", 50000000L);
+                item.put("returnDate", returnDate = firstRepayPrincipalDate);
+                item.put("payDate", DateTools.calculate(returnDate, "+1d"));
+                schedules.add(item);
+            }
+            {
+                Map<String, Object> item = new HashMap<>();
+                item.put("returnPrincipal", 70000000L);
+                item.put("returnDate", returnDate = DateTools.calculate(returnDate, "+2M"));
+                item.put("payDate", returnDate);
+                schedules.add(item);
+            }
+            {
+                Map<String, Object> item = new HashMap<>();
+                item.put("returnPrincipal", 70000000L);
+                item.put("returnDate", returnDate = DateTools.calculate(returnDate, "+2M"));
+                item.put("payDate", returnDate);
+                schedules.add(item);
+            }
+            {
+                Map<String, Object> item = new HashMap<>();
+                item.put("returnPrincipal", 70000000L);
+                item.put("returnDate", returnDate = DateTools.calculate(returnDate, "+2M"));
+                item.put("payDate", returnDate);
+                schedules.add(item);
+            }
+            {
+                Map<String, Object> item = new HashMap<>();
+                item.put("returnPrincipal", 70000000L);
+                item.put("returnDate", returnDate = DateTools.calculate(returnDate, "+2M"));
+                item.put("payDate", returnDate);
+                schedules.add(item);
+            }
+            {
+                Map<String, Object> item = new HashMap<>();
+                item.put("returnPrincipal", 70000000L);
+                item.put("returnDate", returnDate = DateTools.calculate(returnDate, "+2M"));
+                item.put("payDate", DateTools.calculate(returnDate, "+5d"));
+                schedules.add(item);
+            }
+            container.compareDatas(schedules, "还本计划", Arrays.asList("idx"));
+        } catch (ResultSetMismatchException e) {
+            log.error(e.getMessage());
         }
     }
 

@@ -75,14 +75,17 @@ public abstract class EditableException extends Exception {
      * @param message 异常消息
      */
     public void prependMessage(String message) {
-        if (message == null || message.length() == 0) {
-            return;
-        }
+        if (message == null || message.length() == 0) return;
 
         if (this.message == null) {
             this.message = message;
         } else {
-            this.message = message + this.message;
+            char last = message.charAt(message.length() - 1);
+            if (last == ' ' || last == '\t' || last == '\r' || last == '\n') {
+                this.message = message + this.message;
+            } else {
+                this.message = message + " " + this.message;
+            }
         }
     }
 
@@ -92,14 +95,17 @@ public abstract class EditableException extends Exception {
      * @param message 异常消息
      */
     public void appendMessage(String message) {
-        if (message == null || message.length() == 0) {
-            return;
-        }
+        if (message == null || message.length() == 0) return;
 
         if (this.message == null) {
             this.message = message;
         } else {
-            this.message = message + this.message;
+            char last = message.charAt(message.length() - 1);
+            if (last == ' ' || last == '\t' || last == '\r' || last == '\n') {
+                this.message = this.message + message;
+            } else {
+                this.message = this.message + " " + message;
+            }
         }
     }
 

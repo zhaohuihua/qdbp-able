@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.excel.exception.ResultSetMismatchException;
 
 /**
  * Bean容器
@@ -131,6 +133,111 @@ public class BeanContainer implements Serializable {
             temp.add(TypeUtils.castToJavaBean(object, type));
         }
         return temp;
+    }
+
+    /**
+     * 核对结果集
+     * 
+     * @param actualResult 实际结果集数据
+     * @param targetName 目标结果集的名称
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareDatas(List<T> actualResult, String targetName) throws ResultSetMismatchException {
+        this.compareDatas(actualResult, targetName, null, null);
+    }
+
+    /**
+     * 核对结果集
+     * 
+     * @param actualResult 实际结果集数据
+     * @param targetName 目标结果集的名称
+     * @param resources 自定义提示消息
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareDatas(List<T> actualResult, String targetName, Map<String, String> resources)
+            throws ResultSetMismatchException {
+        this.compareDatas(actualResult, targetName, null, resources);
+    }
+
+    /**
+     * 核对结果集
+     * 
+     * @param actualResult 实际结果集数据
+     * @param targetName 目标结果集的名称
+     * @param excludeFields 不需要比较的字段列表
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareDatas(List<T> actualResult, String targetName, List<String> excludeFields)
+            throws ResultSetMismatchException {
+        this.compareDatas(actualResult, targetName, excludeFields, null);
+    }
+
+    /**
+     * 核对结果集
+     * 
+     * @param actualResult 实际结果集数据
+     * @param targetName 目标结果集的名称
+     * @param excludeFields 不需要比较的字段列表
+     * @param resources 自定义提示消息
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareDatas(List<T> actualResult, String targetName, List<String> excludeFields,
+            Map<String, String> resources) throws ResultSetMismatchException {
+        BeanGroup bean = findGroup(targetName);
+        if (bean == null) {
+            String msg = newDataNotFoundMessage(targetName, resources);
+            throw new ResultSetMismatchException(msg);
+        }
+
+        try {
+            bean.compareDatasOf(actualResult, excludeFields, resources);
+        } catch (ResultSetMismatchException e) {
+            e.prependMessage("[" + getName() + "]");
+            throw e;
+        }
+    }
+
+    /**
+     * 核对数据列表
+     * 
+     * @param actualResult 实际数据列表数据
+     * @param targetName 目标数据列表的名称
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareValues(List<T> actualResult, String targetName) throws ResultSetMismatchException {
+        this.compareValues(actualResult, targetName, null);
+    }
+
+    /**
+     * 核对数据列表
+     * 
+     * @param actualResult 实际数据列表数据
+     * @param targetName 目标数据列表的名称
+     * @param resources 自定义提示消息
+     * @throws ResultSetMismatchException 不匹配
+     */
+    public <T> void compareValues(List<T> actualResult, String targetName, Map<String, String> resources)
+            throws ResultSetMismatchException {
+        BeanGroup bean = findGroup(targetName);
+        if (bean == null) {
+            String msg = newDataNotFoundMessage(targetName, resources);
+            throw new ResultSetMismatchException(msg);
+        }
+
+        try {
+            bean.compareValuesOf(actualResult, resources);
+        } catch (ResultSetMismatchException e) {
+            e.prependMessage("[" + getName() + "]");
+            throw e;
+        }
+    }
+
+    private String newDataNotFoundMessage(String targetName, Map<String, String> resources) {
+        String pattern = resources == null ? null : resources.get("data.not.found");
+        if (VerifyTools.isBlank(pattern)) {
+            pattern = "[{target}] not found in [{container}].";
+        }
+        return StringTools.format(pattern, "container", getName(), "target", targetName);
     }
 
 }

@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.util.TypeUtils;
@@ -33,6 +34,18 @@ public abstract class ExcelTools {
 
     /** 公式中的单元格引用 **/
     private static final Pattern CELL_REF = Pattern.compile("(\\$?[a-z]+)(\\$?[0-9]+)", Pattern.CASE_INSENSITIVE);
+
+    /** 获取Sheet的总行数 **/
+    public static int getTotalRowsOfSheet(Sheet sheet) {
+        // sheet.getPhysicalNumberOfRows()这个方法有坑
+        // 之前填好30行数据, 之后又从别的表格复制了5行插入在最前面, 总行数应该是35才对, 但这个方法返回的依然是30
+        return Math.max(sheet.getLastRowNum(), sheet.getPhysicalNumberOfRows());
+    }
+
+    /** 获取Row的总列数 **/
+    public static int getTotalColumnsOfRow(Row row) {
+        return Math.max(row.getLastCellNum(), row.getPhysicalNumberOfCells());
+    }
 
     /**
      * 列名转换为列序号<br>

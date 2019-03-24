@@ -470,7 +470,8 @@ public class MetadataTools {
             if (row == null) {
                 continue;
             }
-            for (int i = 0; i < row.getLastCellNum(); i++) {
+            int size = ExcelTools.getTotalColumnsOfRow(row);
+            for (int i = 0; i < size; i++) {
                 Cell cell = row.getCell(i);
                 if (maxColumnIndex < i) {
                     maxColumnIndex = i;
