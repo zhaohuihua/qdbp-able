@@ -19,26 +19,40 @@ public class BeanContainer implements Serializable {
     /** serialVersionUID **/
     private static final long serialVersionUID = 1L;
 
-    private List<BeanGroup> groups;
+    /** 容器名称 **/
+    private String name;
+    /** 容器内容 **/
+    private List<BeanGroup> content;
+
+    /** 获取容器名称 **/
+    public String getName() {
+        return name;
+    }
+
+    /** 设置容器名称 **/
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /** 获取容器内容 **/
+    public List<BeanGroup> getContent() {
+        return this.content != null ? this.content : new ArrayList<BeanGroup>();
+    }
 
     public void addItem(BeanGroup bean) {
         Objects.requireNonNull(bean, "bean");
-        if (this.groups == null) {
-            this.groups = new ArrayList<>();
+        if (this.content == null) {
+            this.content = new ArrayList<>();
         }
-        this.groups.add(bean);
-    }
-
-    public List<BeanGroup> getGroups() {
-        return this.groups != null ? this.groups : new ArrayList<BeanGroup>();
+        this.content.add(bean);
     }
 
     public BeanGroup findGroup(String name) {
         Objects.requireNonNull(name, "name");
-        if (this.groups == null) {
+        if (this.content == null) {
             return null;
         }
-        for (BeanGroup bean : groups) {
+        for (BeanGroup bean : content) {
             if (name.equals(bean.getName()) || name.equals(bean.getAlias())) {
                 return bean;
             }
@@ -118,4 +132,5 @@ public class BeanContainer implements Serializable {
         }
         return temp;
     }
+
 }

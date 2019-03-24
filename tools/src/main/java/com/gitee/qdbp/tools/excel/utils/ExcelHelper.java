@@ -41,7 +41,7 @@ public class ExcelHelper {
         if (fieldInfos == null && metadata.getFieldRows() != null) {
             fieldInfos = MetadataTools.parseFieldInfoByRows(sheet, metadata.getFieldRows());
             if (fieldInfos.isEmpty()) {
-                log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());
+                log.warn("Sheet[{}], Field list is empty, fieldRows={}", sheetName, metadata.getFieldRows());
             }
         }
 
@@ -61,7 +61,7 @@ public class ExcelHelper {
                 continue;
             }
             if (metadata.isSkipRow(row)) {
-                log.trace("skip row, sheetName={}, row={}", sheetName, i);
+                log.trace("Sheet[{}], skip row, row={}", sheetName, i);
                 continue;
             }
             try {
@@ -69,7 +69,9 @@ public class ExcelHelper {
             } catch (ServiceException e) {
                 cb.addFailed(sheetName, i + 1, e);
                 if (e.getCause() != null) {
-                    log.error("excel parse error, {}, {}", e.getMessage(), e.getCause().getMessage(), e);
+                    String error = e.getMessage();
+                    String cause = e.getCause().getMessage();
+                    log.error("Sheet[{}], excel parse error, {}, {}", sheetName, error, cause, e);
                 }
             } catch (NumberFormatException e) {
                 cb.addFailed(sheetName, i + 1, ResultCode.PARAMETER_FORMAT_ERROR);
@@ -77,7 +79,7 @@ public class ExcelHelper {
                 cb.addFailed(sheetName, i + 1, ResultCode.PARAMETER_FORMAT_ERROR);
             } catch (Throwable e) {
                 cb.addFailed(sheetName, i + 1, ResultCode.SERVER_INNER_ERROR);
-                log.error("excel parse error.", e);
+                log.error("Sheet[{}], excel parse error.", sheetName, e);
             }
         }
     }
@@ -166,12 +168,12 @@ public class ExcelHelper {
 
     public static void fill(List<?> list, Sheet sheet, XMetadata metadata, SheetFillCallback cb) {
 
+        String sheetName = sheet.getSheetName();
         List<FieldInfo> fieldInfos = metadata.getFieldInfos();
         if (fieldInfos == null && metadata.getFieldRows() != null) {
             fieldInfos = MetadataTools.parseFieldInfoByRows(sheet, metadata.getFieldRows());
             if (fieldInfos.isEmpty()) {
-                String sheetName = sheet.getSheetName();
-                log.warn("Field list is empty, sheetName={}, fieldRows={}", sheetName, metadata.getFieldRows());
+                log.warn("Sheet[{}], Field list is empty, fieldRows={}", sheetName, metadata.getFieldRows());
             }
         }
 
@@ -187,8 +189,8 @@ public class ExcelHelper {
         if (footerRows != null) {
             if (footerRows.getMin() < begin + 1) {
                 // 页脚不能小于开始行+1, 也就是说表头与页脚之间最少要有一行
-                String m = "Footer must be greater than begin row + 1. FooterMinRow={}, BeginRow={}.";
-                log.warn(m, footerRows.getMin() + 1, begin + 1);
+                String m = "Sheet[{}], Footer must be greater than begin row + 1. FooterMinRow={}, BeginRow={}.";
+                log.warn(m, sheetName, footerRows.getMin() + 1, begin + 1);
                 footerRows = null;
             } else {
                 int footerMin = Math.max(footerRows.getMin(), begin + 1);

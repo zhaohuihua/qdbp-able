@@ -215,6 +215,7 @@ public class ExcelBeans {
     }
 
     private void doParseSheet(Sheet sheet, int skipRows) {
+        this.container.setName(sheet.getSheetName());
         int totalRows = sheet.getPhysicalNumberOfRows();
         for (int i = skipRows; i <= totalRows; i++) {
             Row row = sheet.getRow(i);
@@ -246,7 +247,8 @@ public class ExcelBeans {
         }
 
         if (groupStartRowIndex < 0) { // 未找到#start就已经找到其他标识了
-            log.warn("RowNo[{}]: {} must be followed by start", rowIndex, rowType.name());
+            String sheetName = container.getName();
+            log.warn("Sheet[{}]Row[{}]: {} must be followed by start", sheetName, rowIndex, rowType.name());
             return;
         }
         if (this.currGroup == null) {
@@ -263,10 +265,10 @@ public class ExcelBeans {
             if (this.fieldRowIndex > 0) {
                 this.doParseBeanRow(row);
             } else {
-                // 没有定义field, 按List<?>处理, 如List<String>
+                // 没有定义field, 按List<Object>处理, 如List<String>
                 if (this.lastType != RowType.bean) {
-                    String m = "RowNo[{}]: field not found start by RowNo[{}], To be processed by List<?>";
-                    log.debug(m, rowIndex, Math.max(groupStartRowIndex, headerStartRowIndex));
+                    String m = "Sheet[{}]Row[{}]: field not found start by Row[{}], To be processed by List<Object>";
+                    log.trace(m, container.getName(), rowIndex, Math.max(groupStartRowIndex, headerStartRowIndex));
                 }
                 this.doParseValueRow(row);
             }
@@ -293,7 +295,7 @@ public class ExcelBeans {
         String secondValue = getCellValueOfString(row.getCell(2));
         if (VerifyTools.isAllBlank(firstValue, secondValue)) { // 两个值都为空
             int rowIndex = row.getRowNum() + 1;
-            log.warn("RowNo[{}]: start name and alias not found", rowIndex);
+            log.warn("Sheet[{}]Row[{}]: start name and alias not found", container.getName(), rowIndex);
             return;
         }
         String name = null;
@@ -319,9 +321,9 @@ public class ExcelBeans {
         int rowIndex = row.getRowNum() + 1;
         if (map.isEmpty()) {
             if (rowType == RowType.field) {
-                log.warn("RowNo[{}]: {} cells is required", rowIndex, rowType.name());
+                log.warn("Sheet[{}]Row[{}]: {} cells is required", container.getName(), rowIndex, rowType.name());
             } else {
-                log.warn("RowNo[{}]: {} cells is all blank", rowIndex, rowType.name());
+                log.warn("Sheet[{}]Row[{}]: {} cells is all blank", container.getName(), rowIndex, rowType.name());
             }
             return;
         }
@@ -455,10 +457,10 @@ public class ExcelBeans {
             }
         } catch (Exception e) {
             cellInfo.setValue(null);
-            String m = "Cell[{},{}], value:{}, failed to calculate expression:{}, {}";
+            String m = "Sheet[{}]Cell[{},{}], value:{}, failed to calculate expression:{}, {}";
             String columnName = ExcelTools.columnIndexToName(cellInfo.getColumn());
             String valueString = JsonTools.toLogString(newValue) + '(' + newValue.getClass().getSimpleName() + ')';
-            log.warn(m, cellInfo.getRow(), columnName, valueString, suffix, e.toString());
+            log.warn(m, container.getName(), cellInfo.getRow(), columnName, valueString, suffix, e.toString());
         }
     }
 
@@ -504,24 +506,26 @@ public class ExcelBeans {
         if (rules == null || rules.isEmpty()) {
             // 没有预置的转换规则
             map.put(cellInfo.getField(), cellInfo.getValue());
-        } else {
-            // 调用转换规则
-            for (CellRule rule : rules) {
-                try {
-                    Map<String, Object> values = rule.imports(cellInfo);
-                    map.put(cellInfo.getField(), cellInfo.getValue());
-                    if (VerifyTools.isNotBlank(values)) {
-                        map.putAll(values);
-                    }
-                } catch (Exception e) {
-                    Object value = cellInfo.getValue();
-                    cellInfo.setValue(null);
-                    if (log.isWarnEnabled()) {
-                        String m = "Cell[{},{}], value:{}, failed to execute convert rule:{}, {}";
-                        String columnName = ExcelTools.columnIndexToName(cellInfo.getColumn());
-                        String valueString = JsonTools.toLogString(value);
-                        log.warn(m, cellInfo.getRow(), columnName, valueString, rule.toString(), e.toString());
-                    }
+            return;
+        }
+
+        // 调用转换规则
+        for (CellRule rule : rules) {
+            try {
+                Map<String, Object> values = rule.imports(cellInfo);
+                map.put(cellInfo.getField(), cellInfo.getValue());
+                if (VerifyTools.isNotBlank(values)) {
+                    map.putAll(values);
+                }
+            } catch (Exception e) {
+                Object value = cellInfo.getValue();
+                cellInfo.setValue(null);
+                if (log.isWarnEnabled()) {
+                    String m = "Sheet[{}]Cell[{},{}], value:{}, failed to execute convert rule:{}, {}";
+                    String sheetName = container.getName();
+                    String columnName = ExcelTools.columnIndexToName(cellInfo.getColumn());
+                    String valueString = JsonTools.toLogString(value);
+                    log.warn(m, sheetName, cellInfo.getRow(), columnName, valueString, rule.toString(), e.toString());
                 }
             }
         }
@@ -549,9 +553,9 @@ public class ExcelBeans {
                 }
                 CellRule rule = this.rules == null ? null : this.rules.get(name);
                 if (rule == null) {
-                    String m = "Cell[{},{}], {} type [{}] not found.";
+                    String m = "Sheet[{}]Cell[{},{}], {} type [{}] not found.";
                     String columnName = ExcelTools.columnIndexToName(columnInfo.getColumn());
-                    log.warn(m, rowIndex, columnName, rowType.name(), name);
+                    log.warn(m, container.getName(), rowIndex, columnName, rowType.name(), name);
                 } else {
                     rules.add(rule);
                 }
