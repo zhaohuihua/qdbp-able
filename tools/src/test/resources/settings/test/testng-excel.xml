@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="excel" verbose="1">
+	<test name="ExcelBeans">
+		<classes>
+			<class name="com.gitee.qdbp.tools.excel.beans.ExcelBeansTest" />
+		</classes>
+	</test>
+</suite>
