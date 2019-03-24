@@ -7,11 +7,14 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.DoubleSerializer;
 import com.alibaba.fastjson.serializer.JSONSerializer;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.beans.KeyString;
+import com.gitee.qdbp.able.utils.ConvertTools;
 import com.gitee.qdbp.able.utils.VerifyTools;
 
 /**
@@ -45,12 +48,17 @@ public abstract class JsonTools {
         return buffer.toString();
     }
 
+    private static SerializeConfig JSON_CONFIG = new SerializeConfig();
+    static {
+        JSON_CONFIG.put(Double.class, new DoubleSerializer("#.##################"));
+    }
+
     public static String toLogString(Object object) {
         if (object == null) {
             return "null";
         }
         try (SerializeWriter out = new SerializeWriter()) {
-            JSONSerializer serializer = new JSONSerializer(out);
+            JSONSerializer serializer = new JSONSerializer(out, JSON_CONFIG);
             serializer.config(SerializerFeature.QuoteFieldNames, false);
             serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
             serializer.write(object);
@@ -63,12 +71,37 @@ public abstract class JsonTools {
             return "null";
         }
         try (SerializeWriter out = new SerializeWriter()) {
-            JSONSerializer serializer = new JSONSerializer(out);
+            JSONSerializer serializer = new JSONSerializer(out, JSON_CONFIG);
             serializer.config(SerializerFeature.QuoteFieldNames, true);
             serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
             serializer.write(object);
             return out.toString();
         }
+    }
+
+    /**
+     * 将Java对象转换为Map
+     * 
+     * @param object Java对象
+     * @return Map
+     */
+    public static Map<String, Object> beanToMap(Object object) {
+        return beanToMap(object, false);
+    }
+
+    /**
+     * 将Java对象转换为Map
+     * 
+     * @param object Java对象
+     * @param clearBlankValue 是否清除空值
+     * @return Map
+     */
+    public static Map<String, Object> beanToMap(Object object, boolean clearBlankValue) {
+        if (object == null) {
+            return null;
+        }
+        Map<String, Object> map = (JSONObject) JSON.toJSON(object);
+        return clearBlankValue ? ConvertTools.clearBlankValue(map, false) : map;
     }
 
     /**
