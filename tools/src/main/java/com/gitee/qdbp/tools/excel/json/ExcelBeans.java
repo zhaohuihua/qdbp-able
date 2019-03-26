@@ -273,9 +273,10 @@ public class ExcelBeans {
                 this.doParseValueRow(row);
             }
         } else { // field title rule
-            if (this.lastType == RowType.start || this.lastType == RowType.bean) {
+            if (this.lastType != RowType.field && this.lastType != RowType.title && this.lastType != RowType.rule) {
                 this.headerStartRowIndex = rowIndex;
                 this.fieldRowIndex = -1;
+                this.columns = null;
             }
             if (rowType == RowType.field) {
                 this.fieldRowIndex = rowIndex;
