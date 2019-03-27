@@ -2,10 +2,12 @@ package com.gitee.qdbp.tools.excel.json;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.utils.ConvertTools;
 import com.gitee.qdbp.able.utils.DateTools;
 import com.gitee.qdbp.able.utils.StringTools;
@@ -399,9 +401,11 @@ public class BeanGroup implements Serializable {
         }
     }
 
-    // 1. 一个值为空另一个不为空为不匹配
+    // 1. 一个值为空另一个不为空即不匹配
     // 2. 相同类型的直接比较
-    // 3. 不同类型的转换为字符串比较
+    // 3. 数字转换为double比较, int 100 = double 100.0 = new BigDecimal("100.0");
+    // 4. 时间按毫秒值比较
+    // 5. 不同类型的转换为字符串比较
     private static boolean compareValue(Object expectValue, Object actualValue) {
         if (VerifyTools.isAllBlank(expectValue, actualValue)) {
             return true; // 都为空, 判定为匹配
@@ -413,17 +417,61 @@ public class BeanGroup implements Serializable {
 
         if (expectValue.getClass() == actualValue.getClass()) {
             // 相同类型的直接比较
-            if (VerifyTools.notEquals(expectValue, actualValue)) {
-                return false;
-            }
+            return VerifyTools.equals(expectValue, actualValue);
+        } else if (isNumberValue(expectValue) || isNumberValue(actualValue)) {
+            // 数字转换为double比较
+            return compareNumber(expectValue, actualValue);
+        } else if (isDateValue(expectValue) || isDateValue(actualValue)) {
+            // 时间按毫秒值比较
+            return compareDate(expectValue, actualValue);
         } else { // 不同类型的转换为字符串比较
-            String expectString = JsonTools.toLogString(expectValue);
-            String actualString = JsonTools.toLogString(actualValue);
-            if (VerifyTools.notEquals(expectString, actualString)) {
-                return false;
-            }
+            return compareString(expectValue, actualValue);
         }
-        return true;
+    }
+
+    private static boolean isNumberValue(Object value) {
+        if (value == null) {
+            return false;
+        }
+        Class<?> c = value.getClass();
+        if (c == int.class || c == double.class || c == long.class || c == float.class || c == short.class) {
+            return true;
+        }
+        return Number.class.isAssignableFrom(c);
+    }
+
+    private static boolean isDateValue(Object value) {
+        if (value == null) {
+            return false;
+        }
+        Class<?> c = value.getClass();
+        return Date.class.isAssignableFrom(c) || Calendar.class.isAssignableFrom(c);
+    }
+
+    private static boolean compareNumber(Object expectValue, Object actualValue) {
+        try {
+            Double expectNumber = TypeUtils.castToDouble(expectValue);
+            Double actualNumber = TypeUtils.castToDouble(actualValue);
+            return expectNumber.doubleValue() == actualNumber.doubleValue();
+        } catch (Exception e) {
+            return compareString(expectValue, actualValue);
+        }
+    }
+
+    private static boolean compareDate(Object expectValue, Object actualValue) {
+        try {
+            Date expectDate = TypeUtils.castToDate(expectValue);
+            Date actualDate = TypeUtils.castToDate(actualValue);
+            return expectDate.getTime() == actualDate.getTime();
+        } catch (Exception e) {
+            return compareString(expectValue, actualValue);
+        }
+    }
+
+    private static boolean compareString(Object expectValue, Object actualValue) {
+        String expectString = JsonTools.toLogString(expectValue);
+        String actualString = JsonTools.toLogString(actualValue);
+        return VerifyTools.equals(expectString, actualString);
     }
 
     private static String fieldValueToString(Object value) {
