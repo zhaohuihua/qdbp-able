@@ -496,21 +496,34 @@ public abstract class StringTools {
         return count;
     }
 
+
     /** 是不是肯定的 **/
     public static boolean isPositive(String value, boolean defValue) {
-        if (VerifyTools.isNotBlank(value) && isExists(true, value, "on", "yes", "true", "1")) {
-            return true;
-        } else {
+        if (VerifyTools.isBlank(value)) {
             return defValue;
+        } else {
+            if (isExists(true, value, "Y", "yes", "true", "on", "1")) {
+                return true;
+            } else if (isExists(true, value, "N", "no", "false", "off", "0")) {
+                return false;
+            } else { // 配置了不能识别为boolean的字符串, 返回defValue
+                return defValue;
+            }
         }
     }
 
     /** 是不是否定的 **/
     public static boolean isNegative(String value, boolean defValue) {
-        if (VerifyTools.isNotBlank(value) && isExists(true, value, "off", "no", "false", "0")) {
-            return true;
-        } else {
+        if (VerifyTools.isBlank(value)) {
             return defValue;
+        } else {
+            if (isExists(true, value, "Y", "yes", "true", "on", "1")) {
+                return false;
+            } else if (isExists(true, value, "N", "no", "false", "off", "0")) {
+                return true;
+            } else { // 配置了不能识别为boolean的字符串, 返回defValue
+                return defValue;
+            }
         }
     }
 

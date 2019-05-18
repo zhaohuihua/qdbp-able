@@ -8,10 +8,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.PaneInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.util.TypeUtils;
@@ -122,6 +129,65 @@ public abstract class ExcelTools {
         }
     }
 
+    /**
+     * 复制Sheet<br>
+     * TODO 目前只复制了部分属性, 另外复制前景色和背景色有问题
+     * 
+     * @param src 复制源
+     * @param target 目标行
+     * @param copyValue 是否复制值
+     */
+    public static void copySheet(Sheet src, Sheet target, boolean copyValue) {
+        if (src == null || target == null) {
+            return;
+        }
+
+        boolean columnWidthSetted = false;
+        Iterator<Row> iterator = src.rowIterator();
+        while (iterator.hasNext()) {
+            Row srow = iterator.next();
+            Row trow = target.getRow(srow.getRowNum());
+            if (trow == null) {
+                trow = target.createRow(srow.getRowNum());
+            }
+            copyRow(srow, trow, copyValue);
+            // 复制列宽,隐藏列
+            if (!columnWidthSetted) {
+                columnWidthSetted = true;
+                Iterator<Cell> cellIterator = srow.cellIterator();
+                while (cellIterator.hasNext()) {
+                    Cell scell = cellIterator.next();
+                    int columnIndex = scell.getColumnIndex();
+                    target.setColumnWidth(columnIndex, src.getColumnWidth(columnIndex));
+                    target.setColumnHidden(columnIndex, src.isColumnHidden(columnIndex));
+                }
+            }
+        }
+        // 复制合并区域
+        int sheetMergerCount = src.getNumMergedRegions();
+        for (int i = 0; i < sheetMergerCount; i++) {
+            CellRangeAddress range = src.getMergedRegion(i);
+            target.addMergedRegion(range);
+        }
+
+        // 复制Sheet全局参数
+        target.setAutobreaks(src.getAutobreaks());
+        target.setDefaultColumnWidth(src.getDefaultColumnWidth());
+        target.setDefaultRowHeight(src.getDefaultRowHeight());
+        // 冻结窗格
+        PaneInformation panelInfo = src.getPaneInformation();
+        if (panelInfo != null && panelInfo.isFreezePane()) {
+            target.createFreezePane(panelInfo.getVerticalSplitLeftColumn(), panelInfo.getHorizontalSplitTopRow());
+        }
+    }
+
+    /**
+     * 复制行
+     * 
+     * @param src 复制源
+     * @param target 目标行
+     * @param copyValue 是否复制值
+     */
     public static void copyRow(Row src, Row target, boolean copyValue) {
         if (src == null || target == null) {
             return;
@@ -136,7 +202,7 @@ public abstract class ExcelTools {
         Iterator<Cell> iterator = src.cellIterator();
         while (iterator.hasNext()) {
             Cell scell = iterator.next();
-            Cell tcell = target.getCell(scell.getColumnIndex(), Row.CREATE_NULL_AS_BLANK);
+            Cell tcell = target.getCell(scell.getColumnIndex(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
             // 复制单元格
             copyCell(scell, tcell, copyValue);
@@ -145,8 +211,8 @@ public abstract class ExcelTools {
             // 例如, 从第3行复制公式, 公式=$A$1+C2+D3+E4
             // 复制到第10行, 公式就应该变成=$A$1+C9+D10+E11
             // $开头的行号$A$1是固定不变的
-            int cellType = scell.getCellType();
-            if (cellType == Cell.CELL_TYPE_FORMULA) {
+            CellType cellType = scell.getCellTypeEnum();
+            if (cellType == CellType.FORMULA) {
                 String formula = scell.getCellFormula();
 
                 Matcher matcher = CELL_REF.matcher(formula);
@@ -169,23 +235,30 @@ public abstract class ExcelTools {
         }
     }
 
+    /**
+     * 复制单元格
+     * 
+     * @param src 复制源
+     * @param target 目标行
+     * @param copyValue 是否复制值
+     */
     public static void copyCell(Cell src, Cell target, boolean copyValue) {
         if (src == null || target == null) {
             return;
         }
 
         // 复制样式
-        target.setCellStyle(src.getCellStyle());
+        copyCellStyle(src, target);
 
         // 单元格类型
-        int cellType = src.getCellType();
+        CellType cellType = src.getCellTypeEnum();
         target.setCellType(cellType);
 
-        if (cellType == Cell.CELL_TYPE_FORMULA) { // 公式
+        if (cellType == CellType.FORMULA) { // 公式
             target.setCellFormula(src.getCellFormula());
         } else if (copyValue) { // 复制内容
 
-            if (cellType == Cell.CELL_TYPE_ERROR) { // 错误
+            if (cellType == CellType.ERROR) { // 错误
                 target.setCellErrorValue(src.getErrorCellValue());
             } else {
                 Object value = getCellValue(src);
@@ -202,6 +275,87 @@ public abstract class ExcelTools {
         }
     }
 
+    private static void copyCellStyle(Cell src, Cell target) {
+        if (src.getSheet().getWorkbook() == target.getSheet().getWorkbook()) {
+            target.setCellStyle(src.getCellStyle());
+        } else {
+            CellStyle srcStyle = src.getCellStyle();
+            CellStyle targetStyle = target.getSheet().getWorkbook().createCellStyle();
+            copyCellStyle(srcStyle, targetStyle);
+            target.setCellStyle(targetStyle);
+            copyCellFont(src, target);
+        }
+    }
+
+    private static void copyCellStyle(CellStyle src, CellStyle target) {
+        target.setAlignment(src.getAlignmentEnum());
+        // 边框和边框颜色
+        target.setBorderBottom(src.getBorderBottomEnum());
+        target.setBorderLeft(src.getBorderLeftEnum());
+        target.setBorderRight(src.getBorderRightEnum());
+        target.setBorderTop(src.getBorderTopEnum());
+        target.setTopBorderColor(src.getTopBorderColor());
+        target.setBottomBorderColor(src.getBottomBorderColor());
+        target.setRightBorderColor(src.getRightBorderColor());
+        target.setLeftBorderColor(src.getLeftBorderColor());
+
+        // 为什么复制背景色不管用,复制前景色背景就变全黑了?
+        // target.setFillBackgroundColor(src.getFillBackgroundColor()); // 背景色
+        // target.setFillForegroundColor(src.getFillForegroundColor()); // 前景色
+
+        target.setDataFormat(src.getDataFormat());
+        target.setFillPattern(src.getFillPatternEnum());
+
+        target.setHidden(src.getHidden());
+        target.setIndention(src.getIndention()); // 首行缩进
+        target.setLocked(src.getLocked());
+        target.setRotation(src.getRotation()); // 旋转
+        target.setVerticalAlignment(src.getVerticalAlignmentEnum());
+        target.setWrapText(src.getWrapText());
+    }
+
+    private static void copyCellFont(Cell src, Cell target) {
+        short srcFontIndex = src.getCellStyle().getFontIndex();
+        Font srcFont = src.getSheet().getWorkbook().getFontAt(srcFontIndex);
+        if (srcFont == null) {
+            return;
+        }
+        if (src.getSheet().getWorkbook() == target.getSheet().getWorkbook()) {
+            target.getCellStyle().setFont(srcFont);
+        } else {
+            Workbook wb = target.getSheet().getWorkbook();
+            boolean bold = srcFont.getBold();
+            short color = srcFont.getColor();
+            short fontHeight = srcFont.getFontHeight();
+            String fontName = srcFont.getFontName();
+            boolean italic = srcFont.getItalic();
+            boolean strikeout = srcFont.getStrikeout();
+            short typeOffset = srcFont.getTypeOffset();
+            byte underline = srcFont.getUnderline();
+            Font oldFont = wb.findFont(bold, color, fontHeight, fontName, italic, strikeout, typeOffset, underline);
+            if (oldFont != null) {
+                target.getCellStyle().setFont(oldFont);
+            } else {
+                Font newFont = wb.createFont();
+                newFont.setBold(bold);
+                newFont.setColor(color);
+                newFont.setFontHeight(fontHeight);
+                newFont.setFontName(fontName);
+                newFont.setItalic(italic);
+                newFont.setStrikeout(strikeout);
+                newFont.setTypeOffset(typeOffset);
+                newFont.setUnderline(underline);
+                target.getCellStyle().setFont(newFont);
+            }
+        }
+    }
+
+    /**
+     * 获取单元格的值
+     * 
+     * @param cell 单元格
+     * @return 单元格的值
+     */
     public static Object getCellValue(Cell cell) {
 
         if (cell == null) {
@@ -211,20 +365,20 @@ public abstract class ExcelTools {
         Object object = null;
 
         // 获取单元格类型
-        int cellType = cell.getCellType();
-        if (cellType == Cell.CELL_TYPE_FORMULA) {
+        CellType cellType = cell.getCellTypeEnum();
+        if (cellType == CellType.FORMULA) {
             // 如果单元格类型是公式, 取公式结果的类型
-            cellType = cell.getCachedFormulaResultType();
+            cellType = cell.getCachedFormulaResultTypeEnum();
         }
 
         switch (cellType) {
-        case Cell.CELL_TYPE_STRING:
+        case STRING:
             object = cell.getStringCellValue();
             break;
-        case Cell.CELL_TYPE_BOOLEAN:
+        case BOOLEAN:
             object = cell.getBooleanCellValue();
             break;
-        case Cell.CELL_TYPE_NUMERIC:
+        case NUMERIC:
             switch (cell.getCellStyle().getDataFormat()) {
             case 58: // yyyy-MM-dd
             case 57: // yyyy年m月
@@ -262,13 +416,34 @@ public abstract class ExcelTools {
         return object;
     }
 
+    /**
+     * 设置单元格的值, 如果格式转换失败将不会设置单元格
+     * 
+     * @param cell 单元格
+     * @param value 值
+     * @return 是否成功
+     */
     public static boolean setCellValue(Cell cell, Object value) {
+        return setCellValue(cell, value, false);
+    }
+
+    /**
+     * 设置单元格的值
+     * 
+     * @param cell 单元格
+     * @param value 值
+     * @param setToStringOnConvertError 格式转换失败时是否设置为toString的值
+     * @return 是否成功
+     */
+    public static boolean setCellValue(Cell cell, Object value, boolean setToStringOnConvertError) {
         try {
             doSetCellValue(cell, value);
             return true;
         } catch (Exception e) {
             log.error("SetCellValueError, " + e.toString());
-            cell.setCellValue(TypeUtils.castToString(value));
+            if (setToStringOnConvertError) {
+                cell.setCellValue(value == null ? "" : value.toString()); // 执行到这里value不可能为空了
+            }
             return false;
         }
     }
@@ -279,12 +454,13 @@ public abstract class ExcelTools {
             return;
         }
         if (value == null) {
-            cell.setCellType(Cell.CELL_TYPE_BLANK);
+            cell.setCellType(CellType.BLANK);
             return;
         }
 
-        switch (cell.getCellType()) {
-        case Cell.CELL_TYPE_BLANK: // 空单元格, 根据数据类型赋值
+        CellType cellType = cell.getCellTypeEnum();
+        switch (cellType) {
+        case BLANK: // 空单元格, 根据数据类型赋值
             if (value instanceof Date) {
                 cell.setCellValue((Date) value);
             } else if (value instanceof Calendar) {
@@ -292,15 +468,16 @@ public abstract class ExcelTools {
             } else if (value instanceof Boolean) {
                 cell.setCellValue(TypeUtils.castToBoolean(value));
             } else if (value instanceof Number) {
+                // Cell.setCellValue()对数字的处理只有double类型
                 cell.setCellValue(((Number) value).doubleValue());
             } else {
                 cell.setCellValue(TypeUtils.castToString(value));
             }
             break;
-        case Cell.CELL_TYPE_BOOLEAN:
+        case BOOLEAN:
             cell.setCellValue(TypeUtils.castToBoolean(value));
             break;
-        case Cell.CELL_TYPE_NUMERIC:
+        case NUMERIC:
             switch (cell.getCellStyle().getDataFormat()) {
             case 58: // yyyy-MM-dd
             case 57: // yyyy年m月
@@ -320,7 +497,7 @@ public abstract class ExcelTools {
                 break;
             }
             break;
-        default: // Cell.CELL_TYPE_STRING and other
+        default: // STRING and other
             cell.setCellValue(TypeUtils.castToString(value));
             break;
         }

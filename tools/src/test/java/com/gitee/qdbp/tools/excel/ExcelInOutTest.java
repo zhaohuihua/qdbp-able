@@ -23,7 +23,7 @@ import com.gitee.qdbp.tools.files.PathTools;
 import com.gitee.qdbp.tools.utils.JsonTools;
 import com.gitee.qdbp.tools.utils.PropertyTools;
 
-public class ExcelTest {
+public class ExcelInOutTest {
 
     private static class Callback extends ImportCallback {
 
@@ -53,7 +53,7 @@ public class ExcelTest {
     }
 
     public static void main(String[] args) {
-        URL path = PathTools.findClassResource(ExcelTest.class, "ExcelTest.txt");
+        URL path = PathTools.findClassResource(ExcelInOutTest.class, "ExcelInOutTest.txt");
         System.out.println(path);
         Properties original = PropertyTools.load(path, "UTF-8");
         Properties common = PropertyTools.filter(original, "common."); // 公共配置
@@ -65,7 +65,7 @@ public class ExcelTest {
 
     private static void test(Properties properties, int index) {
 
-        URL xlsx = PathTools.findClassResource(ExcelTest.class, "员工信息导入." + index + ".xlsx");
+        URL xlsx = PathTools.findClassResource(ExcelInOutTest.class, "员工信息导入." + index + ".xlsx");
         XMetadata metadata = MetadataTools.parseProperties(properties);
         XExcelParser parser = new XExcelParser(metadata);
 
@@ -87,7 +87,7 @@ public class ExcelTest {
             return;
         }
 
-        URL tpl = PathTools.findClassResource(ExcelTest.class, "员工信息(模板)." + index + ".xlsx");
+        URL tpl = PathTools.findClassResource(ExcelInOutTest.class, "员工信息(模板)." + index + ".xlsx");
         String save = "D:/员工信息导出." + index + ".%s.xlsx";
         XExcelExporter exporter = new XExcelExporter(metadata);
 

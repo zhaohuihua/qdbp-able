@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,7 +236,7 @@ public class ExcelHelper {
                 if (info == null || info.getColumn() == null) {
                     continue;
                 }
-                Cell cell = row.getCell(info.getColumn() - 1, Row.CREATE_NULL_AS_BLANK);
+                Cell cell = row.getCell(info.getColumn() - 1, MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 // 设置值
                 setValue(cell, info, data, cb);
             }

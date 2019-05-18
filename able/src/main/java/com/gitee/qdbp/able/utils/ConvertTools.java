@@ -19,7 +19,7 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 /**
- * 格式转换工具类
+ * 格式转换工具
  *
  * @author zhaohuihua
  * @version 151221
@@ -36,7 +36,7 @@ public abstract class ConvertTools {
      * @return 转换后的数组, 如果list=null则返回null
      */
     public static <T, C extends T> T[] toArray(Collection<C> list, Class<T> clazz) {
-        if (list == null) return null;
+        if (list == null) { return null; }
 
         int size = list.size();
         @SuppressWarnings("unchecked")
@@ -194,7 +194,7 @@ public abstract class ConvertTools {
         if (VerifyTools.isBlank(value)) {
             throw new NumberFormatException("null");
         }
-        Long number = toLong(value, 0L);
+        Long number = toLong(value, null);
         if (number == null) {
             throw new NumberFormatException(value);
         } else {
@@ -223,7 +223,6 @@ public abstract class ConvertTools {
                 return defaults;
             }
         } else {
-            Pattern ptn = Pattern.compile("\\*");
             String[] values = ptn.split(value);
             long number = 1;
             for (String string : values) {
@@ -249,7 +248,7 @@ public abstract class ConvertTools {
         if (VerifyTools.isBlank(value)) {
             throw new NumberFormatException("null");
         }
-        Double number = toDouble(value, 0D);
+        Double number = toDouble(value, null);
         if (number == null) {
             throw new NumberFormatException(value);
         } else {
@@ -280,7 +279,7 @@ public abstract class ConvertTools {
         if (VerifyTools.isBlank(value)) {
             throw new NumberFormatException("null");
         }
-        Double number = toDouble(value, 0D);
+        Double number = toDouble(value, null);
         if (number == null) {
             throw new NumberFormatException(value);
         } else {
@@ -288,6 +287,7 @@ public abstract class ConvertTools {
         }
     }
 
+    private static final Pattern ptn = Pattern.compile("\\*");
     /**
      * 转换为数字
      *
@@ -309,7 +309,6 @@ public abstract class ConvertTools {
                 return defaults;
             }
         } else {
-            Pattern ptn = Pattern.compile("\\*");
             String[] values = ptn.split(value);
             double number = 1.0;
             for (String string : values) {
