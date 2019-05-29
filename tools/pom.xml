@@ -10,7 +10,6 @@
 
 	<artifactId>qdbp-tools</artifactId>
 	<packaging>jar</packaging>
-	<version>2.5.3</version>
 
 	<dependencies>
 
