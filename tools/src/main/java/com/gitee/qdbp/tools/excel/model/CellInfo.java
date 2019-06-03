@@ -1,8 +1,8 @@
 package com.gitee.qdbp.tools.excel.model;
 
 import java.util.List;
-import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.XMetadata;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 单元格信息

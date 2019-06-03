@@ -2,6 +2,7 @@ package com.gitee.qdbp.able.model.ordering;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -17,12 +18,13 @@ import java.util.regex.Pattern;
 public class Orderings implements Serializable {
 
     /** 版本序列号 **/
-    private static final long serialVersionUID = 6926222322201187819L;
+    private static final long serialVersionUID = 1L;
 
     /** 多个条件的分隔符正则表达式 **/
     private static final Pattern GROUP = Pattern.compile(",");
-    /** 多个单词的分隔符正则表达式 **/
-    private static final Pattern WORDS = Pattern.compile("\\s+");
+
+    /** 不排序 **/
+    public static final List<Ordering> NONE = Collections.emptyList();
 
     private List<Ordering> orderings = new ArrayList<>();
 
@@ -84,22 +86,18 @@ public class Orderings implements Serializable {
             if (item.trim().length() == 0) {
                 continue;
             }
-            String[] words = WORDS.split(item.trim());
-            if (words.length == 1) {
-                container.asc(words[0]);
-            } else if (words.length > 1) {
-                String by = words[0];
-                String type = words[1];
-                switch (type) {
-                case "asc":
-                case "ASC":
+            item = item.trim();
+            int spaceIndex = item.lastIndexOf(' ');
+            if (spaceIndex < 0) {
+                container.asc(item);
+            } else {
+                String by = item.substring(0, spaceIndex).trim();
+                String type = item.substring(spaceIndex + 1);
+                if ("asc".equalsIgnoreCase(type)) {
                     container.asc(by);
-                    break;
-                case "desc":
-                case "DESC":
+                } else if ("desc".equalsIgnoreCase(type)) {
                     container.desc(by);
-                    break;
-                default:
+                } else {
                     throw new IllegalArgumentException("OrderTypeError: " + type);
                 }
             }

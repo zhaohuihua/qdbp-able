@@ -3,9 +3,9 @@ package com.gitee.qdbp.tools.http;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Properties;
-import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.tools.files.PathTools;
 import com.gitee.qdbp.tools.utils.Config;
+import com.gitee.qdbp.tools.utils.StringTools;
 
 /**
  * URL配置项工具类

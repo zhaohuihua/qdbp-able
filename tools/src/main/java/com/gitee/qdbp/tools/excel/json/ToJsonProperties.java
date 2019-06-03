@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import com.gitee.qdbp.able.utils.StringTools;
 import com.gitee.qdbp.tools.excel.XMetadata;
 import com.gitee.qdbp.tools.excel.utils.MetadataTools;
 import com.gitee.qdbp.tools.utils.PropertyTools;
+import com.gitee.qdbp.tools.utils.StringTools;
 
 /**
  * 数据转换配置<br>

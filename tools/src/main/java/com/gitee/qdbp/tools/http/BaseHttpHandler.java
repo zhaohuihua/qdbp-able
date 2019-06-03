@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.qdbp.able.result.ResponseMessage;
 import com.gitee.qdbp.able.result.ResultCode;
-import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 public class BaseHttpHandler implements IHttpHandler {
 

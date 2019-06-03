@@ -1,7 +1,7 @@
 package com.gitee.qdbp.able.beans;
 
 import java.util.regex.Pattern;
-import com.gitee.qdbp.able.utils.StringTools;
+import com.gitee.qdbp.tools.utils.StringTools;
 
 /**
  * 收集参数

@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 用来做数据隔离的数据权限属性

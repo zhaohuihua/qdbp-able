@@ -1,7 +1,7 @@
 package com.gitee.qdbp.tools.excel.model;
 
 import java.io.Serializable;
-import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 字段信息

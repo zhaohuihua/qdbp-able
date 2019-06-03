@@ -7,9 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.gitee.qdbp.able.utils.ConvertTools;
-import com.gitee.qdbp.able.utils.StringTools;
-import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.ConvertTools;
+import com.gitee.qdbp.tools.utils.StringTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 序号列表配置类<br>

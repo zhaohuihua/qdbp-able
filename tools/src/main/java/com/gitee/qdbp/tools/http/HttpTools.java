@@ -41,7 +41,7 @@ import com.gitee.qdbp.able.beans.KeyString;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.result.ResponseMessage;
 import com.gitee.qdbp.able.result.ResultCode;
-import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * HTTP请求工具类

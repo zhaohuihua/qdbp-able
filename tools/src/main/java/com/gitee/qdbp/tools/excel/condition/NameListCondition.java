@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.gitee.qdbp.able.utils.ConvertTools;
-import com.gitee.qdbp.able.utils.StringTools;
-import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.ConvertTools;
+import com.gitee.qdbp.tools.utils.StringTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 名称列表配置类<br>

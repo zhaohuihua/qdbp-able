@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ResourceNotFoundException;
-import com.gitee.qdbp.able.utils.VerifyTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 资源工具类<br>

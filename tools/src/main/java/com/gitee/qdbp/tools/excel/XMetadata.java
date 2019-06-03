@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.poi.ss.usermodel.Row;
-import com.gitee.qdbp.able.utils.VerifyTools;
 import com.gitee.qdbp.tools.excel.condition.IndexListCondition;
 import com.gitee.qdbp.tools.excel.condition.IndexRangeCondition;
 import com.gitee.qdbp.tools.excel.condition.MatchesRowCondition;
@@ -17,6 +16,7 @@ import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.rule.CellRule;
 import com.gitee.qdbp.tools.excel.utils.MetadataTools;
 import com.gitee.qdbp.tools.utils.Config;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * excel配置数据<br>

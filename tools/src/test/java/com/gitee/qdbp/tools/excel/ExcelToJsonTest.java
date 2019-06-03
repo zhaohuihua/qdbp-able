@@ -38,7 +38,7 @@ public class ExcelToJsonTest {
             {
                 System.out.println("paging: 5");
                 List<Map<String, Object>> users = result.get("users");
-                PageList<Map<String, Object>> list = QueryTools.filter(users, null, Paging.of(1, 5));
+                PageList<Map<String, Object>> list = QueryTools.filter(users, null, new Paging(1, 5));
                 System.out.println("users.size=" + users.size() + ", paged.size=" + list.size());
                 System.out.println(JsonTools.toJsonString(list));
             }

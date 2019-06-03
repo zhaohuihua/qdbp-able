@@ -3,7 +3,11 @@ package com.gitee.qdbp.able.model.paging;
 import java.io.Serializable;
 
 /**
- * 分页查询参数
+ * 分页查询参数<br>
+ * 第1页: start=0, end=10;<br>
+ * 第2页: start=10, end=20.<br>
+ * mysql: limit {start}, {rows}<br>
+ * oracle: SELECT * FROM ( SELECT ROWNUM R_N, T_T.* FROM ( {sql} ) T_T WHERE ROWNUM <= {end}) WHERE R_N > {start}
  *
  * @author zhaohuihua
  * @version 140516
@@ -12,37 +16,27 @@ public class Paging implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
-
     /** 跳过行数默认值 **/
-    private static final int SKIP_DEFAULT = 0;
-
+    private static final int OFFSET_DEFAULT = 0;
     /** 当前页数默认值 **/
     private static final int PAGE_DEFAULT = 1;
-
     /** 每页行数默认值 **/
     private static final int ROWS_DEFAULT = 10;
-
     /** 每页行数最小值(行数为0时只统计总数不查询列表) **/
     private static final int ROWS_MIN = 0;
-
     /** 不分页 **/
-    public static final Paging NONE = new ReadOnlyPaging(PAGE_DEFAULT, ROWS_MIN, SKIP_DEFAULT, false, false);
-
+    public static final Paging NONE = new ReadOnlyPaging(PAGE_DEFAULT, ROWS_MIN, OFFSET_DEFAULT, false, false);
     /** 只统计(不查询列表) **/
-    public static final Paging COUNT = new ReadOnlyPaging(PAGE_DEFAULT, ROWS_MIN, SKIP_DEFAULT, true, true);
+    public static final Paging COUNT = new ReadOnlyPaging(PAGE_DEFAULT, ROWS_MIN, OFFSET_DEFAULT, true, true);
 
     /** 跳过多少行 **/
-    private Integer skip;
-
+    private Integer offset;
     /** 每页显示行数(行数为0时只统计总数不查询列表) **/
     private Integer rows;
-
     /** 当前页数 **/
     private Integer page;
-
     /** 是否需要统计总数 **/
     private boolean needCount = true;
-
     /** 是否开启分页(false时不分页,查询全部) **/
     private boolean paging = true;
 
@@ -55,14 +49,35 @@ public class Paging implements Serializable {
      * 
      * @param page 当前页数(从1开始)
      * @param rows 每页显示行数
-     * @param skip 跳过多少行
+     */
+    public Paging(int page, int rows) {
+        this(page, rows, OFFSET_DEFAULT, true, true);
+    }
+
+    /**
+     * 构造函数
+     * 
+     * @param page 当前页数(从1开始)
+     * @param rows 每页显示行数
+     * @param needCount 是否统计总数
+     */
+    public Paging(int page, int rows, boolean needCount) {
+        this(page, rows, OFFSET_DEFAULT, true, needCount);
+    }
+
+    /**
+     * 构造函数
+     * 
+     * @param page 当前页数(从1开始)
+     * @param rows 每页显示行数
+     * @param offset 跳过多少行
      * @param paging 是否分页
      * @param needCount 是否统计总数
      */
-    protected Paging(Integer page, Integer rows, Integer skip, boolean paging, boolean needCount) {
+    protected Paging(Integer page, Integer rows, Integer offset, boolean paging, boolean needCount) {
         this.page = page;
         this.rows = rows;
-        this.skip = skip;
+        this.offset = offset;
         this.paging = paging;
         this.needCount = needCount;
     }
@@ -72,17 +87,17 @@ public class Paging implements Serializable {
      *
      * @return 返回跳过多少行
      */
-    public Integer getSkip() {
-        return format(skip, SKIP_DEFAULT);
+    public Integer getOffset() {
+        return format(offset, OFFSET_DEFAULT);
     }
 
     /**
      * 设置跳过多少行
      *
-     * @param skip 要设置的跳过多少行
+     * @param offset 要设置的跳过多少行
      */
-    public void setSkip(Integer skip) {
-        this.skip = skip;
+    public void setOffset(Integer offset) {
+        this.offset = offset;
     }
 
     /**
@@ -127,7 +142,7 @@ public class Paging implements Serializable {
      * @return 返回开始行数
      */
     public Integer getStart() {
-        return getSkip() + (getPage() - 1) * getRows();
+        return getOffset() + (getPage() - 1) * getRows();
     }
 
     /**
@@ -199,26 +214,26 @@ public class Paging implements Serializable {
     }
 
     /**
-     * 创建一个分页(不统计总数)
+     * 通过offset+rows参数构造分页对象
      * 
-     * @param page 当前页数(从1开始)
+     * @param offset 开始行数(从0开始)
      * @param rows 每页显示行数
-     * @return 分页信息
+     * @return 分页对象
      */
-    public static Paging of(int page, int rows) {
-        return new Paging(page, rows, SKIP_DEFAULT, true, false);
+    public static Paging offset(int offset, int rows) {
+        return new Paging(1, rows, offset, true, true);
     }
 
     /**
-     * 创建一个分页
+     * 通过offset+rows参数构造分页对象
      * 
-     * @param page 当前页数(从1开始)
+     * @param offset 开始行数(从0开始)
      * @param rows 每页显示行数
-     * @param needCount 是否统计总数
-     * @return 分页信息
+     * @param needCount 是否分页
+     * @return 分页对象
      */
-    public static Paging of(int page, int rows, boolean needCount) {
-        return new Paging(page, rows, SKIP_DEFAULT, true, needCount);
+    public static Paging offset(int offset, int rows, boolean needCount) {
+        return new Paging(1, rows, offset, true, needCount);
     }
 
     protected static class ReadOnlyPaging extends Paging {
@@ -226,12 +241,12 @@ public class Paging implements Serializable {
         /** 版本序列号 **/
         private static final long serialVersionUID = 1L;
 
-        protected ReadOnlyPaging(Integer page, Integer rows, Integer skip, boolean paging, boolean needCount) {
-            super(page, rows, skip, paging, needCount);
+        protected ReadOnlyPaging(Integer page, Integer rows, Integer offset, boolean paging, boolean needCount) {
+            super(page, rows, offset, paging, needCount);
         }
 
         @Override
-        public void setSkip(Integer skip) {
+        public void setOffset(Integer offset) {
             throw new UnsupportedOperationException("read only");
         }
 
