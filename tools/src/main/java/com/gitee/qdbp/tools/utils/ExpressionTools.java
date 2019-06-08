@@ -1,7 +1,5 @@
 package com.gitee.qdbp.tools.utils;
 
-import com.gitee.qdbp.tools.utils.StringTools;
-import com.gitee.qdbp.tools.utils.VerifyTools;
 import ognl.Ognl;
 import ognl.OgnlException;
 

@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -533,7 +532,7 @@ public abstract class ConvertTools {
      * @return number of bytes
      */
     public static long parseByteString(String string) {
-        Objects.requireNonNull(string, "ByteString");
+        VerifyTools.requireNotBlank(string, "ByteString");
         // 截取数字和单位
         String number = string.trim();
         String unit = null;

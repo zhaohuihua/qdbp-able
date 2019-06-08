@@ -1,7 +1,5 @@
 package com.gitee.qdbp.able.exception;
 
-import com.gitee.qdbp.able.exception.EditableRuntimeException;
-
 /**
  * 资源未找到
  *

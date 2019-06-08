@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -25,9 +24,6 @@ import com.gitee.qdbp.able.beans.KeyString;
 import com.gitee.qdbp.able.beans.KeyValue;
 import com.gitee.qdbp.able.exception.ResourceNotFoundException;
 import com.gitee.qdbp.tools.files.PathTools;
-import com.gitee.qdbp.tools.utils.ConvertTools;
-import com.gitee.qdbp.tools.utils.StringTools;
-import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 配置文件工具类<br>
@@ -680,13 +676,13 @@ public abstract class PropertyTools {
 
         /** 设置过滤器 **/
         public void setFilters(Filter... filters) {
-            Objects.requireNonNull(filters, "filters");
+            VerifyTools.requireNotBlank(filters, "filters");
             this.filters = Arrays.asList(filters);
         }
 
         /** 增加过滤器 **/
         public void addFilter(Filter... filters) {
-            Objects.requireNonNull(filters, "filters");
+            VerifyTools.requireNotBlank(filters, "filters");
             if (this.filters == null) {
                 this.filters = new ArrayList<>();
             }
@@ -700,13 +696,13 @@ public abstract class PropertyTools {
 
         /** 设置查找文件位置的classpath **/
         public void setClasspaths(Class<?>... classpaths) {
-            Objects.requireNonNull(classpaths, "classpaths");
+            VerifyTools.requireNotBlank(classpaths, "classpaths");
             this.classpaths = Arrays.asList(classpaths);
         }
 
         /** 增加查找文件位置的classpath **/
         public void addClasspath(Class<?>... classpaths) {
-            Objects.requireNonNull(classpaths, "classpaths");
+            VerifyTools.requireNotBlank(classpaths, "classpaths");
             if (this.classpaths == null) {
                 this.classpaths = new ArrayList<>();
             }

@@ -15,7 +15,6 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
@@ -342,7 +341,7 @@ public abstract class PathTools {
      * @throws ResourceNotFoundException 资源不存在
      */
     public static URL findResource(String resourceLocation, Class<?>... classes) throws ResourceNotFoundException {
-        Objects.requireNonNull(resourceLocation, "resourceLocation");
+        VerifyTools.requireNotBlank(resourceLocation, "resourceLocation");
 
         ResourceBean resource = parseResource(resourceLocation);
         String prefix = resource.getPrefix();
@@ -377,8 +376,8 @@ public abstract class PathTools {
      */
     public static URL findRelativeResource(URL url, String resourceLocation, Class<?>... classes)
             throws ResourceNotFoundException {
-        Objects.requireNonNull(url, "url");
-        Objects.requireNonNull(resourceLocation, "resourceLocation");
+        VerifyTools.requireNotBlank(url, "url");
+        VerifyTools.requireNotBlank(resourceLocation, "resourceLocation");
 
         ResourceBean resource = parseResource(resourceLocation);
         String prefix = resource.getPrefix();
@@ -507,8 +506,8 @@ public abstract class PathTools {
      * @return 资源URL
      */
     public static URL findClassResource(Class<?> clazz, String resourceLocation) throws ResourceNotFoundException {
-        Objects.requireNonNull(clazz, "clazz");
-        Objects.requireNonNull(resourceLocation, "resourceLocation");
+        VerifyTools.requireNotBlank(clazz, "clazz");
+        VerifyTools.requireNotBlank(resourceLocation, "resourceLocation");
 
         ResourceBean resource = parseResource(resourceLocation);
         String prefix = resource.getPrefix();

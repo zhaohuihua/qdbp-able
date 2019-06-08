@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Objects;
 import org.apache.poi.POIXMLException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -16,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.tools.excel.utils.ExcelHelper;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * Excel导出
@@ -102,7 +102,7 @@ public class XExcelExporter {
     }
 
     public void setExportCallback(ExportCallback callback) {
-        Objects.requireNonNull(callback, "callback");
+        VerifyTools.requireNotBlank(callback, "callback");
         this.callback = callback;
     }
 

@@ -16,10 +16,6 @@ import com.gitee.qdbp.able.model.ordering.Ordering;
 import com.gitee.qdbp.able.model.ordering.Orderings;
 import com.gitee.qdbp.able.model.paging.PageList;
 import com.gitee.qdbp.able.model.paging.Paging;
-import com.gitee.qdbp.tools.utils.ConvertTools;
-import com.gitee.qdbp.tools.utils.DateTools;
-import com.gitee.qdbp.tools.utils.StringTools;
-import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 查询工具, 根据查询条件过滤, 分页

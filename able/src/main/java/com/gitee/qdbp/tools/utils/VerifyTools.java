@@ -12,6 +12,19 @@ import java.util.Map;
  */
 public abstract class VerifyTools {
 
+    /**
+     * 检查指定的对象是否不为空, 如果为空(或为空字符串)将抛出IllegalArgumentException异常.<br>
+     * 用法: VerifyTools.requireNotBlank(entity.getEmail(), "email");
+     * 
+     * @param object 待检查的对象
+     * @param name 对象的描述或名称
+     */
+    public static void requireNotBlank(Object object, String name) {
+        if (isBlank(object)) {
+            throw new IllegalArgumentException(name + " must not be blank.");
+        }
+    }
+
     /** 返回第一个非空的参数; 如果全都为空, 返回最后一个参数 **/
     @SuppressWarnings("unchecked")
     public static <T> T nvl(T... objects) {

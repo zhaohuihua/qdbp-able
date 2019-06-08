@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * Copy form CompoundComparator.<br>
@@ -41,7 +41,7 @@ public class ComplexComparator<T> implements Comparator<T>, Serializable {
      */
     @SafeVarargs
     public ComplexComparator(Comparator<? extends T>... comparators) {
-        Objects.requireNonNull(comparators, "Comparators must not be null");
+        VerifyTools.requireNotBlank(comparators, "Comparators must not be null");
         this.comparators = new ArrayList<>(comparators.length);
         for (Comparator<? extends T> comparator : comparators) {
             addComparator(comparator);

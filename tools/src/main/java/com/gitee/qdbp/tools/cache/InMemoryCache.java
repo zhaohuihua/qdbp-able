@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.beans.VolatileData;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 内存中的缓存
@@ -233,7 +233,7 @@ public class InMemoryCache extends BaseCacheService {
     /** {@inheritDoc} **/
     @Override
     public <T> void hoset(String key, String subkey, T object) {
-        Objects.requireNonNull(object, "object");
+        VerifyTools.requireNotBlank(object, "object");
         Map<String, String> map = serializeFields(object);
 
         MapItem item = getOrCreateMapItem(key, subkey);

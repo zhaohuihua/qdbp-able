@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.tools.excel.exception.ResultSetMismatchException;
 import com.gitee.qdbp.tools.utils.StringTools;
@@ -42,7 +41,7 @@ public class BeanContainer implements Serializable {
     }
 
     public void addItem(BeanGroup bean) {
-        Objects.requireNonNull(bean, "bean");
+        VerifyTools.requireNotBlank(bean, "bean");
         if (this.content == null) {
             this.content = new ArrayList<>();
         }
@@ -50,7 +49,7 @@ public class BeanContainer implements Serializable {
     }
 
     public BeanGroup findGroup(String name) {
-        Objects.requireNonNull(name, "name");
+        VerifyTools.requireNotBlank(name, "name");
         if (this.content == null) {
             return null;
         }

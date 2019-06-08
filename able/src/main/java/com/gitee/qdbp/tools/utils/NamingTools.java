@@ -84,6 +84,23 @@ public class NamingTools {
      * @return 下划线命名法名称
      */
     public static String toUnderlineString(String name) {
+        return toSeparatorString(name, '_');
+    }
+
+    /**
+     * 转换为空格拆分格式<br>
+     * 如: userName = user name, SiteURL = site url, IUserService = iuser service<br>
+     * user$Name = user$name, user Name = user name, user name = user name, md5String = md5 string
+     *
+     * @author zhaohuihua
+     * @param name 待转换的名称
+     * @return 空格拆分的字符串
+     */
+    public static String toSpaceSplitString(String name) {
+        return toSeparatorString(name, ' ');
+    }
+
+    private static String toSeparatorString(String name, char separator) {
         if (name == null || name.length() == 0) {
             return name;
         }
@@ -94,12 +111,12 @@ public class NamingTools {
         for (char c : chars) {
             if (Character.isWhitespace(c)) {
                 if (lastLowerCase) {
-                    buffer.append("_");
+                    buffer.append(separator);
                 }
                 lastLowerCase = false;
             } else if (Character.isUpperCase(c)) {
                 if (lastLowerCase) {
-                    buffer.append("_");
+                    buffer.append(separator);
                 }
                 buffer.append(Character.toLowerCase(c));
                 lastLowerCase = false;

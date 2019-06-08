@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
@@ -110,7 +109,7 @@ public class ExcelBeans {
      * @param sheetName Sheet名称
      */
     public BeanContainer parse(InputStream is, String sheetName) throws ServiceException {
-        Objects.requireNonNull(sheetName, "sheetName");
+        VerifyTools.requireNotBlank(sheetName, "sheetName");
         this.lock.lock();
 
         try (Workbook wb = WorkbookFactory.create(is)) {
@@ -138,7 +137,7 @@ public class ExcelBeans {
      * @param sheetName Sheet名称
      */
     public BeanContainer parse(Workbook wb, String sheetName) throws ServiceException {
-        Objects.requireNonNull(sheetName, "sheetName");
+        VerifyTools.requireNotBlank(sheetName, "sheetName");
         this.lock.lock();
         try {
             this.init();

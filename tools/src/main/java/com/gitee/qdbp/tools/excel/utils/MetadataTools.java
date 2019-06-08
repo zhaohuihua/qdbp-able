@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Properties;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -588,7 +587,7 @@ public class MetadataTools {
      * @return 转换规则
      */
     public static Map<String, CellRule> parseRules(Workbook wb, String sheetName, String columnFields, int skipRows) {
-        Objects.requireNonNull(sheetName, "sheetName");
+        VerifyTools.requireNotBlank(sheetName, "sheetName");
         if (wb.getSheet(sheetName) == null) {
             log.warn("Failed to parse convert rule, sheet not found. sheet={}", sheetName);
             return null;
@@ -602,7 +601,7 @@ public class MetadataTools {
     }
 
     private static XMetadata newRuleMetadata(String sheetName, String columnFields, int skipRows) {
-        Objects.requireNonNull(sheetName, "sheetName");
+        VerifyTools.requireNotBlank(sheetName, "sheetName");
         Properties config = new Properties();
         config.put("field.names", columnFields);
         config.put("skip.rows", skipRows);

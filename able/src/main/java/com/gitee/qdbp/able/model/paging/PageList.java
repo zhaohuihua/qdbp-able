@@ -121,7 +121,7 @@ public class PageList<T> implements Iterable<T>, Serializable {
     }
 
     /** PageList转List **/
-    public List<T> toList() {
+    public PartList<T> toList() {
         PartList<T> pl = new PartList<T>();
         if (!this.isEmpty()) {
             pl.addAll(this.getList());
