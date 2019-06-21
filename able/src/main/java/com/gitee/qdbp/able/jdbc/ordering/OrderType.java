@@ -1,4 +1,4 @@
-package com.gitee.qdbp.able.model.ordering;
+package com.gitee.qdbp.able.jdbc.ordering;
 
 /**
  * 排序类型

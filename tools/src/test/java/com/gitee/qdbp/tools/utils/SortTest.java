@@ -7,7 +7,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.gitee.qdbp.able.instance.ComplexComparator;
 import com.gitee.qdbp.able.instance.MapFieldComparator;
-import com.gitee.qdbp.able.model.ordering.Orderings;
+import com.gitee.qdbp.able.jdbc.ordering.Orderings;
 
 public class SortTest {
 

@@ -3,8 +3,8 @@ package com.gitee.qdbp.able.result;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import com.gitee.qdbp.able.model.paging.PageList;
-import com.gitee.qdbp.able.model.paging.PartList;
+import com.gitee.qdbp.able.jdbc.paging.PageList;
+import com.gitee.qdbp.able.jdbc.paging.PartList;
 
 /**
  * 响应消息

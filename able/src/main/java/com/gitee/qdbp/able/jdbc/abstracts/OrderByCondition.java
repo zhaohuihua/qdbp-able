@@ -1,4 +1,4 @@
-package com.gitee.qdbp.able.model.db;
+package com.gitee.qdbp.able.jdbc.abstracts;
 
 /**
  * 自定义OrderBy条件

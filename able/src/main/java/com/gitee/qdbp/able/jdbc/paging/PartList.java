@@ -1,4 +1,4 @@
-package com.gitee.qdbp.able.model.paging;
+package com.gitee.qdbp.able.jdbc.paging;
 
 import java.util.ArrayList;
 import java.util.Collection;

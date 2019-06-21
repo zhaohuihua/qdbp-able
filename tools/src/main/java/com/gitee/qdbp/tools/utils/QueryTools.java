@@ -11,11 +11,11 @@ import java.util.regex.Pattern;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.able.instance.ComplexComparator;
 import com.gitee.qdbp.able.instance.MapFieldComparator;
-import com.gitee.qdbp.able.model.ordering.OrderType;
-import com.gitee.qdbp.able.model.ordering.Ordering;
-import com.gitee.qdbp.able.model.ordering.Orderings;
-import com.gitee.qdbp.able.model.paging.PageList;
-import com.gitee.qdbp.able.model.paging.Paging;
+import com.gitee.qdbp.able.jdbc.ordering.OrderType;
+import com.gitee.qdbp.able.jdbc.ordering.Ordering;
+import com.gitee.qdbp.able.jdbc.ordering.Orderings;
+import com.gitee.qdbp.able.jdbc.paging.PageList;
+import com.gitee.qdbp.able.jdbc.paging.Paging;
 
 /**
  * 查询工具, 根据查询条件过滤, 分页
