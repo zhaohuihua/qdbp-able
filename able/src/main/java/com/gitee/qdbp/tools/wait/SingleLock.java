@@ -4,8 +4,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 单条件等待锁
@@ -15,8 +13,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SingleLock {
     
-    private static final Logger log = LoggerFactory.getLogger(SingleLock.class);
-
     private Lock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
 
@@ -44,7 +40,6 @@ public class SingleLock {
             lock.lock(); // 获取锁
             return condition.await(time, TimeUnit.MILLISECONDS); // 等待
         } catch (InterruptedException e) {
-            log.error("InterruptedException", e);
             // Restore the interrupted status
             Thread.currentThread().interrupt();
             return false;

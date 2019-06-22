@@ -6,7 +6,7 @@ package com.gitee.qdbp.able.exception;
  * @author zhaohuihua
  * @version 170624
  */
-public abstract class EditableException extends Exception {
+public abstract class EditableException extends RuntimeException {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;

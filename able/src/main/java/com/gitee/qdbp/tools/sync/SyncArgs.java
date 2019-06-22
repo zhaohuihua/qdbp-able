@@ -8,7 +8,7 @@ import java.util.Arrays;
  * @author zhh
  * @version 170526
  */
-public interface Args {
+public interface SyncArgs {
 
     int length();
 
@@ -42,7 +42,7 @@ public interface Args {
 
     }
 
-    public static class AnyArgs implements Args {
+    public static class AnyArgs implements SyncArgs {
 
         private final Arg<?>[] args;
 

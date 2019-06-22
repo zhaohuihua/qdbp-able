@@ -6,7 +6,7 @@ import com.gitee.qdbp.tools.utils.ReflectTools;
 
 /**
  * 异步执行方法, 带结果回调<br>
- * Callback&lt;String&gt; callback = new Callback.Log<>();<br>
+ * SyncCallback&lt;String&gt; callback = new SyncCallback.Log<>();<br>
  * Args args = new AnyArgs(arg1, arg2);<br>
  * new SyncInvoker&lt;XxxService, String&gt;(xxxService, "methood", args, callback).start();<br>
  *
@@ -17,10 +17,10 @@ public class SyncInvoker<T, R> extends Thread {
 
     protected T target;
     protected String method;
-    protected Args args;
-    protected Callback<? super R> callback;
+    protected SyncArgs args;
+    protected SyncCallback<? super R> callback;
 
-    public SyncInvoker(T target, String method, Args args, Callback<? super R> callback) {
+    public SyncInvoker(T target, String method, SyncArgs args, SyncCallback<? super R> callback) {
         this.target = target;
         this.method = method;
         this.args = args;

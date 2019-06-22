@@ -10,7 +10,7 @@ import com.gitee.qdbp.able.result.IResultMessage;
  * @author zhaohuihua
  * @version 150915
  */
-public class ServiceException extends EditableRuntimeException implements IResultMessage {
+public class ServiceException extends EditableException implements IResultMessage {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;

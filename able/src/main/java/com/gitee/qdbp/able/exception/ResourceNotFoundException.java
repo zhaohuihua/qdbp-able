@@ -6,7 +6,7 @@ package com.gitee.qdbp.able.exception;
  * @author zhaohuihua
  * @version 170624
  */
-public class ResourceNotFoundException extends EditableRuntimeException {
+public class ResourceNotFoundException extends EditableException {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;

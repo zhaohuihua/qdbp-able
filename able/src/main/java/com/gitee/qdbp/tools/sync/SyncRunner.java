@@ -9,7 +9,7 @@ package com.gitee.qdbp.tools.sync;
  */
 public class SyncRunner<T> extends SyncInvoker<T, Object> {
 
-    public SyncRunner(T target, String method, Args args) {
-        super(target, method, args, new Callback.Ignore<Object>());
+    public SyncRunner(T target, String method, SyncArgs args) {
+        super(target, method, args, new SyncCallback.Ignore<Object>());
     }
 }
