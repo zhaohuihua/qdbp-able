@@ -381,7 +381,9 @@ public abstract class PropertyTools {
         if (index == 0) {
             return value;
         } else {
-            buffer.append(value.substring(index));
+            if (index < value.length()) {
+                buffer.append(value.substring(index));
+            }
             return buffer.toString();
         }
     }
