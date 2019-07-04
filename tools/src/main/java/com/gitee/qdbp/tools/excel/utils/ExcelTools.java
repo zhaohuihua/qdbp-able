@@ -219,7 +219,9 @@ public abstract class ExcelTools {
                 int index = 0;
                 StringBuilder buffer = new StringBuilder();
                 while (matcher.find()) {
-                    buffer.append(formula.substring(index, matcher.start()));
+                    if (index < matcher.start()) {
+                        buffer.append(formula.substring(index, matcher.start()));
+                    }
                     buffer.append(matcher.group(1)); // 列标
                     String row = matcher.group(2); // 行标
                     if (row.startsWith("$")) { // 固定行标
@@ -229,8 +231,14 @@ public abstract class ExcelTools {
                     }
                     index = matcher.end();
                 }
-                buffer.append(formula.substring(index));
-                tcell.setCellFormula(buffer.toString());
+                if (index == 0) {
+                    tcell.setCellFormula(formula);
+                } else {
+                    if (index < formula.length()) {
+                        buffer.append(formula.substring(index));
+                    }
+                    tcell.setCellFormula(buffer.toString());
+                }
             }
         }
     }
