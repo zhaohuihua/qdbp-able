@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
+import com.gitee.qdbp.tools.utils.ReflectTools;
 
 /**
  * 深度路径Map, 用于Ognl取值<br>
- * a.b.c, a.b.c.d 不能共存, 保留最路径最深的a.b.c.d
+ * a.b.c, a.b.c.d 不能共存, 保留路径最深的a.b.c.d
  *
  * <pre>
  * DepthPathMap dpm = new DepthPathMap();
@@ -25,26 +26,26 @@ import java.util.regex.Pattern;
  *
  * Map<String, Object> map = dpm.map();
  *
- * Ognl.getValue("author", map); -- Map({code=100, name=zhaohuihua})
- * Ognl.getValue("author.code", map); -- 100
- * Ognl.getValue("author.name", map); -- zhaohuihua
+ * dpm.get("author"); -- Map({code=100, name=zhaohuihua})
+ * dpm.get("author.code"); -- 100
+ * dpm.get("author.name"); -- zhaohuihua
  *
- * Ognl.getValue("code.folder", map); -- Map({service=service, page=views})
- * Ognl.getValue("code.folder.service", map); -- service
- * Ognl.getValue("code.folder.page", map); -- views
+ * dpm.get("code.folder"); -- Map({service=service, page=views})
+ * dpm.get("code.folder.service"); -- service
+ * dpm.get("code.folder.page"); -- views
  * </pre>
  *
  * @author zhaohuihua
  * @version 151221
  */
-public class DepthPathMap {
+public class DepthMap {
 
     private static final Pattern SEPARATOR = Pattern.compile("\\.");
 
     private Map<String, Object> map = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public DepthPathMap put(String key, Object value) {
+    public DepthMap put(String key, Object value) {
         String[] keys = SEPARATOR.split(key);
 
         List<String> list = Arrays.asList(keys);
@@ -76,12 +77,16 @@ public class DepthPathMap {
         return this;
     }
 
+    public <T> T get(String key) {
+        return ReflectTools.getDepthValue(this.map, key);
+    }
+
     public Map<String, Object> map() {
         return map;
     }
 
-    public DepthPathMap copy() {
-        DepthPathMap n = new DepthPathMap();
+    public DepthMap copy() {
+        DepthMap n = new DepthMap();
         n.map.putAll(this.map);
         return n;
     }
@@ -93,13 +98,13 @@ public class DepthPathMap {
      * @param prefix 前缀
      * @return
      */
-    public static DepthPathMap load(Properties setting, String prefix) {
+    public static DepthMap load(Properties setting, String prefix) {
 
         if (!prefix.endsWith(".")) {
             prefix = prefix + ".";
         }
 
-        DepthPathMap dpm = new DepthPathMap();
+        DepthMap dpm = new DepthMap();
         for (Entry<Object, Object> e : setting.entrySet()) {
             String key = e.getKey().toString();
             if (key.startsWith(prefix)) {

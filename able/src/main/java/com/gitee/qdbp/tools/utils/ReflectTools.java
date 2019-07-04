@@ -5,7 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * 反射工具类
@@ -14,6 +17,96 @@ import java.util.List;
  * @version 170526
  */
 public abstract class ReflectTools {
+
+    /** 或运算符 **/
+    private static Pattern FIELD_OR_SPLITOR = Pattern.compile("\\s*\\|\\|\\s*");
+    /** 数组或点正则表达式 **/
+    private static Pattern FIELD_PART_SPLITOR = Pattern.compile("[\\.\\[\\]]+");
+
+    /**
+     * 从对象中获取字段值, 支持多级字段名<br>
+     * 如 target = { domain:{ text:"baidu", url:"http://baidu.com" } }<br>
+     * -- findFieldValue(target, "domain.text"); 返回 "baidu"<br>
+     * 如 target = { domain:{ text:"baidu", url:"http://baidu.com" } }<br>
+     * -- findFieldValue(target, "domain.name || domain.text"); 返回 "baidu"<br>
+     * 如 list = [{ domain:{ text:"baidu", url:"http://baidu.com" } },<br>
+     * &nbsp;&nbsp;&nbsp;&nbsp;{ domain:{ text:"bing", url:"http://cn.bing.com" } }]<br>
+     * -- findFieldValue(list, "[1].domain.text"); 返回 "bing"<br>
+     * 如 data = { data: [<br>
+     * &nbsp;&nbsp;&nbsp;&nbsp;{ domain:{ text:"baidu", url:"http://baidu.com" } },<br>
+     * &nbsp;&nbsp;&nbsp;&nbsp;{ domain:{ text:"bing", url:"http://cn.bing.com" } }<br>
+     * ] }<br>
+     * -- findFieldValue(list, "data[1].domain.text"); 返回 "bing"<br>
+     * 
+     * @param target 目标对象, 支持数组/List/Map/Bean
+     * @param fieldNames 字段名, 支持带点的多级字段名和数组下标
+     * @return 字段值
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getDepthValue(Object target, String fieldNames) {
+        VerifyTools.requireNotBlank(fieldNames, "field");
+        if (target == null) {
+            return null;
+        }
+        String[] orFields = FIELD_OR_SPLITOR.split(fieldNames);
+        Object value = null;
+        for (String fields : orFields) {
+            value = target;
+            // 将表达式以.或[]拆分为数组
+            String[] list = FIELD_PART_SPLITOR.split(fields);
+            // 逐层取值
+            for (int j = 0; value != null && j < list.length; j++) {
+                String field = list[j];
+                if (VerifyTools.isNotBlank(field) && !field.equals("this")) {
+                    if (value.getClass().isArray()) {
+                        value = getArrayFieldValue((Object[]) value, field);
+                    } else if (value instanceof Collection) {
+                        value = getListFieldValue((Collection<?>) value, field);
+                    } else if (value instanceof Map) {
+                        value = getMapFieldValue((Map<?, ?>) value, field);
+                    } else {
+                        value = getFieldValue(value, field, false);
+                    }
+                }
+            }
+            if (value != null) {
+                break;
+            }
+        }
+        return (T) value;
+    }
+
+    private static Object getMapFieldValue(Map<?, ?> map, String fieldName) {
+        return map.get(fieldName);
+    }
+
+    private static Object getArrayFieldValue(Object[] array, String fieldName) {
+        Integer index = ConvertTools.toInteger(fieldName, null);
+        if (index == null) {
+            return null;
+        } else {
+            return index >= array.length ? null : array[index];
+        }
+    }
+
+    private static Object getListFieldValue(Collection<?> list, String fieldName) {
+        Integer index = ConvertTools.toInteger(fieldName, null);
+        if (index == null) {
+            return null;
+        }
+        if (list instanceof List) {
+            List<?> temp = (List<?>) list;
+            return index >= temp.size() ? null : temp.get(index);
+        } else {
+            int i = 0;
+            for (Object item : list) {
+                if (i++ == index) {
+                    return item;
+                }
+            }
+            return null;
+        }
+    }
 
     /**
      * 通过反射查找字段, 优先查找当前类, 并循继承树向上查找父类
@@ -104,8 +197,10 @@ public abstract class ReflectTools {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, Field field) {
-        VerifyTools.requireNotBlank(target, "target");
         VerifyTools.requireNotBlank(field, "field");
+        if (target == null) {
+            return null;
+        }
         try {
             return (T) field.get(target);
         } catch (IllegalAccessException e) {
@@ -130,14 +225,14 @@ public abstract class ReflectTools {
      * @param target 目标对象
      * @param fieldName 字段名称
      * @param value 字段值
-     * @param throwOnNotFound 如果字段不存在是否抛出异常
+     * @param throwOnFieldNotFound 如果字段不存在是否抛出异常
      */
-    public static void setFieldValue(Object target, String fieldName, Object value, boolean throwOnNotFound) {
+    public static void setFieldValue(Object target, String fieldName, Object value, boolean throwOnFieldNotFound) {
         VerifyTools.requireNotBlank(target, "target");
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
         Class<?> clazz = target.getClass();
-        Field field = findField(clazz, fieldName, throwOnNotFound);
+        Field field = findField(clazz, fieldName, throwOnFieldNotFound);
         if (field == null) {
             return;
         }
@@ -166,9 +261,10 @@ public abstract class ReflectTools {
      * @param target 目标对象
      * @param fieldName 字段名称
      * @param value 字段值
-     * @param throwOnNotFound 如果字段不存在是否抛出异常
+     * @param throwOnFieldNotFound 如果字段不存在是否抛出异常
      */
-    public static void setFieldValueIfAbsent(Object target, String fieldName, Object value, boolean throwOnNotFound) {
+    public static void setFieldValueIfAbsent(Object target, String fieldName, Object value,
+            boolean throwOnFieldNotFound) {
         VerifyTools.requireNotBlank(target, "target");
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
@@ -177,7 +273,7 @@ public abstract class ReflectTools {
         }
 
         Class<?> clazz = target.getClass();
-        Field field = findField(clazz, fieldName, throwOnNotFound);
+        Field field = findField(clazz, fieldName, throwOnFieldNotFound);
         if (field == null) {
             return;
         }
@@ -207,15 +303,14 @@ public abstract class ReflectTools {
      * @param target 目标对象
      * @param fieldName 字段名称
      * @return 字段值
-     * @param throwOnNotFound 如果字段不存在是否抛出异常
+     * @param throwOnFieldNotFound 如果字段不存在是否抛出异常
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getFieldValue(Object target, String fieldName, boolean throwOnNotFound) {
-        VerifyTools.requireNotBlank(target, "target");
+    public static <T> T getFieldValue(Object target, String fieldName, boolean throwOnFieldNotFound) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
         Class<?> clazz = target.getClass();
-        Field field = findField(clazz, fieldName, throwOnNotFound);
+        Field field = findField(clazz, fieldName, throwOnFieldNotFound);
         if (field == null) {
             return null;
         }
@@ -417,16 +512,16 @@ public abstract class ReflectTools {
      * @param <T> 返回结果类型, 如果类型不符将抛出ClassCastException异常
      * @param target 目标对象
      * @param methodName 方法名
-     * @param throwOnNotFound 如果方法不存在是否抛出异常
+     * @param throwOnMethodNotFound 如果方法不存在是否抛出异常
      * @return 方法返回结果
      */
-    public static <T> T invokeMethod(Object target, String methodName, boolean throwOnNotFound) {
+    public static <T> T invokeMethod(Object target, String methodName, boolean throwOnMethodNotFound) {
         VerifyTools.requireNotBlank(target, "target");
         VerifyTools.requireNotBlank(methodName, "methodName");
 
         Class<?> clazz = target.getClass();
         Class<?>[] types = new Class<?>[0];
-        Method method = findMethod(clazz, methodName, throwOnNotFound, types);
+        Method method = findMethod(clazz, methodName, throwOnMethodNotFound, types);
         if (method == null) {
             return null;
         }
@@ -456,12 +551,12 @@ public abstract class ReflectTools {
      * @param <T> 返回结果类型, 如果类型不符将抛出ClassCastException异常
      * @param target 目标对象
      * @param methodName 方法名, 如果方法不存在将抛出IllegalArgumentException异常
-     * @param throwOnNotFound 如果方法不存在是否抛出异常
+     * @param throwOnMethodNotFound 如果方法不存在是否抛出异常
      * @param args 参数
      * @return 方法返回结果
      */
     @SuppressWarnings("unchecked")
-    public static <T> T invokeMethod(Object target, String methodName, boolean throwOnNotFound, Object... args) {
+    public static <T> T invokeMethod(Object target, String methodName, boolean throwOnMethodNotFound, Object... args) {
         VerifyTools.requireNotBlank(target, "target");
         VerifyTools.requireNotBlank(methodName, "methodName");
 
@@ -471,7 +566,7 @@ public abstract class ReflectTools {
             types[i] = args[i] == null ? null : args[i].getClass();
         }
         Class<?> clazz = target.getClass();
-        Method method = findMethod(clazz, methodName, throwOnNotFound, types);
+        Method method = findMethod(clazz, methodName, throwOnMethodNotFound, types);
         if (method == null) {
             return null;
         }
