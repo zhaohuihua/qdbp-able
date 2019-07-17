@@ -369,7 +369,7 @@ public abstract class DateTools {
     }
 
     /**
-     * 转换为结束时间, 即设置时分秒为00:00:00
+     * 转换为开始时间, 即设置时分秒为00:00:00
      *
      * @param date 待处理的日期
      * @return 结束时间

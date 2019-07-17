@@ -72,7 +72,7 @@ public class MetadataTools {
      * footer.rows = 7-9
      * ## 包含指定关键字时跳过此行
      * ## A列为空, 或B列包含小计且H列包含元, 或B列包含总计且H列包含元
-     * # skip.row.when = { A:"NULL" }, { B:"小计", H:"元" }, { B:"总计", H:"元" }
+     * # skip.row.when.contains = { A:"NULL" }, { B:"小计", H:"元" }, { B:"总计", H:"元" }
      * 
      * ## 加载哪些Sheet, sheet.index/sheet.name必填其一
      * ## 配置规则: * 表示全部
@@ -346,7 +346,7 @@ public class MetadataTools {
                 continue;
             }
             List<Item> items = new ArrayList<>();
-            List<String> keys = new ArrayList<>();
+            List<String> keys = new ArrayList<>(json.keySet());
             Collections.sort(keys);
             for (String key : keys) {
                 int index;

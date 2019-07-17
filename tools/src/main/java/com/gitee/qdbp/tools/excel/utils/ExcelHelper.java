@@ -62,7 +62,7 @@ public class ExcelHelper {
                 continue;
             }
             if (metadata.isSkipRow(row)) {
-                log.trace("Sheet[{}], skip row, row={}", sheetName, i);
+                log.trace("Sheet[{}], skip row, row={}", sheetName, i + 1);
                 continue;
             }
             try {
