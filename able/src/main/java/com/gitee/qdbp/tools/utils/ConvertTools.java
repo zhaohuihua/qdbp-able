@@ -580,7 +580,9 @@ public abstract class ConvertTools {
      * @return 合并后的字符串
      */
     public static String joinToString(Collection<?> list, String seprator) {
-
+        if (list == null) {
+            return null;
+        }
         StringBuilder buffer = new StringBuilder();
         if (VerifyTools.isNotBlank(list)) {
             for (Object tmp : list) {
@@ -611,7 +613,9 @@ public abstract class ConvertTools {
      * @return 合并后的字符串
      */
     public static String joinToString(Object[] array, String seprator) {
-
+        if (array == null) {
+            return null;
+        }
         StringBuilder buffer = new StringBuilder();
         if (VerifyTools.isNotBlank(array)) {
             for (Object tmp : array) {
