@@ -22,6 +22,13 @@ import com.gitee.qdbp.able.exception.ExceptionWatcher;
  */
 public abstract class FileTools {
 
+    /**
+     * 从输入流复制到输出流
+     * 
+     * @param input 输入流
+     * @param output 输出流
+     * @throws IOException IO异常
+     */
     public static void copy(InputStream input, OutputStream output) throws IOException {
         int length;
         int bz = 2048;
@@ -36,7 +43,7 @@ public abstract class FileTools {
      *
      * @param data 数据
      * @param path 文件路径
-     * @throws IOException 失败
+     * @throws IOException IO异常
      */
     public static void saveFile(byte[] data, String path) throws IOException {
         Path target = Paths.get(path);
@@ -51,7 +58,7 @@ public abstract class FileTools {
      *
      * @param data 数据
      * @param path 文件路径
-     * @throws IOException 失败
+     * @throws IOException IO异常
      */
     public static void saveFile(InputStream input, String path) throws IOException {
 
@@ -104,7 +111,14 @@ public abstract class FileTools {
 
     /**
      * 移动文件或递归移动文件夹<br>
-     * 源文件不存在时, 不会抛异常, 直接返回成功
+     * 源文件不存在时, 不会抛异常, 直接返回成功<br>
+     * <br>
+     * 如果不关注是否成功建议使用ExceptionLogger记录日志:<br>
+     * FileTools.copy(source, destination, ExceptionLogger.SIMPLE);<br>
+     * 如果既要记录日志又要知道是否成功:<br>
+     * CountLogWatcher counter = ExceptionLogger.newCountWatcher();<br>
+     * FileTools.copy(source, destination, counter);<br>
+     * boolean success = counter.getFailedTimes() == 0;<br>
      * 
      * @param source 源文件
      * @param destination 目标文件
@@ -113,12 +127,19 @@ public abstract class FileTools {
     public static boolean move(String source, String destination) {
         CountWatcher counter = new CountWatcher();
         move(Paths.get(source), Paths.get(destination), counter);
-        return counter.getCount() == 0;
+        return counter.getFailedTimes() == 0;
     }
 
     /**
      * 移动文件或递归移动文件夹<br>
-     * 源文件不存在时, 不会抛异常, 直接返回成功
+     * 源文件不存在时, 不会抛异常, 直接返回成功<br>
+     * <br>
+     * 如果不关注是否成功建议使用ExceptionLogger记录日志:<br>
+     * FileTools.move(source, destination, ExceptionLogger.SIMPLE);<br>
+     * 如果既要记录日志又要知道是否成功:<br>
+     * CountLogWatcher counter = ExceptionLogger.newCountWatcher();<br>
+     * FileTools.move(source, destination, counter);<br>
+     * boolean success = counter.getFailedTimes() == 0;<br>
      * 
      * @param source 源文件
      * @param destination 目标文件
@@ -127,7 +148,7 @@ public abstract class FileTools {
     public static boolean move(File source, File destination) {
         CountWatcher counter = new CountWatcher();
         move(source.toPath(), destination.toPath(), counter);
-        return counter.getCount() == 0;
+        return counter.getFailedTimes() == 0;
     }
 
     /**
@@ -209,7 +230,14 @@ public abstract class FileTools {
 
     /**
      * 复制文件或递归复制文件夹<br>
-     * 源文件不存在时, 不会抛异常, 直接返回成功
+     * 源文件不存在时, 不会抛异常, 直接返回成功<br>
+     * <br>
+     * 如果不关注是否成功建议使用ExceptionLogger记录日志:<br>
+     * FileTools.copy(source, destination, ExceptionLogger.SIMPLE);<br>
+     * 如果既要记录日志又要知道是否成功:<br>
+     * CountLogWatcher counter = ExceptionLogger.newCountWatcher();<br>
+     * FileTools.copy(source, destination, counter);<br>
+     * boolean success = counter.getFailedTimes() == 0;<br>
      * 
      * @param source 源文件
      * @param destination 目标文件
@@ -218,12 +246,19 @@ public abstract class FileTools {
     public static boolean copy(String source, String destination) {
         CountWatcher counter = new CountWatcher();
         copy(Paths.get(source), Paths.get(destination), counter);
-        return counter.getCount() == 0;
+        return counter.getFailedTimes() == 0;
     }
 
     /**
      * 复制文件或递归复制文件夹<br>
-     * 源文件不存在时, 不会抛异常, 直接返回成功
+     * 源文件不存在时, 不会抛异常, 直接返回成功<br>
+     * <br>
+     * 如果不关注是否成功建议使用ExceptionLogger记录日志:<br>
+     * FileTools.copy(source, destination, ExceptionLogger.SIMPLE);<br>
+     * 如果既要记录日志又要知道是否成功:<br>
+     * CountLogWatcher counter = ExceptionLogger.newCountWatcher();<br>
+     * FileTools.copy(source, destination, counter);<br>
+     * boolean success = counter.getFailedTimes() == 0;<br>
      * 
      * @param source 源文件
      * @param destination 目标文件
@@ -232,7 +267,7 @@ public abstract class FileTools {
     public static boolean copy(File source, File destination) {
         CountWatcher counter = new CountWatcher();
         copy(source.toPath(), destination.toPath(), counter);
-        return counter.getCount() == 0;
+        return counter.getFailedTimes() == 0;
     }
 
     /**
@@ -306,7 +341,14 @@ public abstract class FileTools {
 
     /**
      * 删除文件或递归删除文件夹<br>
-     * 源文件不存在时, 直接返回成功
+     * 源文件不存在时, 直接返回成功<br>
+     * <br>
+     * 如果不关注是否成功建议使用ExceptionLogger记录日志:<br>
+     * FileTools.delete(source, ExceptionLogger.SIMPLE);<br>
+     * 如果既要记录日志又要知道是否成功:<br>
+     * CountLogWatcher counter = ExceptionLogger.newCountWatcher();<br>
+     * FileTools.delete(source, counter);<br>
+     * boolean success = counter.getFailedTimes() == 0;<br>
      * 
      * @param source 待删除的文件
      * @return 是否全部成功
@@ -314,12 +356,19 @@ public abstract class FileTools {
     public static boolean delete(String source) {
         CountWatcher counter = new CountWatcher();
         delete(Paths.get(source), counter);
-        return counter.getCount() == 0;
+        return counter.getFailedTimes() == 0;
     }
 
     /**
      * 删除文件或递归删除文件夹<br>
-     * 源文件不存在时, 直接返回成功
+     * 源文件不存在时, 直接返回成功<br>
+     * <br>
+     * 如果不关注是否成功建议使用ExceptionLogger记录日志:<br>
+     * FileTools.delete(source, ExceptionLogger.SIMPLE);<br>
+     * 如果既要记录日志又要知道是否成功:<br>
+     * CountLogWatcher counter = ExceptionLogger.newCountWatcher();<br>
+     * FileTools.delete(source, counter);<br>
+     * boolean success = counter.getFailedTimes() == 0;<br>
      * 
      * @param source 待删除的文件
      * @return 是否全部成功
@@ -327,7 +376,7 @@ public abstract class FileTools {
     public static boolean delete(File source) {
         CountWatcher counter = new CountWatcher();
         delete(source.toPath(), counter);
-        return counter.getCount() == 0;
+        return counter.getFailedTimes() == 0;
     }
 
     /**
@@ -400,7 +449,7 @@ public abstract class FileTools {
             return true;
         }
 
-        public int getCount() {
+        public int getFailedTimes() {
             return counter.get();
         }
     }
