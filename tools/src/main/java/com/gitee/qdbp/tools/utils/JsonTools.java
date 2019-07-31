@@ -1,9 +1,13 @@
 package com.gitee.qdbp.tools.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -13,6 +17,7 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.gitee.qdbp.able.beans.DepthMap;
 import com.gitee.qdbp.able.beans.KeyString;
 
 /**
@@ -166,5 +171,118 @@ public abstract class JsonTools {
             }
             throw new IllegalArgumentException("json is empty.");
         }
+    }
+
+    /**
+     * 过滤数据字段<br>
+     * <pre>
+        Map&lt;String, Object&gt; data = { main:{}, detail:{}, subject:{}, finance:[], target:[] };
+        String mainFields = "main:id,projectName,publishStatus";
+        String detailFields = "detail:id,totalAmount,holdingTime";
+        String subjectFields = "subject:id,customerName,industryCategory";
+        String financeFields = "finance:id,totalAssets,netAssets,netProfits,busiIncome";
+        String targetFields = "target:id,industryCategory,latestMkt,latestPer";
+        MapTools.filter(data, mainFields, detailFields, subjectFields, financeFields, targetFields);
+     * </pre>
+     * 
+     * @param data 过滤前的数据
+     * @param fields 需要保留的字段列表
+     * @return 过滤后的数据
+     */
+    public Map<String, Object> filterFields(Map<String, Object> data, String... fields) {
+        if (VerifyTools.isAnyBlank(data, fields)) {
+            return data;
+        }
+        Map<String, Set<String>> conditions = parseConditioin(fields);
+        DepthMap result = new DepthMap();
+        for (Map.Entry<String, Set<String>> entry : conditions.entrySet()) {
+            String group = entry.getKey();
+            Set<String> keys = entry.getValue();
+            if (group == null) {
+                fillToDepthMap(data, keys, result);
+            } else {
+                Object value = ReflectTools.getDepthValue(result, group);
+                if (VerifyTools.isNotBlank(value)) {
+                    fillToDepthMap(value, group, keys, result);
+                }
+            }
+        }
+        return result.map();
+    }
+
+    private static void fillToDepthMap(Map<String, Object> data, Set<String> keys, DepthMap container) {
+        Map<String, Object> filtered = filterObject(data, keys);
+        if (VerifyTools.isBlank(filtered)) {
+            for (Map.Entry<String, Object> temp : filtered.entrySet()) {
+                container.put(temp.getKey(), temp.getValue());
+            }
+        }
+    }
+
+    private static void fillToDepthMap(Object data, String group, Set<String> keys, DepthMap container) {
+        if (data.getClass().isArray()) {
+            List<?> list = ConvertTools.toList((Object[]) data);
+            List<Map<String, Object>> filtered = filterCollection(list, keys);
+            if (VerifyTools.isNotBlank(filtered)) {
+                container.put(group, filtered);
+            }
+        } else if (data instanceof Collection) {
+            List<Map<String, Object>> filtered = filterCollection((Collection<?>) data, keys);
+            if (VerifyTools.isNotBlank(filtered)) {
+                container.put(group, filtered);
+            }
+        } else {
+            Map<String, Object> filtered = filterObject(data, keys);
+            if (VerifyTools.isNotBlank(filtered)) {
+                container.put(group, filtered);
+            }
+        }
+    }
+
+    private static Map<String, Object> filterObject(Object data, Set<String> keys) {
+        DepthMap container = new DepthMap();
+        for (String key : keys) {
+            Object value = ReflectTools.getDepthValue(data, key);
+            if (VerifyTools.isNotBlank(value)) {
+                container.put(key, value);
+            }
+        }
+        return container.map();
+    }
+
+    private static List<Map<String, Object>> filterCollection(Collection<?> data, Set<String> keys) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Object object : data) {
+            list.add(filterObject(object, keys));
+        }
+        return list;
+    }
+
+    private static Map<String, Set<String>> parseConditioin(String... fields) {
+        Map<String, Set<String>> conditions = new HashMap<>();
+        for (String field : fields) {
+            String group = null;
+            String keys = field;
+            int index = field.indexOf(':');
+            if (index == 0) {
+                keys = field.substring(index + 1).trim();
+            } else if (index > 0) {
+                group = field.substring(0, index).trim();
+                keys = field.substring(index + 1).trim();
+            }
+            String[] fieldNames = StringTools.split(keys, true, ',', ' ');
+            if (conditions.containsKey(group)) {
+                for (String i : fieldNames) {
+                    conditions.get(group).add(i);
+                }
+            } else {
+                Set<String> list = new HashSet<>();
+                for (String i : fieldNames) {
+                    list.add(i);
+                }
+                conditions.put(group, list);
+            }
+        }
+        return conditions;
     }
 }
