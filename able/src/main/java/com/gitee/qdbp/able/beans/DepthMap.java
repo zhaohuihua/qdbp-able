@@ -44,6 +44,13 @@ public class DepthMap {
 
     private Map<String, Object> map = new HashMap<>();
 
+    public DepthMap() {
+    }
+
+    public DepthMap(Map<String, Object> map) {
+        this.map = map;
+    }
+
     @SuppressWarnings("unchecked")
     public DepthMap put(String key, Object value) {
         String[] keys = SEPARATOR.split(key);
