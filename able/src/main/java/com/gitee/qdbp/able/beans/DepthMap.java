@@ -71,6 +71,7 @@ public class DepthMap {
                     older = new HashMap<>();
                     parent.put(name, older);
                 }
+                parent = (Map<String, Object>) older;
             } else {
                 // 没有下一级
                 if (older != null && older instanceof Map) {
@@ -78,8 +79,8 @@ public class DepthMap {
                     continue;
                 }
                 parent.put(name, value);
+                parent = null; // 没有下一级了, 不需要再处理parent
             }
-            parent = (Map<String, Object>) older;
         }
         return this;
     }
