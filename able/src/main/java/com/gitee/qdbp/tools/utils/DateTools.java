@@ -108,29 +108,196 @@ public abstract class DateTools {
                     return dp.parse(date);
                 }
             }
-            throw new IllegalArgumentException("Date format is not supported.");
+            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
         }
     }
 
     /**
-     * 按标准格式解析日期<br>
+     * 智能解析日期<br>
      * parse("2000-10-20 15:25:35.450");<br>
-     * parse("20001020152535450");<br>
      * parse("2000-10-20 15:25:35");<br>
-     * parse("20001020152535");<br>
      * parse("2000-10-20");<br>
+     * parse("2018/8/20 15:25:35");<br>
+     * parse("8/20/2018 15:25:35");<br>
+     * parse("20001020152535450");<br>
+     * parse("20001020152535");<br>
      * parse("20001020");<br>
      * parse("15:25:35");<br>
      * parse("152535");<br>
+     * 解析年月日格式说明<br>
+     * 年月日(中式): 2018/8/8, 2018/8/20, 2018/12/12<br>
+     * 月日年(美式): 8/8/2018, 8/20/2018, 12/12/2018<br>
+     * 日月年(英式): 20/8/2018(20大于12的作为日); 7/8/2018(无法识别月日顺序按月日年处理)<br>
+     * 注意: 大于31的识别为年份; 大于99的为公元年份; 小于等于99的, 30及以上为19XX年, 小于等于29的为20XX年<br>
+     * 三个数字都不大于31时, 按年月日顺序处理: 6/7/8=2006/7/8; 29/7/8=2029/7/8; 30/7/8=1930/7/8<br>
+     * 大于2位的识别为公元年份: 6/7/8=2006/7/8; 0006/7/8=公元6年7月8日<br>
      * 
      * @param string 日期字符串
      * @return 日期
      */
     public static Date parse(String string) {
-        if (string == null) {
+        if (string == null || string.trim().length() == 0) {
             return null;
         }
-        return PARSERS.parse(string);
+        String datetime = string.trim();
+        if (datetime.indexOf(' ') >= 0) {
+            String[] array = StringTools.split(datetime, ' ');
+            if (array.length != 2) {
+                throw new IllegalArgumentException("Date format is not supported [" + datetime + "].");
+            }
+            Date date;
+            if (datetime.indexOf('-') >= 0) {
+                date = parseYyyyMMdd(array[0], '-');
+            } else if (datetime.indexOf('/') >= 0) {
+                date = parseYyyyMMdd(array[0], '/');
+            } else {
+                throw new IllegalArgumentException("Date format is not supported [" + datetime + "].");
+            }
+            return parseTime(date, array[1]);
+        } else if (datetime.indexOf(':') >= 0) {
+            return parseTime(toStartTime(new Date()), datetime);
+        } else if (datetime.indexOf('-') >= 0) {
+            return parseYyyyMMdd(datetime, '-');
+        } else if (datetime.indexOf('/') >= 0) {
+            return parseYyyyMMdd(datetime, '/');
+        } else {
+            return PARSERS.parse(datetime);
+        }
+    }
+
+    /**
+     * 解析年月日<br>
+     * 年月日(中式): 2018/8/8, 2018/8/20, 2018/12/12<br>
+     * 月日年(美式): 8/8/2018, 8/20/2018, 12/12/2018<br>
+     * 日月年(英式): 20/8/2018(20大于12的作为日); 7/8/2018(无法识别月日顺序按月日年处理)<br>
+     * 注意: 大于31的识别为年份; 大于99的为公元年份; 小于等于99的, 30及以上为19XX年, 小于等于29的为20XX年<br>
+     * 三个数字都不大于31时, 按年月日顺序处理: 6/7/8=2006/7/8; 29/7/8=2029/7/8; 30/7/8=1930/7/8<br>
+     * 大于2位的识别为公元年份: 6/7/8=2006/7/8; 0006/7/8=公元6年7月8日<br>
+     * 
+     * @param date 日期字符串
+     * @param separator 分隔符
+     * @return 解析后的日期
+     */
+    private static Date parseYyyyMMdd(String date, char separator) {
+        String[] array = StringTools.split(date, separator);
+        if (array.length != 3) { // 不是三个数字
+            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+        }
+        int longCount = 0;
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].length() > 2) {
+                longCount++;
+            }
+        }
+        if (longCount > 1) { // 不只一个三位以上数字, 例如: 2018/8/100
+            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+        }
+        int first = parseInt(array[0], "Date", date);
+        int second = parseInt(array[1], "Date", date);
+        int third = parseInt(array[2], "Date", date);
+        Integer year = null;
+        Integer month = null;
+        Integer day = null;
+        if (array[0].length() > 2 || first > 31) { // 年/月/日, 例如: 2018/7/8; 0006/7/8(公元6年)
+            year = array[0].length() > 2 ? first : parseYear(first);
+            month = second;
+            day = third;
+        } else if (array[1].length() > 2 || second > 31) { // 年份出现在中间, 例如: 7/2018/8
+            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+        } else if (array[2].length() > 2 || third > 31) { // 月/日/年;日/月/年
+            year = array[2].length() > 2 ? third : parseYear(third);
+            if (first > 12) { // 日/月/年, 例如: 20/8/2018
+                month = second;
+                day = first;
+            } else { // 月/日/年, 例如: 8/20/2018; 7/8/2018(无法识别月日顺序,按月日年处理)
+                month = first;
+                day = second;
+            }
+        } else { // 三个数字都没有大于31, 按年/月/日处理
+            // 6/7/8(在excel中文版输入6/7/8会显示为2006年7月8日)
+            year = parseYear(first);
+            month = second;
+            day = third;
+        }
+        if (year > 9999 || month > 12 || day > 31) { // 2018/20/20, 2018/20/8, 2018/8/32, 20/20/2018
+            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+        }
+        return DateTools.of(year, month - 1, day);
+    }
+
+    private static Date parseTime(Date date, String string) {
+        long millis = parseTime(string);
+        return DateTools.addMillisecond(date, (int) millis);
+    }
+
+    /**
+     * 解析时间<br>
+     * 带毫秒或不带毫秒, 10:20:30, 10:5:8.360 毫秒如果超过三位只截止前三位, 10:20:30.999999=10:20:30.999
+     * 
+     * @param string 时间字符串
+     * @return 时间毫秒数
+     */
+    private static long parseTime(String string) {
+        if (string == null || string.trim().length() == 0) {
+            return 0;
+        }
+        String time = string.trim();
+        // 解析毫秒数
+        int millis = 0;
+        int dotIndex = time.indexOf('.');
+        if (dotIndex == 0) {
+            throw new IllegalArgumentException("Time format is not supported [" + string + "].");
+        } else if (dotIndex > 0) {
+            String millisString = time.substring(dotIndex + 1);
+            time = time.substring(0, dotIndex);
+            if (VerifyTools.isAnyBlank(time, millisString)) {
+                throw new IllegalArgumentException("Time format is not supported [" + string + "].");
+            }
+            if (millisString.length() > 3) {
+                millisString = millisString.substring(0, 3);
+            }
+            millis = parseInt(millisString, "Time", string);
+        }
+        // 解析时分秒
+        String[] array = StringTools.split(time, ':');
+        if (array.length != 3) { // 不是三个数字
+            throw new IllegalArgumentException("Time format is not supported [" + time + "].");
+        }
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].length() > 2) {
+                throw new IllegalArgumentException("Time format is not supported [" + time + "].");
+            }
+        }
+        int hours = parseInt(array[0], "Time", time);
+        int minutes = parseInt(array[1], "Time", time);
+        int seconds = parseInt(array[2], "Time", time);
+        if (hours > 23 || minutes > 59 || seconds > 59) {
+            throw new IllegalArgumentException("Time format is not supported [" + time + "].");
+        }
+        return hours * RATE_HOUR + minutes * RATE_MINUTE + seconds * RATE_SECOND + millis;
+    }
+
+    /** 解析年份: 大于99的为公元年份; 小于等于99的, 30及以上为19XX年, 小于等于29的为20XX年 **/
+    // 在excel中文版输入6/7/8会显示为2006年7月8日
+    // 在excel中文版输入29/7/8会显示为2029年7月8日
+    // 在excel中文版输入30/7/8会显示为1930年7月8日
+    private static int parseYear(int number) {
+        if (number > 99 || number < 0) {
+            return number;
+        } else if (number < 30) {
+            return 2000 + number;
+        } else {
+            return 1900 + number;
+        }
+    }
+
+    private static int parseInt(String value, String type, String original) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            String fmt = "%s format is not supported [%s], number format error [%s].";
+            throw new IllegalArgumentException(String.format(fmt, type, original, value));
+        }
     }
 
     /** 按指定格式解析日期 **/

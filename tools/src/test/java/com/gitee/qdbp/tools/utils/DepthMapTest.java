@@ -8,6 +8,7 @@ public class DepthMapTest {
 
         DepthMap dpm = new DepthMap();
         dpm.put("author", "xxx"); // 该设置无效, 会被后面的覆盖掉
+        dpm.put("author.code", 99);
         dpm.put("author.code", 100);
         dpm.put("author.name", "zhaohuihua");
 

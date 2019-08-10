@@ -7,12 +7,51 @@ import java.util.Date;
 public class DateToolsTest {
 
     public static void main(String[] args) throws Exception {
+        testParse();
         testCalculate();
-
         testTime("2015-02-08 20:30:40.500");
         testTime("2016-02-08 20:30:40.500");
         testTime("2016-03-08 20:30:40.500");
         testTime("2016-04-08 20:30:40.500");
+    }
+
+    private static void testParse() {
+        testParseDate("2018/0/0");
+        testParseDate("2018/0/8");
+        testParseDate("2018/7/8");
+        testParseDate("2018/7/20");
+        testParseDate("2018/12/24");
+        testParseDate("2016/2/29");
+        testParseDate("2018/2/29");
+        testParseDate("7/8/2018");
+        testParseDate("7/20/2018");
+        testParseDate("12/24/2018");
+        testParseDate("6/7/8");
+        testParseDate("0006/7/8");
+        testParseDate("7/8/0006");
+        testParseTime("0:0:0");
+        testParseTime("4:5:6");
+        testParseTime("20:30:40");
+        testParseTime("23:59:59");
+        testParseTime("4:5:6.999");
+        testParseTime("23:59:59.999999");
+        testParseDateTime("2018/7/8 20:30:40");
+        testParseDateTime("2018/7/8 4:5:6.999");
+        testParseDateTime("2018/7/8 23:59:59.999999");
+        System.out.println("------------------");
+        System.out.println();
+    }
+
+    private static void testParseDate(String string) {
+        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toDateString(DateTools.parse(string)));
+    }
+
+    private static void testParseTime(String string) {
+        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toNormativeString(DateTools.parse(string)));
+    }
+
+    private static void testParseDateTime(String string) {
+        System.out.println(StringTools.pad(string, ' ', false, 25) + DateTools.toNormativeString(DateTools.parse(string)));
     }
 
     private static void testCalculate() {
