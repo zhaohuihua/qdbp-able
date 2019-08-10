@@ -132,7 +132,7 @@ public abstract class JsonTools {
 
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 String jsonKey = TypeUtils.castToString(entry.getKey());
-                Object jsonValue = beanToMap(entry.getValue());
+                Object jsonValue = beanToJson(entry.getValue(), config);
                 json.put(jsonKey, jsonValue);
             }
 
