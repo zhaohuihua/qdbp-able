@@ -22,7 +22,7 @@ import com.gitee.qdbp.able.exception.ResourceNotFoundException;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
- * 资源工具类<br>
+ * 路径处理工具类<br>
  *
  * @author zhaohuihua
  * @version 170625
@@ -492,9 +492,9 @@ public abstract class PathTools {
 
     /**
      * 获取指定类相对位置的资源<br>
-     * getClassResource()是查找指定类路径的相对位置的资源<br>
+     * findClassResource()是查找指定类路径的相对位置的资源<br>
      * findResource()是查找classpath下的资源<br>
-     * 如getClassResource(com.xxx.abc.Test.class, "mmm/nnn.txt")会查找以下位置:<br>
+     * 如findClassResource(com.xxx.abc.Test.class, "mmm/nnn.txt")会查找以下位置:<br>
      * 1. {classpath}/com/xxx/abc/mmm/nnn.txt<br>
      * 2. jar!/com/xxx/abc/mmm/nnn.txt<br>
      * findResource("mmm/nnn.txt", com.xxx.abc.Test.class)会查找以下位置:<br>
@@ -502,7 +502,7 @@ public abstract class PathTools {
      * 2. jar!/mmm/nnn.txt<br>
      * 
      * @param resourceLocation 资源位置
-     * @param classes 备选查找位置
+     * @param clazz 指定类
      * @return 资源URL
      */
     public static URL findClassResource(Class<?> clazz, String resourceLocation) throws ResourceNotFoundException {
