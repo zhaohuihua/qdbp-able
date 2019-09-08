@@ -42,11 +42,35 @@ public abstract class DateTools {
     public static final String PATTERN_GENERAL_DATETIME = "yyyy-MM-dd HH:mm:ss";
     /** 日期+时间(纯数字没有分隔符) **/
     public static final String PATTERN_COMPACT_DATETIME = "yyyyMMddHHmmss";
+    /** 标准格式+ISO时区(FastJson支持这种格式) **/
+    // 2010-10-20T15:25:35.450+08:00
+    // yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+    public static final String PATTERN_GENERAL_NORMATIVE_T_ISO_XXX = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    /** 标准格式+ISO时区 **/
+    // 2010-10-20T15:25:35.450+0800
+    // yyyy-MM-dd'T'HH:mm:ss.SSSXX
+    public static final String PATTERN_GENERAL_NORMATIVE_T_ISO_XX = "yyyy-MM-dd'T'HH:mm:ss.SSSXX";
+    /** 标准格式+ISO时区 **/
+    // 2010-10-20T15:25:35.450+08
+    // yyyy-MM-dd'T'HH:mm:ss.SSSX
+    public static final String PATTERN_GENERAL_NORMATIVE_T_ISO_X = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+    /** 标准格式+GMT时区 **/
+    // 2010-10-20 15:25:35.450 +0800
+    // yyyy-MM-dd HH:mm:ss.SSS Z
+    public static final String PATTERN_GENERAL_NORMATIVE_GMT_ZONE = "yyyy-MM-dd HH:mm:ss.SSS Z";
+    /** 紧凑格式+GMT时区(纯数字没有分隔符)(FastJson支持这种格式) **/
+    // 20101020152535450+08:00
+    // yyyyMMddHHmmssSSSZ
+    public static final String PATTERN_COMPACT_NORMATIVE_GMT_ZONE = "yyyyMMddHHmmssSSSZ";
 
     // 解析日期时支持的格式
     private static DateParsers PARSERS = new DateParsers(PATTERN_GENERAL_NORMATIVE, PATTERN_COMPACT_NORMATIVE,
             PATTERN_GENERAL_DATE, PATTERN_COMPACT_DATE, PATTERN_GENERAL_TIME, PATTERN_COMPACT_TIME,
-            PATTERN_GENERAL_DATETIME, PATTERN_COMPACT_DATETIME);
+            PATTERN_GENERAL_DATETIME, PATTERN_COMPACT_DATETIME,
+            // ISO时区
+            PATTERN_GENERAL_NORMATIVE_T_ISO_XXX, PATTERN_GENERAL_NORMATIVE_T_ISO_XX, PATTERN_GENERAL_NORMATIVE_T_ISO_X,
+            // GMT时区
+            PATTERN_GENERAL_NORMATIVE_GMT_ZONE, PATTERN_COMPACT_NORMATIVE_GMT_ZONE);
 
     /**
      * 日期解析类
@@ -58,8 +82,12 @@ public abstract class DateTools {
 
         /** 正则表达式转义字符 **/
         private static final Pattern REG_CHAR = Pattern.compile("([\\{\\}\\[\\]\\(\\)\\^\\$\\.\\*\\?\\-\\+\\\\])");
-        /** 日期格式字符 **/
-        private static final Pattern DATE_CHAR = Pattern.compile("[yMdHmsS]");
+        /** 数字字符(替换为[0-9]) **/
+        private static final Pattern NUMBER_CHAR = Pattern.compile("[yMdHmsS]");
+        /** 常量字符(去掉两边的单引号) **/
+        private static final Pattern CONST_CHAR = Pattern.compile("'([^']+)'");
+        /** 单引号字符(两个单引号替换为一个) **/
+        private static final Pattern SINGLE_QUOTE_CHAR = Pattern.compile("''");
 
         private int length;
         private Pattern regexp;
@@ -69,19 +97,50 @@ public abstract class DateTools {
             this.length = pattern.length();
             this.pattern = pattern;
             String regexp = REG_CHAR.matcher(pattern).replaceAll("\\\\$1");
-            regexp = DATE_CHAR.matcher(pattern).replaceAll("[0-9]");
+            regexp = NUMBER_CHAR.matcher(regexp).replaceAll("\\\\d");
+
+            // 时区字符只支持末尾的字符, 因为不好识别'Z'之类的常量字符
+            if (regexp.endsWith("X")) { // ISO时区字符
+                this.length = 0;
+                // X=+/-hh, XX=+/-hhmm, 3个X=+/-hh:mm
+                if (regexp.endsWith("XXX")) {
+                    regexp = StringTools.removeRight(regexp, 'X') + "[+-]\\d\\d:\\d\\d";
+                } else if (regexp.endsWith("XX")) {
+                    regexp = StringTools.removeRight(regexp, 'X') + "[+-]\\d{4}";
+                } else if (regexp.endsWith("X")) {
+                    regexp = StringTools.removeRight(regexp, 'X') + "[+-]\\d{2}";
+                }
+            } else if (regexp.endsWith("Z")) { // GMT时区字符
+                this.length = 0;
+                // GMT或GMT+/-hh:mm或+/-hhmm
+                regexp = StringTools.removeRight(regexp, 'Z') + "(?:\\w+|\\w+[+-]\\d\\d:\\d\\d|[+-]\\d{4})";
+            }
+            { // 常量字符
+                Matcher matcher = CONST_CHAR.matcher(regexp);
+                if (matcher.find()) {
+                    this.length = 0;
+                    regexp = matcher.replaceAll("$1");
+                }
+            }
+            { // 单引号字符
+                Matcher matcher = SINGLE_QUOTE_CHAR.matcher(regexp);
+                if (matcher.find()) {
+                    this.length = 0;
+                    regexp = matcher.replaceAll("'");
+                }
+            }
             this.regexp = Pattern.compile(regexp);
         }
 
         public boolean supported(String date) {
-            return date.length() == length && this.regexp.matcher(date).matches();
+            return (length <= 0 || length == date.length()) && this.regexp.matcher(date).matches();
         }
 
         public Date parse(String date) {
             try {
                 return new SimpleDateFormat(this.pattern).parse(date);
             } catch (ParseException e) {
-                throw new IllegalArgumentException("Date format is not supported.", e);
+                throw new IllegalArgumentException("Date format is not supported [" + date + "].", e);
             }
         }
     }
@@ -140,25 +199,79 @@ public abstract class DateTools {
             return null;
         }
         String datetime = string.trim();
-        if (datetime.indexOf(' ') >= 0) {
+        int spaceIndex = -1;
+        int hbarIndex = -1;
+        int slashIndex = -1;
+        int colonIndex = -1;
+        int dotIndex = -1;
+        int otherCharIndex = -1;
+        char[] chars = datetime.toCharArray();
+        for (char i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (c == ' ') {
+                if (spaceIndex < 0) {
+                    spaceIndex = i;
+                }
+            } else if (c == '-') {
+                if (hbarIndex < 0) {
+                    hbarIndex = i;
+                }
+            } else if (c == '/') {
+                if (slashIndex < 0) {
+                    slashIndex = i;
+                }
+            } else if (c == ':') {
+                if (colonIndex < 0) {
+                    colonIndex = i;
+                }
+            } else if (c == '.') {
+                if (dotIndex < 0) {
+                    dotIndex = i;
+                }
+            } else if (c < '0' || c > '9') {
+                if (otherCharIndex < 0) {
+                    otherCharIndex = i;
+                }
+            }
+        }
+        if (otherCharIndex >= 0) {
+            return PARSERS.parse(datetime);
+        } else if (spaceIndex > 0) {
             String[] array = StringTools.split(datetime, ' ');
             if (array.length != 2) {
-                throw new IllegalArgumentException("Date format is not supported [" + datetime + "].");
+                return PARSERS.parse(datetime);
+            }
+            if (colonIndex >= 0 && colonIndex < spaceIndex || dotIndex >= 0 && dotIndex < spaceIndex) {
+                // 日期部分有冒号或点
+                return PARSERS.parse(datetime);
+            } else if (hbarIndex >= 0 && hbarIndex > spaceIndex || slashIndex >= 0 && slashIndex > spaceIndex) {
+                // 时间部分有横框或斜杠
+                return PARSERS.parse(datetime);
             }
             Date date;
-            if (datetime.indexOf('-') >= 0) {
+            if ((slashIndex < 0 || slashIndex > spaceIndex) && (hbarIndex > 0 && hbarIndex < spaceIndex)) {
+                // 横杠分隔的日期: 没有斜杠,有横杠且横杠的位置在日期部分
                 date = parseYyyyMMdd(array[0], '-');
-            } else if (datetime.indexOf('/') >= 0) {
+            } else if ((hbarIndex < 0 || hbarIndex > spaceIndex) && (slashIndex > 0 && slashIndex < spaceIndex)) {
+                // 斜杠分隔的日期: 没有横杠,有斜杠且斜杠的位置在日期部分
                 date = parseYyyyMMdd(array[0], '/');
             } else {
-                throw new IllegalArgumentException("Date format is not supported [" + datetime + "].");
+                return PARSERS.parse(datetime);
             }
-            return parseTime(date, array[1]);
-        } else if (datetime.indexOf(':') >= 0) {
+            if (colonIndex > spaceIndex) {
+                // 时间部分有冒号
+                return parseTime(date, array[1]);
+            } else {
+                return PARSERS.parse(datetime);
+            }
+        } else if (hbarIndex < 0 && slashIndex < 0 && colonIndex > 0) {
+            // 时间: 没有横杠和斜杠,有冒号
             return parseTime(toStartTime(new Date()), datetime);
-        } else if (datetime.indexOf('-') >= 0) {
+        } else if (colonIndex < 0 && dotIndex < 0 && slashIndex < 0 && hbarIndex > 0) {
+            // 横杠分隔的日期: 没有冒号和点,没有斜杠,有横杠
             return parseYyyyMMdd(datetime, '-');
-        } else if (datetime.indexOf('/') >= 0) {
+        } else if (colonIndex < 0 && dotIndex < 0 && hbarIndex < 0 && slashIndex > 0) {
+            // 横杠分隔的日期: 没有冒号和点,没有横杠,有斜杠
             return parseYyyyMMdd(datetime, '/');
         } else {
             return PARSERS.parse(datetime);
@@ -232,7 +345,9 @@ public abstract class DateTools {
 
     /**
      * 解析时间<br>
-     * 带毫秒或不带毫秒, 10:20:30, 10:5:8.360 毫秒如果超过三位只截止前三位, 10:20:30.999999=10:20:30.999
+     * 毫秒分隔符支持点或逗号, 10:20:30.999或10:20:30,999(FastJson支持逗号)<br>
+     * 带毫秒或不带毫秒, 10:20:30, 10:5:8.360<br>
+     * 毫秒如果超过三位只截止前三位, 10:20:30.999999=10:20:30.999
      * 
      * @param string 时间字符串
      * @return 时间毫秒数
@@ -241,18 +356,22 @@ public abstract class DateTools {
         if (string == null || string.trim().length() == 0) {
             return 0;
         }
-        String time = string.trim();
+        String[] parts = StringTools.split(string.trim(), '.', ',');
+        if (parts.length != 1 && parts.length != 2) {
+            throw new IllegalArgumentException("Time format is not supported [" + string + "].");
+        }
+        String time = parts[0];
+        if (VerifyTools.isBlank(time)) {
+            throw new IllegalArgumentException("Time format is not supported [" + string + "].");
+        }
         // 解析毫秒数
         int millis = 0;
-        int dotIndex = time.indexOf('.');
-        if (dotIndex == 0) {
-            throw new IllegalArgumentException("Time format is not supported [" + string + "].");
-        } else if (dotIndex > 0) {
-            String millisString = time.substring(dotIndex + 1);
-            time = time.substring(0, dotIndex);
-            if (VerifyTools.isAnyBlank(time, millisString)) {
+        if (parts.length == 2) {
+            String millisString = parts[1];
+            if (VerifyTools.isAnyBlank(millisString)) {
                 throw new IllegalArgumentException("Time format is not supported [" + string + "].");
             }
+            // 毫秒如果超过三位只截止前三位, 10:20:30.999999=10:20:30.999
             if (millisString.length() > 3) {
                 millisString = millisString.substring(0, 3);
             }
