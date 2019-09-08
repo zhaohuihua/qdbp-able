@@ -38,20 +38,35 @@ public class DateToolsTest {
         testParseDateTime("2018/7/8 20:30:40");
         testParseDateTime("2018/7/8 4:5:6.999");
         testParseDateTime("2018/7/8 23:59:59.999999");
+        testParseZoneDateTime("20101020152535450+0000"); // yyyyMMddHHmmssSSSZ
+        testParseZoneDateTime("20101020152535450GMT+00:00"); // yyyyMMddHHmmssSSSZ
+        testParseZoneDateTime("2010-10-20 15:25:35.450 +0000"); // yyyy-MM-dd HH:mm:ss.SSS Z
+        testParseZoneDateTime("2010-10-20 15:25:35.450 GMT+00:00"); // yyyy-MM-dd HH:mm:ss.SSS Z
+        testParseZoneDateTime("2010-10-20T15:25:35.450+00:00"); // yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+        testParseZoneDateTime("2010-10-20T15:25:35.450+0000"); // yyyy-MM-dd'T'HH:mm:ss.SSSXX
+        testParseZoneDateTime("2010-10-20T15:25:35.450+00"); // yyyy-MM-dd'T'HH:mm:ss.SSSXX
         System.out.println("------------------");
         System.out.println();
     }
 
     private static void testParseDate(String string) {
-        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toDateString(DateTools.parse(string)));
+        Date date = DateTools.parse(string);
+        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toDateString(date));
     }
 
     private static void testParseTime(String string) {
-        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toNormativeString(DateTools.parse(string)));
+        Date date = DateTools.parse(string);
+        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toNormativeString(date));
     }
 
     private static void testParseDateTime(String string) {
-        System.out.println(StringTools.pad(string, ' ', false, 25) + DateTools.toNormativeString(DateTools.parse(string)));
+        Date date = DateTools.parse(string);
+        System.out.println(StringTools.pad(string, ' ', false, 25) + DateTools.toNormativeString(date));
+    }
+
+    private static void testParseZoneDateTime(String string) {
+        Date date = DateTools.parse(string);
+        System.out.println(StringTools.pad(string, ' ', false, 35) + DateTools.toNormativeString(date));
     }
 
     private static void testCalculate() {
