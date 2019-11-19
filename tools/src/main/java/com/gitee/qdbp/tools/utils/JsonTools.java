@@ -231,7 +231,10 @@ public abstract class JsonTools {
             return null;
         }
         Map<String, Object> map = (JSONObject) JSON.toJSON(object);
-        return clearBlankValue ? ConvertTools.clearBlankValue(map, false) : map;
+        if (clearBlankValue) {
+            ConvertTools.clearBlankValue(map);
+        }
+        return map;
     }
 
     /**

@@ -316,6 +316,7 @@ public abstract class ReflectTools {
         }
 
         try {
+            field.setAccessible(true);
             return (T) field.get(target);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not access field '" + fieldName + "': " + e.getMessage());

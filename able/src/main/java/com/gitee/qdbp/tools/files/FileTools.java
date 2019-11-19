@@ -1,7 +1,9 @@
 package com.gitee.qdbp.tools.files;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -573,5 +575,84 @@ public abstract class FileTools {
                 return handleException(msg, e, exceptionWatcher);
             }
         }
+    }
+
+    /**
+     * 判断文件的编码格式<br>
+     * 来源: http://www.chsi.com.cn/xy/com/200902/20090218/17570775.html<br>
+     * BOM参考: http://www.bitscn.com/pdb/java/200605/20811.html
+     * 
+     * @param file 指定文件
+     * @return 编码格式
+     * @version 2010-10-05
+     */
+    public static String getEncoding(File file) {
+        String encoding = "GBK";
+        BufferedInputStream bis = null;
+        try {
+            bis = new BufferedInputStream(new FileInputStream(file));
+            bis.mark(0);
+
+            // 带BOM信息的情况, 根据前三位判断编码
+            byte[] bytes = new byte[3];
+            int read = bis.read(bytes, 0, 3);
+            if (read == -1) {
+                return encoding;
+            }
+            if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE) {
+                return "UTF-16LE"; // Little-Endian
+            } else if (bytes[0] == (byte) 0xFE && bytes[1] == (byte) 0xFF) {
+                return "UTF-16BE"; // Big-Endian
+            } else if (bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
+                return "UTF-8";
+            }
+
+            // 根据BOM信息未判断出编码的情况
+            bis.reset();
+            while ((read = bis.read()) != -1) {
+                if (read >= 0xF0) {
+                    break;
+                }
+
+                if (0x80 <= read && read <= 0xBF) { // 单独出现BF以下的, 也算是GBK
+                    break;
+                }
+                if (0xC0 <= read && read <= 0xDF) {
+                    read = bis.read();
+                    // 双字节 (0xC0 - 0xDF)(0x80 - 0xBF), 也可能在GB编码内
+                    if (0x80 <= read && read <= 0xBF) {
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+                // 也有可能出错, 但是几率较小
+                else if (0xE0 <= read && read <= 0xEF) {
+                    read = bis.read();
+                    if (0x80 <= read && read <= 0xBF) {
+                        read = bis.read();
+                        if (0x80 <= read && read <= 0xBF) {
+                            encoding = "UTF-8";
+                            break;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return encoding;
     }
 }

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -633,30 +634,29 @@ public abstract class ConvertTools {
      * 清除Map中的空值
      * 
      * @param map Map对象
-     * @return 清空后的Map对象
      */
-    public static Map<String, Object> clearBlankValue(Map<String, Object> map) {
-        return clearBlankValue(map, false);
-    }
-
-    /**
-     * 清除Map中的空值
-     * 
-     * @param map Map对象
-     * @param emptyOnNull 如果map==null, 是否返回空Map. 如果是, 返回空Map, 否则返回null
-     * @return 清空后的Map对象
-     */
-    public static Map<String, Object> clearBlankValue(Map<String, Object> map, boolean emptyOnNull) {
+    @SuppressWarnings("unchecked")
+    public static void clearBlankValue(Map<String, Object> map) {
         if (map == null) {
-            return emptyOnNull ? new HashMap<String, Object>() : null;
+            return;
         }
-        Map<String, Object> result = new HashMap<String, Object>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            if (VerifyTools.isNotBlank(entry.getValue())) {
-                result.put(entry.getKey(), entry.getValue());
+        Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Object> entry = iterator.next();
+            Object value = entry.getValue();
+            if (VerifyTools.isBlank(value)) {
+                iterator.remove();
+            } else if (value instanceof Map) {
+                clearBlankValue((Map<String, Object>) value);
+            } else if (value instanceof Collection) {
+                Collection<?> collection = (Collection<?>) value;
+                for (Object item : collection) {
+                    if (value instanceof Map) {
+                        clearBlankValue((Map<String, Object>) item);
+                    }
+                }
             }
         }
-        return result;
     }
 
     /**

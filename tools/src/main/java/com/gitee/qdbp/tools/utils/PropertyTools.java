@@ -293,7 +293,7 @@ public abstract class PropertyTools {
      * 根据前缀查找, 得到一个子集
      * 
      * @param original 原集合
-     * @param prefixes 前缀
+     * @param prefixes 前缀, 带分隔符(如prefix.)
      * @return 子集
      */
     public static Properties filter(Properties original, String... prefixes) {
@@ -305,7 +305,7 @@ public abstract class PropertyTools {
      * 
      * @param original 原集合
      * @param cutPrefix 是否截掉前缀
-     * @param prefixes 前缀
+     * @param prefixes 前缀, 带分隔符(如prefix.)
      * @return 子集
      */
     public static Properties filter(Properties original, boolean cutPrefix, String... prefixes) {

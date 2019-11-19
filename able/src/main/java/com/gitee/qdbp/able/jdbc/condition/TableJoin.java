@@ -8,8 +8,8 @@ import com.gitee.qdbp.tools.utils.NamingTools;
  * 表关联<br>
  * 关于查询结果的思考:<br>
  * 对于SYS_USER,SYS_USER_ROLE,SYS_ROLE这样的关联查询<br>
- * 查询结果, 以前是新建一个类,继承SysUser再复制SysRole的所有字段<br>
- * 存在3个问题: 1是复制代码太多; 2是修改SYS_ROLE时需要修改SysRole和新建的这个类; 3是对于重名字段如createTime,remark, 不好处理<br>
+ * 查询结果, 以前是新建一个类SysUserRole,继承SysUser再复制SysRole的所有字段<br>
+ * 存在3个问题: 1是复制代码太多; 2是修改SYS_ROLE时需要修改SysRole和SysUserRole; 3是对于重名字段如createTime,remark, 不好处理<br>
  * 最理想的方式是什么呢?<br>
  * 我觉得应该是新建一个结果类, 有SysUser user, SysUserRole userRole, SysRole role三个字段(子对象), 分别保存来自三个表的查询结果!<br>
  * 如果查询结果不需要关注SYS_USER_ROLE这个关联表, 也可以建SysUser user, SysRole role两个字段(子对象)的类来保存查询结果<br>
