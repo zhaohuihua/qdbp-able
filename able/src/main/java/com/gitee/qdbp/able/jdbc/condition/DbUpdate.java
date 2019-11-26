@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.gitee.qdbp.able.jdbc.base.DbCondition;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 数据库更新操作容器<br>
@@ -84,5 +85,54 @@ public class DbUpdate extends DbItems {
      */
     public static DbUpdate from(Map<String, Object> map) {
         return from(map, DbUpdate.class);
+    }
+
+    /**
+     * 从map中获取参数构建对象
+     * 
+     * @param map Map参数
+     * @param clazz 对象类型
+     * @return 对象实例
+     */
+    protected static <T extends DbItems> T from(Map<String, Object> map, Class<T> clazz) {
+        if (map == null) {
+            throw new NullPointerException("map is null");
+        }
+        if (clazz == null) {
+            throw new NullPointerException("clazz is null");
+        }
+
+        T items;
+        try {
+            items = clazz.newInstance();
+        } catch (InstantiationException e) {
+            throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
+        }
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (VerifyTools.isBlank(key)) {
+                continue;
+            }
+            if (value == null) {
+                continue;
+            }
+            int index = key.lastIndexOf('$');
+            if (index < 0) {
+                if (value.equals("")) {
+                    items.put("ToNull", key, value);
+                } else {
+                    items.put(key, value);
+                }
+            } else {
+                String field = key.substring(0, index);
+                String operate = key.substring(index + 1);
+                items.put(operate, field, value);
+            }
+        }
+        return items;
     }
 }
