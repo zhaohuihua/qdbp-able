@@ -18,34 +18,47 @@ import com.gitee.qdbp.tools.utils.NamingTools;
  * 生成的查询语句的查询字段, 对于重名字段加上表别名作为前缀, 生成列别名, 如U_ID, U_REMARK, UR_ID, UR_REMARK, R_ID, R_REMARK<br>
  * 查询结果根据列别名找到字段名和表别名; 再根据表别名找到resultField, 根据字段名填充数据<br>
  * 也可以指定resultField=this表示结果字段放在主对象中<br>
+ * 这算是最容易理解的代码写法了吧:<br>
  * <pre>
- * // 最容易理解的代码写法:
- * TableJoin tables = new TableJoin(SysUser.class, "u", "user")
- *     .innerJoin(SysUserRole.class, "ur") // 未指定resultField, 不会作为查询字段, 也就不会保存查询结果
- *     .on("u.id", "=", "ur.userId")
- *     .and("ur.dataState", "=", 1)
- *     .innerJoin(SysRole.class, "r", "role")
- *     .on("ur.roleId", "=", "r.id")
- *     .and("r.dataState", "=", 1);
- * DbWhere where = new DbWhere();
- * where.on("u.userId", "in", userIds);
- * // UserRole = { SysUser user; SysRole role; }
- * EasyJoinQuery&lt;UserRole&gt; query = coreJdbcBoot.build(tables, UserRole.class);
- * List&lt;UserRole&gt; roles = query.list(where);
- * </pre>
- * <pre>
- * // 只取SysRole对象, 例如查询当前用户的所有角色
- * TableJoin tables = new TableJoin(SysUser.class, "u")
- *     .innerJoin(SysUserRole.class, "ur")
- *     .on("u.id", "=", "ur.userId")
- *     .and("ur.dataState", "=", 1)
- *     .innerJoin(SysRole.class, "r", "this") // this表示结果字段放在主对象中
- *     .on("ur.roleId", "=", "r.id")
- *     .and("r.dataState", "=", 1);
- * DbWhere where = new DbWhere();
- * where.on("u.userId", "=", userId);
- * EasyJoinQuery&lt;SysRole&gt; query = coreJdbcBoot.build(tables, SysRole.class);
- * List&lt;SysRole&gt; roles = query.list(where);
+    List&lt;String&gt; userCodes = Arrays.asList("evan", "kelly", "coral");
+    // @formatter:off
+    TableJoin tables = new TableJoin(SysUser.class, "u", "user")
+        .innerJoin(SysUserRole.class, "ur")
+        .on("u.id", "=", "ur.userId")
+        .and("ur.dataState", "=", 1)
+        .innerJoin(SysRole.class, "r", "role")
+        .on("ur.roleId", "=", "r.id")
+        .and("r.dataState", "=", 1)
+        .end();
+    // @formatter:on
+    // UserRole = { SysUser user; SysRole role; }
+    // 这里不关注SysUserRole
+    // 因此innerJoin(SysUserRole.class, "ur")未指定第3个参数resultField
+    // 不会出现在SELECT后面的字段列表中, 也就不会保存查询结果
+    EasyJoinQuery&lt;UserRole&gt; query = coreJdbcBoot.buildJoinQuery(tables, UserRole.class);
+    DbWhere where = new DbWhere();
+    where.on("u.userCode", "in", userCodes);
+    PageList&lt;UserRole&gt; userRoles = query.list(where, OrderPaging.NONE);
+    log.debug("UserRolesQuery: {}", JsonTools.toLogString(userRoles));
+ * </pre> <pre>
+    // 只取SysRole对象, 例如查询指定用户的所有角色
+    String userId = "kelly";
+    // @formatter:off
+    TableJoin tables = new TableJoin(SysUser.class, "u")
+        .innerJoin(SysUserRole.class, "ur")
+        .on("u.id", "=", "ur.userId")
+        .and("ur.dataState", "=", 1)
+         // this表示结果字段放在主对象中
+        .innerJoin(SysRole.class, "r", "this")
+        .on("ur.roleId", "=", "r.id")
+        .and("r.dataState", "=", 1)
+        .end();
+    // @formatter:on
+    DbWhere where = new DbWhere();
+    where.on("u.userId", "=", userId);
+    EasyJoinQuery&lt;SysRole&gt; query = coreJdbcBoot.buildJoinQuery(tables, SysRole.class);
+    PageList&lt;SysRole&gt; roles = query.list(where, OrderPaging.NONE);
+    log.debug("RolesQueryByUser: {}", JsonTools.toLogString(roles));
  * </pre>
  *
  * @author zhaohuihua
@@ -338,6 +351,10 @@ public class TableJoin implements Serializable {
 
         public JoinOn(TableJoin join) {
             this.join = join;
+        }
+
+        public TableJoin end() {
+            return this.join;
         }
 
         /** 增加连接条件 **/
