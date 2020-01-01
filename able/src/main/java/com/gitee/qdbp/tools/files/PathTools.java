@@ -65,7 +65,7 @@ public abstract class PathTools {
         }
 
         int i = path.lastIndexOf('.');
-        if (i < 0 || i < path.lastIndexOf('/') || i < path.lastIndexOf('/')) {
+        if (i < 0 || i < path.lastIndexOf('/') || i < path.lastIndexOf('\\')) {
             return null;
         }
         return path.substring(i + (dot ? 0 : 1));
@@ -86,7 +86,7 @@ public abstract class PathTools {
         }
 
         int i = path.lastIndexOf('.');
-        if (i < 0 || i < path.lastIndexOf('/') || i < path.lastIndexOf('/')) {
+        if (i < 0 || i < path.lastIndexOf('/') || i < path.lastIndexOf('\\')) {
             return path;
         }
 
@@ -129,7 +129,7 @@ public abstract class PathTools {
             return null;
         }
 
-        int i = path.lastIndexOf('/');
+        int i = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
         return i < 0 ? "" : i == 0 ? "/" : path.substring(0, i + 1);
     }
 
@@ -391,7 +391,10 @@ public abstract class PathTools {
                 // 这种写法不兼容jar:协议
                 // url.toURI().resolve(new URI(resourceLocation)).toURL();
                 newurl = resolveRelativePath(url, resourceLocation);
-            } catch (MalformedURLException | URISyntaxException e) {
+            } catch (MalformedURLException e) {
+                String desc = "Resource location [" + resourceLocation + "] relative to [" + url + "]";
+                throw new ResourceNotFoundException(desc + " is not a well-formed path");
+            } catch (URISyntaxException e) {
                 String desc = "Resource location [" + resourceLocation + "] relative to [" + url + "]";
                 throw new ResourceNotFoundException(desc + " is not a well-formed path");
             }
@@ -441,7 +444,9 @@ public abstract class PathTools {
         String desc = "Path [" + path + "] relative to [" + url + "]";
         try {
             return resolveRelativePath(url, path);
-        } catch (MalformedURLException | URISyntaxException e) {
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(desc + " is not a well-formed path");
+        } catch (URISyntaxException e) {
             throw new IllegalArgumentException(desc + " is not a well-formed path");
         }
     }
@@ -701,13 +706,17 @@ public abstract class PathTools {
     }
 
     private static boolean endsWithSeparator(CharSequence string) {
-        if (string == null || string.length() == 0) return false;
+        if (string == null || string.length() == 0) {
+            return false;
+        }
         char lastChar = string.toString().charAt(string.length() - 1);
         return lastChar == SLASH || lastChar == BSLASH;
     }
 
     private static boolean startsWithSeparator(CharSequence string) {
-        if (string == null || string.length() == 0) return false;
+        if (string == null || string.length() == 0) {
+            return false;
+        }
         char firstChar = string.toString().charAt(0);
         return firstChar == SLASH || firstChar == BSLASH;
     }
@@ -761,6 +770,23 @@ public abstract class PathTools {
             buffer.append(SLASH);
         }
         return buffer.toString();
+    }
+
+    /**
+     * 判断路径是否超出范围(用于检查拼接的路径是否会超出限定范围)<br>
+     * 例如: String serverPaht = PathTools.concat(rootPath, relativePath)<br>
+     * 此时如果relativePath超出范围就是一个安全隐患<br>
+     * <br>
+     * isPathOutOfBounds("../ccc/ddd.txt") -- true<br>
+     * isPathOutOfBounds("aaa/bbb/../ccc/ddd.txt") -- false<br>
+     * isPathOutOfBounds("aaa/bbb/../../ccc/ddd.txt") -- false<br>
+     * isPathOutOfBounds("aaa/bbb/../../../ccc/ddd.txt") -- true<br>
+     * 
+     * @param path 目标路径
+     * @return 是否超出范围
+     */
+    public static boolean isPathOutOfBounds(String path) {
+        return formatPath(path).startsWith("../");
     }
 
     /**
@@ -834,7 +860,9 @@ public abstract class PathTools {
     /** 判断是不是绝对路径 **/
     public static boolean isAbsolutePath(String path) {
         // 绝对路径: unix的/home/或window的D:/xxx/或http://url
-        if (path == null || path.length() == 0) return false;
+        if (path == null || path.length() == 0) {
+            return false;
+        }
 
         char[] chars = path.toCharArray();
         for (int i = 0, len = chars.length; i < len; i++) {
