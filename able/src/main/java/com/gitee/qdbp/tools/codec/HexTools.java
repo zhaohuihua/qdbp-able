@@ -11,7 +11,7 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
 public abstract class HexTools {
 
     /**
-     * 字符串转换为byte数组<br>
+     * 16进制字符串转换为byte数组<br>
      * "ABCDEF" --&gt; byte[(byte)0xAB, (byte)0xCD, (byte)0xEF]<br>
      * "AB CD EF" --&gt; byte[(byte)0xAB, (byte)0xCD, (byte)0xEF]<br>
      * "123456EF" --&gt; byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF]<br>
@@ -19,8 +19,8 @@ public abstract class HexTools {
      * "0506070F" --&gt; byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF]<br>
      * "05 06 07 0F" --&gt; byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF]<br>
      *
-     * @param hex
-     * @return
+     * @param hex 16进制字符串
+     * @return byte数组
      */
     public static byte[] toBytes(String hex) {
         if (VerifyTools.isBlank(hex)) {
@@ -50,8 +50,8 @@ public abstract class HexTools {
      * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; "123456EF"<br>
      * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; "0506070F"
      *
-     * @param bytes
-     * @return
+     * @param bytes byte数组
+     * @return 16进制字符串
      */
     public static String toString(byte[] bytes) {
         return toString(bytes, false);
@@ -63,8 +63,8 @@ public abstract class HexTools {
      * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; "12 34 56 EF"<br>
      * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; "05 06 07 0F"
      *
-     * @param bytes
-     * @return
+     * @param bytes byte数组
+     * @return 日志字符串
      */
     public static String toLogString(byte[] bytes) {
         return toString(bytes, true);
@@ -74,8 +74,8 @@ public abstract class HexTools {
      * byte数字转换为日志字符串<br>
      * toLogString(byte) = toLogString(byte[]) = toByteString(byte)<br>
      *
-     * @param number
-     * @return
+     * @param number byte数字
+     * @return 日志字符串
      */
     public static String toLogString(byte number) {
         return toByteString(number);
@@ -100,8 +100,8 @@ public abstract class HexTools {
      * 0x08 --&gt; "08"<br>
      * 0xAB --&gt; "AB"<br>
      *
-     * @param number
-     * @return
+     * @param number byte数字
+     * @return 16进制字符串
      */
     public static String toByteString(long number) {
         StringBuilder buffer = new StringBuilder();
@@ -115,8 +115,8 @@ public abstract class HexTools {
      * 0x0008 --&gt; "0008"<br>
      * 0xABCD --&gt; "ABCD"<br>
      *
-     * @param number
-     * @return
+     * @param number short数字
+     * @return 16进制字符串
      */
     public static String toShortString(long number) {
         short b = (short) number;
@@ -132,8 +132,8 @@ public abstract class HexTools {
      * 0x00000008 --&gt; "00000008"<br>
      * 0xABCDEFEF --&gt; "ABCDEFEF"<br>
      *
-     * @param number
-     * @return
+     * @param number int数字
+     * @return 16进制字符串
      */
     public static String toIntString(long number) {
         int b = (int) number;
@@ -149,8 +149,8 @@ public abstract class HexTools {
      * 8 --&gt; "08"<br>
      * 300 = 0x012C --&gt; "012C"<br>
      *
-     * @param number
-     * @return
+     * @param number 数字
+     * @return 16进制字符串
      */
     public static String toString(long number) {
         if (number > 0 && number <= 0xFF) {
@@ -171,8 +171,8 @@ public abstract class HexTools {
      * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; 0x123456EF<br>
      * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; 0x0506070F
      *
-     * @param bytes
-     * @return
+     * @param bytes byte数组
+     * @return 长整形数字
      */
     public static long toLong(byte... bytes) {
         long number = 0;
@@ -189,8 +189,8 @@ public abstract class HexTools {
      * byte[(byte)0x12, (byte)0x34, (byte)0x56, (byte)0xEF] --&gt; 0x123456EF<br>
      * byte[(byte)0x5, (byte)0x6, (byte)0x7, (byte)0xF] --&gt; 0x0506070F
      *
-     * @param bytes
-     * @return
+     * @param bytes byte数组
+     * @return Int数字
      */
     public static int toInteger(byte... bytes) {
         return (int) toLong(bytes);
