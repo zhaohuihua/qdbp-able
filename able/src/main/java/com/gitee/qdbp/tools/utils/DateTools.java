@@ -592,11 +592,31 @@ public abstract class DateTools {
      * @return 第1时间
      */
     public static Date toFirstTime(Date date, int field) {
+        return toFirstTime(date, field, 0);
+    }
+
+    /**
+     * 转换为第1时间<br>
+     * Calendar.YEAR=当年第1时间, Calendar.MONTH=当月第1时间, Calendar.DAY_OF_MONTH=当日第1时间, ...<br>
+     * 如 toFirstTime(2016-08-08 20:30:40.500, Calendar.YEAR, 1) --- 2017-01-01 00:00:00.000<br>
+     * 如 toFirstTime(2016-08-08 20:30:40.500, Calendar.MONTH, 1) --- 2016-09-01 00:00:00.000<br>
+     * 如 toFirstTime(2016-08-08 20:30:40.500, Calendar.DAY_OF_MONTH, 1) --- 2016-08-09 00:00:00.000<br>
+     * 如 toFirstTime(2016-08-08 20:30:40.500, Calendar.HOUR_OF_DAY, 1) --- 2016-08-08 21:00:00.000<br>
+     * 如 toFirstTime(2016-08-08 20:30:40.500, Calendar.MINUTE, 1) --- 2016-08-08 20:31:00.000<br>
+     * 如 toFirstTime(2016-08-08 20:30:40.500, Calendar.SECOND, 1) --- 2016-08-08 20:30:41.000<br>
+     *
+     * @param date 待处理的日期
+     * @param field 类型
+     * @param offset 类型的偏移量
+     * @return 第1时间
+     */
+    private static Date toFirstTime(Date date, int field, int offset) {
         if (date == null) {
             return null;
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
+        addCalendarFieldOffset(calendar, field, offset);
         switch (field) {
         case Calendar.YEAR:
             calendar.set(Calendar.MONTH, Calendar.JANUARY);
@@ -629,11 +649,30 @@ public abstract class DateTools {
      * @return 最后时间
      */
     public static Date toLastTime(Date date, int field) {
+        return toLastTime(date, field, 0);
+    }
+
+    /**
+     * 转换为最后时间<br>
+     * Calendar.YEAR=当年最后时间, Calendar.MONTH=当月最后时间, Calendar.DAY_OF_MONTH=当日最后时间, ...<br>
+     * 如 toLastTime(2016-08-08 20:30:40.500, Calendar.YEAR, 1) --- 2017-12-31 23:59:59.999<br>
+     * 如 toLastTime(2016-08-08 20:30:40.500, Calendar.MONTH, 1) --- 2016-09-30 23:59:59.999<br>
+     * 如 toLastTime(2016-08-08 20:30:40.500, Calendar.DAY_OF_MONTH, 1) --- 2016-08-09 23:59:59.999<br>
+     * 如 toLastTime(2016-08-08 20:30:40.500, Calendar.HOUR_OF_DAY, 1) --- 2016-08-08 21:59:59.999<br>
+     * 如 toLastTime(2016-08-08 20:30:40.500, Calendar.MINUTE, 1) --- 2016-08-08 20:31:59.999<br>
+     * 如 toLastTime(2016-08-08 20:30:40.500, Calendar.SECOND, 1) --- 2016-08-08 20:30:41.999<br>
+     *
+     * @param date 待处理的日期
+     * @param field 类型
+     * @return 最后时间
+     */
+    private static Date toLastTime(Date date, int field, int offset) {
         if (date == null) {
             return null;
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
+        addCalendarFieldOffset(calendar, field, offset);
         switch (field) {
         case Calendar.YEAR:
             calendar.set(Calendar.MONTH, Calendar.DECEMBER);
@@ -654,17 +693,38 @@ public abstract class DateTools {
         return calendar.getTime();
     }
 
+    private static void addCalendarFieldOffset(Calendar calendar, int field, int offset) {
+        if (offset == 0) {
+            return;
+        }
+        if (field == Calendar.YEAR) {
+            calendar.add(Calendar.YEAR, offset);
+        } else if (field == Calendar.MONTH) {
+            calendar.add(Calendar.MONTH, offset);
+        } else if (field == Calendar.DAY_OF_MONTH) {
+            calendar.add(Calendar.DAY_OF_MONTH, offset);
+        } else if (field == Calendar.HOUR_OF_DAY) {
+            calendar.add(Calendar.HOUR_OF_DAY, offset);
+        } else if (field == Calendar.MINUTE) {
+            calendar.add(Calendar.MINUTE, offset);
+        } else if (field == Calendar.SECOND) {
+            calendar.add(Calendar.SECOND, offset);
+        } else if (field == Calendar.MILLISECOND) {
+            calendar.add(Calendar.MILLISECOND, offset);
+        }
+    }
+
     /**
      * 转换为开始时间, 即设置时分秒为00:00:00
      *
      * @param date 待处理的日期
-     * @return 结束时间
+     * @return 开始时间
      */
     public static Date toStartTime(Date date) {
         if (date == null) {
             return null;
         }
-        return toFirstTime(date, Calendar.DAY_OF_MONTH);
+        return toFirstTime(date, Calendar.DAY_OF_MONTH, 0);
     }
 
     /**
@@ -676,6 +736,53 @@ public abstract class DateTools {
     public static Date toEndTime(Date date) {
         if (date == null) {
             return null;
+        }
+        return toLastTime(date, Calendar.DAY_OF_MONTH, 0);
+    }
+
+    /**
+     * 转换为下一天的开始时间, 即日期加1并设置时分秒为00:00:00
+     *
+     * @param date 待处理的日期
+     * @return 下一天的开始时间
+     */
+    public static Date toNextStartTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return toFirstTime(date, Calendar.DAY_OF_MONTH, 1);
+    }
+
+    /**
+     * 转换为下一天的结束时间, 即日期加1并设置时分秒为23:59:59
+     *
+     * @param date 待处理的日期
+     * @return 下一天的结束时间
+     */
+    public static Date toNextEndTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return toLastTime(date, Calendar.DAY_OF_MONTH, 1);
+    }
+
+    /**
+     * 如果未设置时间(即时间部分是00:00:00)则设置为23:59:59
+     *
+     * @param date 待处理的日期
+     * @return 结束时间
+     */
+    public static Date toEndTimeIfZeroTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int[] fields = new int[] { Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND };
+        for (int i = 0; i < fields.length; i++) {
+            if (calendar.get(fields[i]) != 0) {
+                return date;
+            }
         }
         return toLastTime(date, Calendar.DAY_OF_MONTH);
     }
@@ -839,34 +946,6 @@ public abstract class DateTools {
         return calendar.get(Calendar.WEEK_OF_YEAR);
     }
 
-    /** 获取日期的时 **/
-    public static int getHour(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(Calendar.HOUR);
-    }
-
-    /** 获取日期的分 **/
-    public static int getMinute(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(Calendar.MINUTE);
-    }
-
-    /** 获取日期的秒 **/
-    public static int getSecond(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(Calendar.SECOND);
-    }
-
-    /** 获取日期的毫秒 **/
-    public static int getMillisecond(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(Calendar.MILLISECOND);
-    }
-
     /**
      * 获取今天是星期几
      *
@@ -900,6 +979,34 @@ public abstract class DateTools {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+    /** 获取日期的时 **/
+    public static int getHour(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.HOUR);
+    }
+
+    /** 获取日期的分 **/
+    public static int getMinute(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.MINUTE);
+    }
+
+    /** 获取日期的秒 **/
+    public static int getSecond(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.SECOND);
+    }
+
+    /** 获取日期的毫秒 **/
+    public static int getMillisecond(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.MILLISECOND);
     }
 
     /** 计算表达式 **/
