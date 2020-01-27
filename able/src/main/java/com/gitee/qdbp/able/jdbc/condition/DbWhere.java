@@ -9,45 +9,44 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
  * 数据库Where条件容器<br>
  * <pre>
     DbWhere where = new DbWhere();
-    // [SQL] AND ID = :$1$Id
+    // [SQL] AND ID = :$1
     where.on("id", "=", entity.getId());
-    // [SQL] AND ID != :$1$Id
+    // [SQL] AND ID != :$1
     where.on("id", "!=", entity.getId());
-    // [SQL] AND CREATE_TIME > :$1$CreateTime
+    // [SQL] AND CREATE_TIME > :$1
     where.on("createTime", ">", new Date());
-    // [SQL] AND CREATE_TIME >= :$1$CreateTime
+    // [SQL] AND CREATE_TIME >= :$1
     where.on("createTime", ">=", new Date());
-    // [SQL] AND CREATE_TIME < :$1$CreateTime
+    // [SQL] AND CREATE_TIME < :$1
     where.on("createTime", "<", new Date());
-    // [SQL] AND CREATE_TIME <= :$1$CreateTime
+    // [SQL] AND CREATE_TIME <= :$1
     where.on("createTime", "<=", new Date());
     // [SQL] AND USER_STATE IS NULL
     where.on("userState", "is null");
     // [SQL] AND USER_STATE IS NOT NULL
     where.on("userState", "is not null");
-    // [ORACLE/DB2] AND USER_NAME LIKE '%'||:$1$UserName||'%'
-    // [MYSQL] AND USER_NAME LIKE CONCAT('%',:$1$UserName,'%')
+    // [ORACLE/DB2] AND USER_NAME LIKE '%'||:$1||'%'
+    // [MYSQL] AND USER_NAME LIKE CONCAT('%',:$1,'%')
     where.on("userName", "like", entity.getUserName());
-    // [ORACLE/DB2] AND USER_NAME NOT LIKE '%'||:$1$UserName||'%'
-    // [MYSQL] AND USER_NAME NOT LIKE CONCAT('%',:$1$UserName,'%')
+    // [ORACLE/DB2] AND USER_NAME NOT LIKE '%'||:$1||'%'
+    // [MYSQL] AND USER_NAME NOT LIKE CONCAT('%',:$1,'%')
     where.on("userName", "not like", entity.getUserName());
-    // [ORACLE/DB2] AND PHONE LIKE :$1$Phone||'%'
-    // [MYSQL] AND PHONE LIKE CONCAT(:$1$Phone,'%')
+    // [ORACLE/DB2] AND PHONE LIKE :$1||'%'
+    // [MYSQL] AND PHONE LIKE CONCAT(:$1,'%')
     where.on("phone", "starts", "139");
-    // [ORACLE/DB2] AND PHONE LIKE '%'||:$1$Phone
-    // [MYSQL] AND PHONE LIKE CONCAT('%',:$1$Phone)
+    // [ORACLE/DB2] AND PHONE LIKE '%'||:$1
+    // [MYSQL] AND PHONE LIKE CONCAT('%',:$1)
     where.on("phone", "ends", "8888");
-    // [SQL] AND EFTFLAG IN (:$1$Eftflag, :$2$Eftflag, ...)
+    // [SQL] AND EFTFLAG IN (:$1, :$2, ...)
     where.on("eftflag", "in", 'E', 'N', ...);
-    // [SQL] AND EFTFLAG NOT IN (:$1$Eftflag, :$2$Eftflag, ...)
+    // [SQL] AND EFTFLAG NOT IN (:$1, :$2, ...)
     where.on("eftflag", "not in", 'E', 'N', ...);
-    // [SQL] AND CREATE_TIME BETWEEN :$1$CreateTime AND :$2$CreateTime
+    // [SQL] AND CREATE_TIME BETWEEN :$1 AND :$2
     where.on("createTime", "between", entity.getStartTime(), entity.getEndTime());
-    // [SQL] AND ( USER_NAME LIKE '%'||:$1$UserName||'%' OR REAL_NAME LIKE '%'||:$2$realName||'%' OR ... )
+    // [SQL] AND ( USER_NAME LIKE '%'||:$1||'%' OR REAL_NAME LIKE '%'||:$2||'%' OR ... )
     where.sub("or") // 子条件
         .on("userName", "like", entity.getKeyword())
-        .on("realName", "like", entity.getKeyword())
-        .on(...);
+        .on("realName", "like", entity.getKeyword());
  * </pre>
  *
  * @author zhaohuihua

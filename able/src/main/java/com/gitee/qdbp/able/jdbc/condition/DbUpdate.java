@@ -12,11 +12,11 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
  * 支持Set,Add,ToNull操作<br>
  * <pre>
     DbUpdate ud = new DbUpdate();
-    // SQL> SET USER_NAME = :$1$UserName
+    // SQL> SET USER_NAME = :$1
     ud.set("userName", "zhaohuihua"); // 用户名修改为指定值
-    // SQL> SET MEMBER_SCORE = MEMBER_SCORE + :$1$MemberScore
+    // SQL> SET MEMBER_SCORE = MEMBER_SCORE + :$1
     ud.add("memberScore", +100); // 会员积分增加100
-    // SQL> SET MEMBER_SCORE = MEMBER_SCORE - :$1$MemberScore
+    // SQL> SET MEMBER_SCORE = MEMBER_SCORE - :$1
     ud.add("memberScore", -100); // 会员积分减少100
     // SQL> SET USER_STATE = NULL
     ud.toNull("userState"); // 用户状态修改为空
