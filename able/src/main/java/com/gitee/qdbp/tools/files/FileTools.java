@@ -7,14 +7,21 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.CopyOption;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.gitee.qdbp.able.exception.ExceptionWatcher;
+import com.gitee.qdbp.able.exception.FileOversizeException;
+import com.gitee.qdbp.tools.utils.ConvertTools;
 
 /**
  * 文件工具类
@@ -24,20 +31,53 @@ import com.gitee.qdbp.able.exception.ExceptionWatcher;
  */
 public abstract class FileTools {
 
+    /** buffer size used for reading and writing **/
+    private static final int BUFFER_SIZE = 8192;
+
     /**
      * 从输入流复制到输出流
      * 
      * @param input 输入流
      * @param output 输出流
+     * @return 复制的字节数
      * @throws IOException IO异常
      */
-    public static void copy(InputStream input, OutputStream output) throws IOException {
+    public static long copy(InputStream input, OutputStream output) throws IOException {
         int length;
-        int bz = 2048;
-        byte[] buffer = new byte[bz];
+        byte[] buffer = new byte[BUFFER_SIZE];
+        long total = 0;
         while ((length = input.read(buffer, 0, buffer.length)) > 0) {
             output.write(buffer, 0, length);
+            total += length;
         }
+        return total;
+    }
+
+    /**
+     * 从输入流复制到输出流
+     * 
+     * @param input 输入流
+     * @param output 输出流
+     * @param maxSize 允许的最大字节数, 0表示无限制
+     * @return 复制的字节数
+     * @throws FileOversizeException 超出了大小限制
+     * @throws IOException IO异常
+     */
+    public static long copy(InputStream input, OutputStream output, long maxSize)
+            throws FileOversizeException, IOException {
+        int length;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        long total = 0;
+        while ((length = input.read(buffer, 0, buffer.length)) > 0) {
+            if (maxSize > 0 && total + length > maxSize) {
+                String max = ConvertTools.toByteString(maxSize);
+                String msg = "File exceeds maximum permitted size of [" + max + "]";
+                throw new FileOversizeException(msg);
+            }
+            output.write(buffer, 0, length);
+            total += length;
+        }
+        return total;
     }
 
     /**
@@ -51,7 +91,7 @@ public abstract class FileTools {
         Path target = Paths.get(path);
         mkdirsIfNotExists(target);
         try (InputStream in = new ByteArrayInputStream(data)) {
-            Files.copy(in, target);
+            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
@@ -60,13 +100,80 @@ public abstract class FileTools {
      *
      * @param data 数据
      * @param path 文件路径
+     * @return 复制的字节数
      * @throws IOException IO异常
      */
-    public static void saveFile(InputStream input, String path) throws IOException {
+    public static long saveFile(InputStream input, String path) throws IOException {
 
         Path target = Paths.get(path);
         mkdirsIfNotExists(target);
-        Files.copy(input, target);
+        return Files.copy(input, target, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * 将InputStream数据保存到文件
+     *
+     * @param data 数据
+     * @param path 文件路径
+     * @param maxSize 允许的最大字节数
+     * @return 复制的字节数
+     * @throws FileOversizeException 超出了大小限制
+     * @throws IOException IO异常
+     */
+    public static long saveFile(InputStream input, String path, long maxSize)
+            throws FileOversizeException, IOException {
+
+        Path target = Paths.get(path);
+        mkdirsIfNotExists(target);
+        return copy(input, target, maxSize, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    // code copy from Files.copy(InputStream, Path, CopyOption)
+    private static long copy(InputStream in, Path target, long maxSize, CopyOption... options) throws IOException {
+        // ensure not null before opening file
+        Objects.requireNonNull(in);
+
+        // check for REPLACE_EXISTING
+        boolean replaceExisting = false;
+        for (CopyOption opt : options) {
+            if (opt == StandardCopyOption.REPLACE_EXISTING) {
+                replaceExisting = true;
+            } else {
+                if (opt == null) {
+                    throw new NullPointerException("options contains 'null'");
+                } else {
+                    throw new UnsupportedOperationException(opt + " not supported");
+                }
+            }
+        }
+
+        // attempt to delete an existing file
+        SecurityException se = null;
+        if (replaceExisting) {
+            try {
+                Files.deleteIfExists(target);
+            } catch (SecurityException x) {
+                se = x;
+            }
+        }
+
+        // attempt to create target file. If it fails with
+        // FileAlreadyExistsException then it may be because the security
+        // manager prevented us from deleting the file, in which case we just
+        // throw the SecurityException.
+        OutputStream ostream;
+        try {
+            ostream = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        } catch (FileAlreadyExistsException x) {
+            if (se != null) throw se;
+            // someone else won the race and created the file
+            throw x;
+        }
+
+        // do the copy
+        try (OutputStream out = ostream) {
+            return copy(in, out, maxSize);
+        }
     }
 
     /**
