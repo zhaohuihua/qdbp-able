@@ -48,6 +48,7 @@ public class DbUpdate extends DbItems {
         return this;
     }
 
+    @Override
     protected void put(DbFields fields) {
         throw new UnsupportedOperationException("DbUpdate can't supported put(DbFields)");
     }

@@ -1,8 +1,10 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import com.gitee.qdbp.tools.utils.NamingTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 表关联<br>
@@ -83,6 +85,7 @@ public class TableJoin implements Serializable {
      */
     public TableJoin(Class<?> tableType, String tableAlias) {
         this.major = new TableItem(tableType, tableAlias);
+        this.joins = new ArrayList<>();
     }
 
     /**
@@ -94,6 +97,7 @@ public class TableJoin implements Serializable {
      */
     public TableJoin(Class<?> tableType, String tableAlias, String resultField) {
         this.major = new TableItem(tableType, tableAlias, resultField);
+        this.joins = new ArrayList<>();
     }
 
     /**
@@ -404,4 +408,29 @@ public class TableJoin implements Serializable {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        TableItem major = this.getMajor();
+        buffer.append(major.getTableType().getSimpleName());
+        if (VerifyTools.isNotBlank(major.getTableAlias())) {
+            buffer.append(':').append(major.getTableAlias());
+        }
+        if (VerifyTools.isNotBlank(major.getResultField())) {
+            buffer.append(':').append(major.getResultField());
+        }
+        List<JoinItem> joins = this.getJoins();
+        if (VerifyTools.isNotBlank(joins)) {
+            for (JoinItem item : joins) {
+                buffer.append('+').append(item.getTableType().getSimpleName());
+                if (VerifyTools.isNotBlank(item.getTableAlias())) {
+                    buffer.append(':').append(item.getTableAlias());
+                }
+                if (VerifyTools.isNotBlank(item.getResultField())) {
+                    buffer.append(':').append(item.getResultField());
+                }
+            }
+        }
+        return buffer.toString();
+    }
 }
