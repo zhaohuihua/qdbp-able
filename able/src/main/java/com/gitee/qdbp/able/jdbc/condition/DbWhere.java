@@ -1,13 +1,8 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import com.gitee.qdbp.able.jdbc.base.DbCondition;
 import com.gitee.qdbp.able.jdbc.base.WhereCondition;
-import com.gitee.qdbp.tools.utils.StringTools;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
@@ -84,149 +79,39 @@ public class DbWhere extends DbItems {
      */
     public DbWhere on(String fieldName, String operate, Object... fieldValues) {
         DbField condition = parseCondition(fieldName, operate, fieldValues);
-        super.put(condition);
+        this.put(condition);
         return this;
     }
 
     /** 增加自定义条件 **/
     public DbWhere on(WhereCondition condition) {
-        super.put(condition);
+        this.put(condition);
         return this;
     }
 
     private static DbField parseCondition(String fieldName, String operate, Object... fieldValues) {
-        if (isMatches(operate, "IsNull", "is null", "IsNotNull", "is not null")) {
-            Object first = fieldValues == null || fieldValues.length == 0 ? null : fieldValues[0];
-            if (isMatches(operate, "IsNull", "is null")) {
-                if (isPositive(first)) {
-                    return new DbField("IsNull", fieldName);
-                } else {
-                    return new DbField("IsNotNull", fieldName);
-                }
-            } else { // if (isMatches(operate, "IsNotNull", "is not null")) 
-                if (isPositive(first)) {
-                    return new DbField("IsNotNull", fieldName);
-                } else {
-                    return new DbField("IsNull", fieldName);
-                }
-            }
-        } else if (isMatches(operate, "Between")) {
-            List<Object> arrayValues = parseArrayValue(fieldValues);
-            // 必须有两个参数
-            if (VerifyTools.isBlank(arrayValues)) {
-                String msg = "FieldValues is required, fieldName is %s, operate is %s";
-                throw new IllegalArgumentException(String.format(msg, fieldName, operate));
-            }
-            if (arrayValues.size() < 2) {
-                String msg = "FieldValues.size() can't be less then 2, fieldName is %s, operate is %s";
-                throw new IllegalArgumentException(String.format(msg, fieldName, operate));
-            }
-            return new DbField("Between", fieldName, arrayValues);
-        } else if (isMatches(operate, "In", "NotIn", "not in")) {
-            // 至少要有一个参数
-            if (VerifyTools.isBlank(fieldValues)) {
-                String msg = "FieldValues is required, fieldName is %s, operate is %s";
-                throw new IllegalArgumentException(String.format(msg, fieldName, operate));
-            }
-            List<Object> arrayValues = parseArrayValue(fieldValues);
-            if (isMatches(operate, "In")) {
-                return new DbField("In", fieldName, arrayValues);
-            } else { // if (isMatches(operate, "NotIn", "not in"))
-                return new DbField("NotIn", fieldName, arrayValues);
-            }
-        } else {
-            // 必须要有一个参数
-            Object first = fieldValues == null || fieldValues.length == 0 ? null : fieldValues[0];
-            if (VerifyTools.isBlank(first)) {
-                String msg = "FieldValue is required, fieldName is %s, operate is %s";
-                throw new IllegalArgumentException(String.format(msg, fieldName, operate));
-            }
-            if (isMatches(operate, ">", "GreaterThen", "greater then")) {
-                return new DbField("GreaterThen", fieldName, first);
-            } else if (isMatches(operate, "<", "LessThen", "less then")) {
-                return new DbField("LessThen", fieldName, first);
-            } else if (isMatches(operate, ">=", "GreaterEqualsThen", "greater equals then")) {
-                return new DbField("GreaterEqualsThen", fieldName, first);
-            } else if (isMatches(operate, "<=", "LessEqualsThen", "less equals then")) {
-                return new DbField("LessEqualsThen", fieldName, first);
-            } else if (isMatches(operate, "=", "Equals")) {
-                return new DbField("Equals", fieldName, first);
-            } else if (isMatches(operate, "!=", "<>", "NotEquals", "not equals")) {
-                return new DbField("NotEquals", fieldName, first);
-            } else if (isMatches(operate, "Like")) {
-                return new DbField("Like", fieldName, first);
-            } else if (isMatches(operate, "NotLike", "not like")) {
-                return new DbField("NotLike", fieldName, first);
-            } else if (isMatches(operate, "Starts")) {
-                return new DbField("Starts", fieldName, first);
-            } else if (isMatches(operate, "Ends")) {
-                return new DbField("Ends", fieldName, first);
+        VerifyTools.nvl(fieldName, "fieldName");
+        DbField condition = new DbField();
+        condition.setFieldName(fieldName);
+        condition.setOperateType(operate);
+        if (fieldValues != null && fieldValues.length > 0) {
+            if (fieldValues.length == 1) {
+                condition.setFieldValue(fieldValues[0]);
             } else {
-                String msg = "Unsupported operate, fieldName is %s, operate is %s, fieldValue is %s";
-                throw new IllegalArgumentException(String.format(msg, fieldName, operate, first));
+                condition.setFieldValue(fieldValues);
             }
         }
-    }
-
-    private static boolean isMatches(String string, String... expectStrings) {
-        for (String expect : expectStrings) {
-            if (expect.equalsIgnoreCase(string)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isPositive(Object value) {
-        if (value == null) {
-            return true;
-        } else if (value.getClass() == boolean.class || value.getClass() == Boolean.class) {
-            return !Boolean.FALSE.equals(value);
-        } else if (value instanceof Number) {
-            return ((Number) value).doubleValue() != 0;
-        } else if (value instanceof String) {
-            return StringTools.isPositive((String) value, true);
-        } else {
-            String msg = "FieldValue format error, can't convert to boolean, value=%s";
-            throw new IllegalArgumentException(String.format(msg, value));
-        }
-    }
-
-    private static List<Object> parseArrayValue(Object... values) {
-        if (values == null) {
-            return null;
-        }
-        if (values.length == 0) {
-            return new ArrayList<Object>();
-        }
-        Object value = values.length == 1 ? values[0] : values;
-        List<Object> list;
-        if (value.getClass().isArray()) {
-            list = Arrays.asList((Object[]) value);
-        } else if (value instanceof Collection) {
-            list = new ArrayList<Object>((Collection<?>) value);
-        } else if (value instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) value;
-            list = new ArrayList<Object>(map.values());
-        } else if (value instanceof Iterable) {
-            list = new ArrayList<Object>();
-            Iterable<?> iterable = (Iterable<?>) value;
-            for (Object temp : iterable) {
-                list.add(temp);
-            }
-        } else {
-            list = Arrays.asList(value);
-        }
-        return list;
+        return condition;
     }
 
     /** 创建子查询条件 **/
-    public SubWhere sub(String operateType) {
-        return this.sub(operateType, true);
+    public SubWhere sub(String logicType) {
+        return this.sub(logicType, true);
     }
 
     /** 创建子查询条件 **/
     public SubWhere sub(String logicType, boolean positive) {
+        VerifyTools.nvl(logicType, "logicType");
         SubWhere sub = new SubWhere(this, logicType, positive);
         this.put(sub);
         return sub;
@@ -239,7 +124,7 @@ public class DbWhere extends DbItems {
      */
     public void replace(String fieldName, String operate, Object... fieldValues) {
         DbField condition = parseCondition(fieldName, operate, fieldValues);
-        super.replace(condition);
+        this.replace(condition);
     }
 
     /**
