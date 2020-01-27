@@ -408,21 +408,22 @@ public class TableJoin implements Serializable {
         }
     }
 
-    @Override
-    public String toString() {
+    public static String buildCacheKey(TableJoin tables, boolean simpleName) {
         StringBuilder buffer = new StringBuilder();
-        TableItem major = this.getMajor();
-        buffer.append(major.getTableType().getSimpleName());
+        TableItem major = tables.getMajor();
+        Class<?> majorType = major.getTableType();
+        buffer.append(simpleName ? majorType.getSimpleName() : majorType.getName());
         if (VerifyTools.isNotBlank(major.getTableAlias())) {
             buffer.append(':').append(major.getTableAlias());
         }
         if (VerifyTools.isNotBlank(major.getResultField())) {
             buffer.append(':').append(major.getResultField());
         }
-        List<JoinItem> joins = this.getJoins();
+        List<JoinItem> joins = tables.getJoins();
         if (VerifyTools.isNotBlank(joins)) {
             for (JoinItem item : joins) {
-                buffer.append('+').append(item.getTableType().getSimpleName());
+                Class<?> itemType = item.getTableType();
+                buffer.append('+').append(simpleName ? itemType.getSimpleName() : itemType.getName());
                 if (VerifyTools.isNotBlank(item.getTableAlias())) {
                     buffer.append(':').append(item.getTableAlias());
                 }
@@ -432,5 +433,10 @@ public class TableJoin implements Serializable {
             }
         }
         return buffer.toString();
+    }
+
+    @Override
+    public String toString() {
+        return buildCacheKey(this, true);
     }
 }
