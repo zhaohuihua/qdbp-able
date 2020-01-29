@@ -37,10 +37,10 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
     // [ORACLE/DB2] AND PHONE LIKE '%'||:$1
     // [MYSQL] AND PHONE LIKE CONCAT('%',:$1)
     where.on("phone", "ends", "8888");
-    // [SQL] AND EFTFLAG IN (:$1, :$2, ...)
-    where.on("eftflag", "in", 'E', 'N', ...);
-    // [SQL] AND EFTFLAG NOT IN (:$1, :$2, ...)
-    where.on("eftflag", "not in", 'E', 'N', ...);
+    // [SQL] AND USER_STATE IN (:$1, :$2, ...)
+    where.on("userState", "in", UserState.NORMAL, UserState.LOCKED, ...);
+    // [SQL] AND USER_STATE NOT IN (:$1, :$2, ...)
+    where.on("userState", "not in", UserState.NORMAL, UserState.LOCKED, ...);
     // [SQL] AND CREATE_TIME BETWEEN :$1 AND :$2
     where.on("createTime", "between", entity.getStartTime(), entity.getEndTime());
     // [SQL] AND ( USER_NAME LIKE '%'||:$1||'%' OR REAL_NAME LIKE '%'||:$2||'%' OR ... )
