@@ -437,4 +437,9 @@ public class AntStringMatcher implements StringMatcher {
         char firstChar = string.charAt(0);
         return firstChar == this.pathSeparator;
     }
+
+    @Override
+    public String toString() {
+        return "ant:" + pattern;
+    }
 }

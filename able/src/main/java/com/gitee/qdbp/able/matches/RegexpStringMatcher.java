@@ -57,4 +57,9 @@ public class RegexpStringMatcher implements StringMatcher {
     public boolean matches(String source) {
         return pattern.matcher(source).matches();
     }
+
+    @Override
+    public String toString() {
+        return "regexp:" + pattern;
+    }
 }

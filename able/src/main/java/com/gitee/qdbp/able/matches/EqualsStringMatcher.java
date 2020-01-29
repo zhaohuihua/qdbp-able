@@ -21,4 +21,8 @@ public class EqualsStringMatcher implements StringMatcher {
         return pattern.equals(source);
     }
 
+    @Override
+    public String toString() {
+        return "equals:" + pattern;
+    }
 }
