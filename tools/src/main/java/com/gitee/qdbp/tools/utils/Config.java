@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import com.gitee.qdbp.able.beans.KeyString;
+import com.gitee.qdbp.tools.property.PropertyContainer;
 import com.gitee.qdbp.tools.utils.PropertyTools.Options;
 
 /**
@@ -23,7 +24,7 @@ import com.gitee.qdbp.tools.utils.PropertyTools.Options;
  * @author zhaohuihua
  * @version 140724
  */
-public class Config implements Serializable {
+public class Config implements PropertyContainer, Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -145,6 +146,7 @@ public class Config implements Serializable {
      * @param key KEY
      * @return VALUE
      */
+    @Override
     public String getString(String key) {
         return PropertyTools.getString(properties, key, true);
     }
@@ -156,6 +158,7 @@ public class Config implements Serializable {
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
      */
+    @Override
     public String getString(String key, boolean warning) {
         return PropertyTools.getString(properties, key, warning);
     }
@@ -167,6 +170,7 @@ public class Config implements Serializable {
      * @param defvalue 默认值
      * @return VALUE
      */
+    @Override
     public String getStringUseDefValue(String key, String defvalue) {
         return PropertyTools.getStringUseDefValue(properties, key, defvalue);
     }
@@ -178,6 +182,7 @@ public class Config implements Serializable {
      * @param keys 备用KEY
      * @return VALUE
      */
+    @Override
     public String getStringUseDefKeys(String key, String... keys) {
         return PropertyTools.getStringUseDefKeys(properties, key, keys);
     }
@@ -191,17 +196,19 @@ public class Config implements Serializable {
      * @param suffixes 多级后缀
      * @return VALUE
      */
+    @Override
     public String getStringUseSuffix(String key, String suffixes) {
         return PropertyTools.getStringUseSuffix(properties, key, suffixes);
     }
 
     /**
-     * 获取Integer类型的配置项值<br>
+     * 获取Long类型的配置项值<br>
      * 如果值不存在, 将输出警告日志
      *
      * @param key KEY
      * @return VALUE
      */
+    @Override
     public Long getLong(String key) {
         return PropertyTools.getLong(properties, key, true);
     }
@@ -213,8 +220,22 @@ public class Config implements Serializable {
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
      */
+    @Override
     public Long getLong(String key, boolean warning) {
         return PropertyTools.getLong(properties, key, warning);
+    }
+
+    /**
+     * 获取Long类型的配置项值<br>
+     * 如果配置项值为null则返回默认值
+     *
+     * @param key KEY
+     * @param defvalue 默认值
+     * @return VALUE
+     */
+    @Override
+    public Long getLongUseDefValue(String key, Long defvalue) {
+        return PropertyTools.getLongUseDefValue(properties, key, defvalue);
     }
 
     /**
@@ -224,6 +245,7 @@ public class Config implements Serializable {
      * @param key KEY
      * @return VALUE
      */
+    @Override
     public Integer getInteger(String key) {
         return PropertyTools.getInteger(properties, key, true);
     }
@@ -235,8 +257,22 @@ public class Config implements Serializable {
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
      */
+    @Override
     public Integer getInteger(String key, boolean warning) {
         return PropertyTools.getInteger(properties, key, warning);
+    }
+
+    /**
+     * 获取Integer类型的配置项值<br>
+     * 如果配置项值为null则返回默认值
+     *
+     * @param key KEY
+     * @param defvalue 默认值
+     * @return VALUE
+     */
+    @Override
+    public Integer getIntegerUseDefValue(String key, Integer defvalue) {
+        return PropertyTools.getIntegerUseDefValue(properties, key, defvalue);
     }
 
     /**
@@ -246,6 +282,7 @@ public class Config implements Serializable {
      * @param key KEY
      * @return VALUE
      */
+    @Override
     public Boolean getBoolean(String key) {
         return PropertyTools.getBoolean(properties, key, true);
     }
@@ -257,8 +294,22 @@ public class Config implements Serializable {
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
      */
+    @Override
     public Boolean getBoolean(String key, boolean warning) {
         return PropertyTools.getBoolean(properties, key, warning);
+    }
+
+    /**
+     * 获取Boolean类型的配置项值<br>
+     * 如果配置项值为null则返回默认值
+     *
+     * @param key KEY
+     * @param defvalue 默认值
+     * @return VALUE
+     */
+    @Override
+    public Boolean getBooleanUseDefValue(String key, Boolean defvalue) {
+        return PropertyTools.getBooleanUseDefValue(properties, key, defvalue);
     }
 
     /**
@@ -268,6 +319,7 @@ public class Config implements Serializable {
      * @param key KEY
      * @return VALUE
      */
+    @Override
     public String[] getArray(String key) {
         return PropertyTools.getArray(properties, key, true);
     }
@@ -280,8 +332,79 @@ public class Config implements Serializable {
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
      */
+    @Override
     public String[] getArray(String key, boolean warning) {
         return PropertyTools.getArray(properties, key, warning);
+    }
+
+    /**
+     * 获取Class类型的配置值并返回实例化对象
+     * 
+     * @param <T> 类型
+     * @param <S> 子类型
+     * @param key KEY
+     * @param type 期望返回的类型
+     * @param warning 值不存在时,是否输出警告日志
+     * @return 配置的实例化对象
+     */
+    public <T, S extends T> S getClassInstance(String key, Class<T> type, boolean warning) {
+        String value = this.getString(key, warning);
+        if (VerifyTools.isBlank(value)) {
+            return null;
+        } else {
+            return newClassInstance(key, value, type);
+        }
+    }
+
+    /**
+     * 获取Class类型的配置值并返回实例化对象<br>
+     * 如果没有找到配置项, 返回默认类型的实例化对象
+     * 
+     * @param <T> 类型
+     * @param <S> 子类型
+     * @param key KEY
+     * @param type 期望返回的类型
+     * @param deftype 默认类型
+     * @return 配置的实例化对象
+     */
+    public <T, S extends T> S getClassInstance(String key, Class<T> type, Class<S> deftype) {
+        String value = this.getString(key, false);
+        if (VerifyTools.isNotBlank(value)) {
+            return newClassInstance(key, value, type);
+        } else {
+            if (deftype == null) {
+                return null;
+            } else {
+                try {
+                    return deftype.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    String m = "Default class can't instantiate, " + deftype.getName() + ", key=" + key;
+                    throw new IllegalStateException(m, e);
+                }
+            }
+        }
+    }
+
+    private <T, S extends T> S newClassInstance(String key, String className, Class<T> type) {
+        Class<?> clazz;
+        try {
+            clazz = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            String m = "Class not found, " + key + "=" + className;
+            throw new IllegalStateException(m, e);
+        }
+        if (!type.isAssignableFrom(clazz)) {
+            String m = "Class isn't expected type, " + key + "=" + className + ", expected: " + type.getName();
+            throw new IllegalStateException(m);
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            S instance = (S) clazz.newInstance();
+            return instance;
+        } catch (InstantiationException | IllegalAccessException e) {
+            String m = "Class can't instantiate, " + key + "=" + className;
+            throw new IllegalStateException(m, e);
+        }
     }
 
     /**
@@ -298,6 +421,7 @@ public class Config implements Serializable {
      *
      * @return 所有配置项条目
      */
+    @Override
     public List<KeyString> entries() {
         return PropertyTools.entries(properties);
     }

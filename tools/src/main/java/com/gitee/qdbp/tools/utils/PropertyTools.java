@@ -65,6 +65,7 @@ public abstract class PropertyTools {
      * key.a = {property:key.b}<br>
      * 如果值不存在, 将输出警告日志
      *
+     * @param properties Properties
      * @param key KEY
      * @return VALUE
      */
@@ -77,6 +78,7 @@ public abstract class PropertyTools {
      * 支持引用其他配置项<br>
      * key.a = {property:key.b}<br>
      *
+     * @param properties Properties
      * @param key KEY
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
@@ -88,6 +90,7 @@ public abstract class PropertyTools {
     /**
      * 获取String类型的配置项值, 如果配置项值为null则返回默认值
      *
+     * @param properties Properties
      * @param key KEY
      * @param defvalue 默认值
      * @return VALUE
@@ -100,6 +103,7 @@ public abstract class PropertyTools {
     /**
      * 获取String类型的配置项值, 如果配置项值为null则继续取备用KEY的值
      *
+     * @param properties Properties
      * @param key KEY
      * @param keys 备用KEY
      * @return VALUE
@@ -122,6 +126,7 @@ public abstract class PropertyTools {
      * 如key = a.b.c, suffixes=x.y.z<br>
      * 取值顺序为: a.b.c.x.y.z - a.b.c.x.y - a.b.c.x - a.b.c
      *
+     * @param properties Properties
      * @param key KEY
      * @param suffixes 多级后缀
      * @return VALUE
@@ -150,19 +155,9 @@ public abstract class PropertyTools {
     }
 
     /**
-     * 获取Integer类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
-     *
-     * @param key KEY
-     * @return VALUE
-     */
-    public static Long getLong(Properties properties, String key) {
-        return getLong(properties, key, true);
-    }
-
-    /**
      * 获取Long类型的配置项值
      *
+     * @param properties Properties
      * @param key KEY
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
@@ -182,9 +177,36 @@ public abstract class PropertyTools {
     }
 
     /**
+     * 获取Long类型的配置项值<br>
+     * 如果值不存在, 将输出警告日志
+     *
+     * @param properties Properties
+     * @param key KEY
+     * @return VALUE
+     */
+    public static Long getLong(Properties properties, String key) {
+        return getLong(properties, key, true);
+    }
+
+    /**
+     * 获取Long类型的配置项值<br>
+     * 如果配置项值为null则返回默认值
+     *
+     * @param properties Properties
+     * @param key KEY
+     * @param defvalue 默认值
+     * @return VALUE
+     */
+    public static Long getLongUseDefValue(Properties properties, String key, Long defvalue) {
+        Long value = getLong(properties, key, false);
+        return VerifyTools.nvl(value, defvalue);
+    }
+
+    /**
      * 获取Integer类型的配置项值<br>
      * 如果值不存在, 将输出警告日志
      *
+     * @param properties Properties
      * @param key KEY
      * @return VALUE
      */
@@ -195,6 +217,7 @@ public abstract class PropertyTools {
     /**
      * 获取Integer类型的配置项值
      *
+     * @param properties Properties
      * @param key KEY
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
@@ -205,9 +228,24 @@ public abstract class PropertyTools {
     }
 
     /**
+     * 获取Integer类型的配置项值<br>
+     * 如果配置项值为null则返回默认值
+     *
+     * @param properties Properties
+     * @param key KEY
+     * @param defvalue 默认值
+     * @return VALUE
+     */
+    public static Integer getIntegerUseDefValue(Properties properties, String key, Integer defvalue) {
+        Integer value = getInteger(properties, key, false);
+        return VerifyTools.nvl(value, defvalue);
+    }
+
+    /**
      * 获取Boolean类型的配置项值<br>
      * 如果值不存在, 将输出警告日志
      *
+     * @param properties Properties
      * @param key KEY
      * @return VALUE
      */
@@ -218,6 +256,7 @@ public abstract class PropertyTools {
     /**
      * 获取Boolean类型的配置项值
      *
+     * @param properties Properties
      * @param key KEY
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
@@ -228,9 +267,24 @@ public abstract class PropertyTools {
     }
 
     /**
+     * 获取Boolean类型的配置项值<br>
+     * 如果配置项值为null则返回默认值
+     *
+     * @param properties Properties
+     * @param key KEY
+     * @param defvalue 默认值
+     * @return VALUE
+     */
+    public static Boolean getBooleanUseDefValue(Properties properties, String key, Boolean defvalue) {
+        Boolean value = getBoolean(properties, key, false);
+        return VerifyTools.nvl(value, defvalue);
+    }
+
+    /**
      * 获取数组类型的配置项值, 以竖杠分隔的字符串拆分为数组<br>
      * 如果值不存在, 将输出警告日志
      *
+     * @param properties Properties
      * @param key KEY
      * @return VALUE
      */
@@ -242,6 +296,7 @@ public abstract class PropertyTools {
      * 获取数组类型的配置项值, 以竖杠分隔的字符串拆分为数组<br>
      * 每一个子字符串都已经trim()过了<br>
      *
+     * @param properties Properties
      * @param key KEY
      * @param warning 值不存在时,是否输出警告日志
      * @return VALUE
@@ -254,6 +309,7 @@ public abstract class PropertyTools {
     /**
      * 返回所有配置项条目
      *
+     * @param properties Properties
      * @author zhaohuihua
      * @return 所有配置项条目
      */
