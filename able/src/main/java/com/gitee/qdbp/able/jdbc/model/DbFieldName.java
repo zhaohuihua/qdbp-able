@@ -1,4 +1,4 @@
-package com.gitee.qdbp.able.jdbc.condition;
+package com.gitee.qdbp.able.jdbc.model;
 
 import java.io.Serializable;
 
