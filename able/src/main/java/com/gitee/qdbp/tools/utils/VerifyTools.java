@@ -173,6 +173,8 @@ public abstract class VerifyTools {
     public static boolean equals(Object o, Object n) {
         if (o == null && n == null) {
             return true;
+        } else if (isBlank(o) && isBlank(n)) {
+            return true;
         } else if (o == null && n != null || o != null && n == null) {
             return false;
         } else {
