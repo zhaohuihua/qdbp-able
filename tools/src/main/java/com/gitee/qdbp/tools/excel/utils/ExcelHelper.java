@@ -21,6 +21,7 @@ import com.gitee.qdbp.tools.excel.model.CellInfo;
 import com.gitee.qdbp.tools.excel.model.ColumnInfo;
 import com.gitee.qdbp.tools.excel.model.FieldInfo;
 import com.gitee.qdbp.tools.excel.model.RowInfo;
+import com.gitee.qdbp.tools.utils.StringTools;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
@@ -68,7 +69,7 @@ public class ExcelHelper {
             try {
                 parse(sheetName, row, i + 1, columnInfos, metadata, cb);
             } catch (ServiceException e) {
-                cb.addFailed(sheetName, i + 1, e);
+                cb.addFailed(sheetName, i + 1, e.getDetails(), null, e);
                 if (e.getCause() != null) {
                     String error = e.getMessage();
                     String cause = e.getCause().getMessage();
@@ -141,7 +142,7 @@ public class ExcelHelper {
                 if (VerifyTools.isNotBlank(original)) {
                     // 不知道怎么取Excel单元格的原始文本, 因此日期,时间就不好提示了
                     if (original instanceof String || original instanceof Boolean || original instanceof Number) {
-                        title += original.toString();
+                        title += StringTools.ellipsis(original.toString(), 30);
                     }
                 }
                 cb.addFailed(sheetName, rowIndex, title, original, e);

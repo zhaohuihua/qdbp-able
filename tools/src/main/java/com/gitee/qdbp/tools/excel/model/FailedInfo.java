@@ -21,7 +21,7 @@ public class FailedInfo implements Failed, Serializable {
     /** 序号 **/
     private Integer index;
 
-    /** 字段名称 **/
+    /** 字段内容(注意:字段名和字段值都填在field这里, value的值不用于前端显示) **/
     private String field;
 
     /** 字段值 **/
@@ -71,12 +71,12 @@ public class FailedInfo implements Failed, Serializable {
         this.index = index;
     }
 
-    /** 获取字段名称 **/
+    /** 字段内容(注意:字段名和字段值都填在field这里, value的值不用于前端显示) **/
     public String getField() {
         return field;
     }
 
-    /** 设置字段名称 **/
+    /** 字段内容(注意:字段名和字段值都填在field这里, value的值不用于前端显示) **/
     public void setField(String field) {
         this.field = field;
     }
