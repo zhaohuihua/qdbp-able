@@ -75,7 +75,9 @@ public abstract class EditableException extends RuntimeException {
      * @param message 异常消息
      */
     public void prependMessage(String message) {
-        if (message == null || message.length() == 0) return;
+        if (message == null || message.length() == 0) {
+            return;
+        }
 
         if (this.message == null) {
             this.message = message;
@@ -95,7 +97,9 @@ public abstract class EditableException extends RuntimeException {
      * @param message 异常消息
      */
     public void appendMessage(String message) {
-        if (message == null || message.length() == 0) return;
+        if (message == null || message.length() == 0) {
+            return;
+        }
 
         if (this.message == null) {
             this.message = message;

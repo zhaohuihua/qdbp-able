@@ -3,6 +3,7 @@ package com.gitee.qdbp.able.result;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import com.gitee.qdbp.able.exception.ServiceException;
 import com.gitee.qdbp.able.jdbc.paging.PageList;
 import com.gitee.qdbp.able.jdbc.paging.PartList;
 
@@ -19,13 +20,12 @@ public class ResponseMessage implements IResultMessage, Serializable {
 
     /** 返回码 **/
     private String code;
-
     /** 返回消息 **/
     private String message;
-
+    /** 错误详情 **/
+    private String errorDetails;
     /** 返回结果 **/
     private Object body;
-
     /** 附加信息 **/
     private Map<String, Object> extra;
 
@@ -54,6 +54,14 @@ public class ResponseMessage implements IResultMessage, Serializable {
     public ResponseMessage(IResultMessage resultMessage) {
         this.code = resultMessage.getCode();
         this.message = resultMessage.getMessage();
+        if (resultMessage instanceof ServiceException) {
+            this.errorDetails = ((ServiceException) resultMessage).getDetails();
+        } else if (resultMessage instanceof ResponseMessage) {
+            ResponseMessage other = (ResponseMessage) resultMessage;
+            this.errorDetails = other.getErrorDetails();
+            this.body = other.getBody();
+            this.extra = other.getExtra();
+        }
     }
 
     /** 获取返回码 **/
@@ -76,6 +84,16 @@ public class ResponseMessage implements IResultMessage, Serializable {
     /** 设置返回消息 **/
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    /** 获取错误详情 **/
+    public String getErrorDetails() {
+        return errorDetails;
+    }
+
+    /** 设置错误详情 **/
+    public void setErrorDetails(String errorDetails) {
+        this.errorDetails = errorDetails;
     }
 
     /** 获取返回内容 **/
@@ -125,7 +143,13 @@ public class ResponseMessage implements IResultMessage, Serializable {
 
     @Override
     public String toString() {
-        return code + "[" + message + "]";
+        StringBuilder buffer = new StringBuilder();
+        buffer.append('[').append(code).append(']');
+        buffer.append(message);
+        if (errorDetails != null && errorDetails.length() > 0) {
+            buffer.append('(').append(errorDetails).append(')');
+        }
+        return buffer.toString();
     }
 
 }

@@ -17,8 +17,8 @@ public class ServiceException extends EditableException implements IResultMessag
 
     /** 错误返回码 **/
     private String code;
-    /** 错误描述 **/
-    private String message;
+    /** 错误详情 **/
+    private String details;
 
     /** 默认构造函数 **/
     public ServiceException() {
@@ -32,7 +32,18 @@ public class ServiceException extends EditableException implements IResultMessag
     public ServiceException(IResultMessage result) {
         super(result.getMessage());
         this.code = result.getCode();
-        this.message = result.getMessage();
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param result 错误返回码
+     * @param details 错误详情
+     */
+    public ServiceException(IResultMessage result, String details) {
+        super(result.getMessage());
+        this.code = result.getCode();
+        this.details = details;
     }
 
     /**
@@ -44,7 +55,19 @@ public class ServiceException extends EditableException implements IResultMessag
     public ServiceException(IResultMessage result, Throwable cause) {
         super(result.getMessage(), cause);
         this.code = result.getCode();
-        this.message = result.getMessage();
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param result 错误返回码
+     * @param details 错误详情
+     * @param cause 引发异常的原因
+     */
+    public ServiceException(IResultMessage result, String details, Throwable cause) {
+        super(result.getMessage(), cause);
+        this.code = result.getCode();
+        this.details = details;
     }
 
     /**
@@ -67,28 +90,33 @@ public class ServiceException extends EditableException implements IResultMessag
     }
 
     /**
-     * 获取错误描述
+     * 获取错误详情
      *
-     * @return 错误描述
+     * @return 错误详情
      */
-    @Override
-    public String getMessage() {
-        return this.message;
+    public String getDetails() {
+        return details;
     }
 
     /**
-     * 设置错误描述
+     * 设置错误详情
      * 
-     * @param message 错误描述
+     * @param details 错误详情
      */
-    @Override
-    public void setMessage(String message) {
-        this.message = message;
+    public void setDetails(String details) {
+        this.details = details;
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + code + "] " + this.getMessage();
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(getClass().getSimpleName());
+        buffer.append('[').append(code).append(']');
+        buffer.append(getMessage());
+        if (details != null && details.length() > 0) {
+            buffer.append('(').append(details).append(')');
+        }
+        return buffer.toString();
     }
 
     /** 从exception.cause中查找ServiceException **/
