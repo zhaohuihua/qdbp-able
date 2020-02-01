@@ -44,7 +44,7 @@ public abstract class SheetParseCallback implements IBatchResult, Serializable {
         failed.add(new FailedInfo(sheetName, row, result));
     }
 
-    /** 具体某一列失败 **/
+    /** 具体某一列失败(注意:字段名和字段值都填在field这里, value的值不用于前端显示) **/
     public void addFailed(String sheetName, int row, String field, Object value, IResultMessage result) {
         failed.add(new FailedInfo(sheetName, row, field, value, result));
     }
