@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.gitee.qdbp.tools.excel.exception.ResultSetMismatchException;
+import com.gitee.qdbp.tools.utils.JsonTools;
 import com.gitee.qdbp.tools.utils.StringTools;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
@@ -86,7 +87,7 @@ public class BeanContainer implements Serializable {
         }
 
         Map<String, Object> map = bean.findFistData();
-        return TypeUtils.castToJavaBean(map, type);
+        return JsonTools.mapToBean(map, type);
     }
 
     public <T> List<T> getBeans(String name, Class<T> type) {
@@ -102,7 +103,7 @@ public class BeanContainer implements Serializable {
 
         List<T> temp = new ArrayList<>();
         for (Map<String, Object> map : list) {
-            temp.add(TypeUtils.castToJavaBean(map, type));
+            temp.add(JsonTools.mapToBean(map, type));
         }
         return temp;
     }
