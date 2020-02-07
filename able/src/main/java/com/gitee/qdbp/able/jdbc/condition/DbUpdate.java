@@ -82,22 +82,10 @@ public class DbUpdate extends DbItems {
      * 从map中获取参数构建对象
      * 
      * @param map Map参数
-     * @param emptiable 是否允许条件为空
      * @return 对象实例
      */
-    public static DbUpdate from(Map<String, Object> map, boolean emptiable) {
-        if (map == null || map.isEmpty()) {
-            if (emptiable) {
-                return new DbUpdate();
-            } else {
-                throw new IllegalArgumentException("map must not be " + (map == null ? "null" : "empty"));
-            }
-        }
-        DbUpdate ud = from(map, DbUpdate.class);
-        if (!emptiable && ud.isEmpty()) {
-            throw new IllegalArgumentException("update object must not be empty.");
-        }
-        return ud;
+    public static DbUpdate parse(Map<String, Object> map) {
+        return parse(map, DbUpdate.class);
     }
 
     /**
@@ -107,10 +95,8 @@ public class DbUpdate extends DbItems {
      * @param clazz 对象类型
      * @return 对象实例
      */
-    protected static <T extends DbItems> T from(Map<String, Object> map, Class<T> clazz) {
-        if (clazz == null) {
-            throw new NullPointerException("clazz is null");
-        }
+    public static <T extends DbUpdate> T parse(Map<String, Object> map, Class<T> clazz) {
+        VerifyTools.requireNonNull(clazz, "class");
 
         T items;
         try {

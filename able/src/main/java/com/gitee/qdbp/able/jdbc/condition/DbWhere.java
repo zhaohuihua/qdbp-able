@@ -58,7 +58,7 @@ public class DbWhere extends DbItems {
     private static final long serialVersionUID = 1L;
 
     /** 没有查询条件的空Where **/
-    public static final DbWhere NONE = new EmptyDbWhere();
+    public static final DbWhere NONE = new NoneWhere();
 
     /**
      * Where条件<br>
@@ -127,27 +127,13 @@ public class DbWhere extends DbItems {
     }
 
     /**
-     * 从map中获取参数构建对象<br>
-     * 一般用于从request.getParameterMap()中获取参数<br>
-     * 应注意, 此时参数由前端传入, 条件不可控, 也有可能条件为空, 需要仔细检查条件内容, 防止越权操作<br>
+     * 从map中获取参数构建对象
      * 
      * @param map Map参数
-     * @param emptiable 是否允许条件为空
      * @return 对象实例
      */
-    public static DbWhere from(Map<String, Object> map, boolean emptiable) {
-        if (map == null || map.isEmpty()) {
-            if (emptiable) {
-                return new EmptiableDbWhere();
-            } else {
-                throw new IllegalArgumentException("map must no be " + (map == null ? "null" : "empty"));
-            }
-        }
-        DbWhere where = from(map, EmptiableDbWhere.class);
-        if (!emptiable && where.isEmpty()) {
-            throw new IllegalArgumentException("where must no be empty.");
-        }
-        return where;
+    public static DbWhere parse(Map<String, Object> map) {
+        return parse(map, DbWhere.class);
     }
 
     /**
@@ -157,7 +143,7 @@ public class DbWhere extends DbItems {
      * @param clazz 对象类型
      * @return 对象实例
      */
-    protected static <T extends DbItems> T from(Map<String, Object> map, Class<T> clazz) {
+    public static <T extends DbWhere> T parse(Map<String, Object> map, Class<T> clazz) {
         VerifyTools.requireNonNull(clazz, "class");
 
         T items;
@@ -195,41 +181,40 @@ public class DbWhere extends DbItems {
      * @author zhaohuihua
      * @version 20200206
      */
-    public static class EmptiableDbWhere extends DbWhere {
+    public static class EmptiableWhere extends DbWhere {
 
         /** serialVersionUID **/
         private static final long serialVersionUID = 1L;
-
     }
 
     /**
-     * 空的查询条件
+     * 空查询条件
      *
      * @author zhaohuihua
      * @version 190310
      */
-    private static class EmptyDbWhere extends EmptiableDbWhere {
+    private static class NoneWhere extends EmptiableWhere {
 
         /** serialVersionUID **/
         private static final long serialVersionUID = 1L;
 
-        private EmptyDbWhere() {
+        private NoneWhere() {
         }
 
         protected void put(String fieldName, Object fieldValue) {
-            throw new UnsupportedOperationException("EmptyDbWhere");
+            throw new UnsupportedOperationException("NoneWhere");
         }
 
         protected void put(String operateType, String fieldName, Object fieldValue) {
-            throw new UnsupportedOperationException("EmptyDbWhere");
+            throw new UnsupportedOperationException("NoneWhere");
         }
 
         protected void put(DbFields fields) {
-            throw new UnsupportedOperationException("EmptyDbWhere");
+            throw new UnsupportedOperationException("NoneWhere");
         }
 
         protected void put(DbCondition condition) {
-            throw new UnsupportedOperationException("EmptyDbWhere");
+            throw new UnsupportedOperationException("NoneWhere");
         }
 
     }
