@@ -82,10 +82,22 @@ public class DbUpdate extends DbItems {
      * 从map中获取参数构建对象
      * 
      * @param map Map参数
+     * @param emptiable 是否允许条件为空
      * @return 对象实例
      */
-    public static DbUpdate from(Map<String, Object> map) {
-        return from(map, DbUpdate.class);
+    public static DbUpdate from(Map<String, Object> map, boolean emptiable) {
+        if (map == null || map.isEmpty()) {
+            if (emptiable) {
+                return new DbUpdate();
+            } else {
+                throw new IllegalArgumentException("map must not be " + (map == null ? "null" : "empty"));
+            }
+        }
+        DbUpdate ud = from(map, DbUpdate.class);
+        if (!emptiable && ud.isEmpty()) {
+            throw new IllegalArgumentException("update object must not be empty.");
+        }
+        return ud;
     }
 
     /**
@@ -96,9 +108,6 @@ public class DbUpdate extends DbItems {
      * @return 对象实例
      */
     protected static <T extends DbItems> T from(Map<String, Object> map, Class<T> clazz) {
-        if (map == null) {
-            throw new NullPointerException("map is null");
-        }
         if (clazz == null) {
             throw new NullPointerException("clazz is null");
         }
@@ -112,26 +121,28 @@ public class DbUpdate extends DbItems {
             throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
         }
 
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (VerifyTools.isBlank(key)) {
-                continue;
-            }
-            if (value == null) {
-                continue;
-            }
-            int index = key.lastIndexOf('$');
-            if (index < 0) {
-                if (value.equals("")) {
-                    items.put("ToNull", key, value);
-                } else {
-                    items.put(key, value);
+        if (map != null && !map.isEmpty()) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (VerifyTools.isBlank(key)) {
+                    continue;
                 }
-            } else {
-                String field = key.substring(0, index);
-                String operate = key.substring(index + 1);
-                items.put(operate, field, value);
+                if (value == null) {
+                    continue;
+                }
+                int index = key.lastIndexOf('$');
+                if (index < 0) {
+                    if (value.equals("")) {
+                        items.put("ToNull", key, value);
+                    } else {
+                        items.put(key, value);
+                    }
+                } else {
+                    String field = key.substring(0, index);
+                    String operate = key.substring(index + 1);
+                    items.put(operate, field, value);
+                }
             }
         }
         return items;

@@ -127,13 +127,27 @@ public class DbWhere extends DbItems {
     }
 
     /**
-     * 从map中获取参数构建对象
+     * 从map中获取参数构建对象<br>
+     * 一般用于从request.getParameterMap()中获取参数<br>
+     * 应注意, 此时参数由前端传入, 条件不可控, 也有可能条件为空, 需要仔细检查条件内容, 防止越权操作<br>
      * 
      * @param map Map参数
+     * @param emptiable 是否允许条件为空
      * @return 对象实例
      */
-    public static DbWhere from(Map<String, Object> map) {
-        return from(map, DbWhere.class);
+    public static DbWhere from(Map<String, Object> map, boolean emptiable) {
+        if (map == null || map.isEmpty()) {
+            if (emptiable) {
+                return new EmptiableDbWhere();
+            } else {
+                throw new IllegalArgumentException("map must no be " + (map == null ? "null" : "empty"));
+            }
+        }
+        DbWhere where = from(map, EmptiableDbWhere.class);
+        if (!emptiable && where.isEmpty()) {
+            throw new IllegalArgumentException("where must no be empty.");
+        }
+        return where;
     }
 
     /**
@@ -144,12 +158,7 @@ public class DbWhere extends DbItems {
      * @return 对象实例
      */
     protected static <T extends DbItems> T from(Map<String, Object> map, Class<T> clazz) {
-        if (map == null) {
-            throw new NullPointerException("map is null");
-        }
-        if (clazz == null) {
-            throw new NullPointerException("clazz is null");
-        }
+        VerifyTools.requireNonNull(clazz, "class");
 
         T items;
         try {
@@ -160,22 +169,37 @@ public class DbWhere extends DbItems {
             throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
         }
 
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (VerifyTools.isAnyBlank(key, value)) {
-                continue;
-            }
-            int index = key.lastIndexOf('$');
-            if (index < 0) {
-                items.put(key, value);
-            } else {
-                String field = key.substring(0, index);
-                String operate = key.substring(index + 1);
-                items.put(operate, field, value);
+        if (map != null) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (VerifyTools.isAnyBlank(key, value)) {
+                    continue;
+                }
+                int index = key.lastIndexOf('$');
+                if (index < 0) {
+                    items.put(key, value);
+                } else {
+                    String field = key.substring(0, index);
+                    String operate = key.substring(index + 1);
+                    items.put(operate, field, value);
+                }
             }
         }
         return items;
+    }
+
+    /**
+     * 允许为空的查询条件
+     *
+     * @author zhaohuihua
+     * @version 20200206
+     */
+    public static class EmptiableDbWhere extends DbWhere {
+
+        /** serialVersionUID **/
+        private static final long serialVersionUID = 1L;
+
     }
 
     /**
@@ -184,7 +208,7 @@ public class DbWhere extends DbItems {
      * @author zhaohuihua
      * @version 190310
      */
-    public static class EmptyDbWhere extends DbWhere {
+    private static class EmptyDbWhere extends EmptiableDbWhere {
 
         /** serialVersionUID **/
         private static final long serialVersionUID = 1L;

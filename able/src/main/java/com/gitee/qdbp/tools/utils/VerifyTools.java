@@ -13,6 +13,19 @@ import java.util.Map;
 public abstract class VerifyTools {
 
     /**
+     * 检查指定的对象是否不为null, 如果为null将抛出NullPointerException异常.<br>
+     * 用法: VerifyTools.requireNonNull(entity.getEmail(), "email");
+     * 
+     * @param object 待检查的对象
+     * @param name 对象的描述或名称
+     */
+    public static void requireNonNull(Object object, String name) {
+        if (object == null) {
+            throw new NullPointerException(name + " must not be null.");
+        }
+    }
+
+    /**
      * 检查指定的对象是否不为空, 如果为空(或为空字符串)将抛出IllegalArgumentException异常.<br>
      * 用法: VerifyTools.requireNotBlank(entity.getEmail(), "email");
      * 
@@ -20,8 +33,11 @@ public abstract class VerifyTools {
      * @param name 对象的描述或名称
      */
     public static void requireNotBlank(Object object, String name) {
+        if (object == null) {
+            throw new NullPointerException(name + " must not be null.");
+        }
         if (isBlank(object)) {
-            throw new IllegalArgumentException(name + " must not be blank.");
+            throw new IllegalArgumentException(name + " must not be empty.");
         }
     }
 
