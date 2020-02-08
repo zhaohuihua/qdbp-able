@@ -49,8 +49,8 @@ public class DbUpdate extends DbItems {
     }
 
     @Override
-    protected void put(DbFields fields) {
-        throw new UnsupportedOperationException("DbUpdate can't supported put(DbFields)");
+    protected void put(DbConditions fields) {
+        throw new UnsupportedOperationException("DbUpdate can't supported put(DbConditions)");
     }
 
     /**
@@ -60,13 +60,12 @@ public class DbUpdate extends DbItems {
      * @return 条件列表
      */
     public List<DbField> fields(String fieldName) {
-        List<DbCondition> items = this.items();
         List<DbField> result = new ArrayList<>();
-        if (items.isEmpty()) {
+        if (this.isEmpty()) {
             return result;
         }
 
-        Iterator<DbCondition> itr = items.iterator();
+        Iterator<DbCondition> itr = this.iterator();
         while (itr.hasNext()) {
             DbCondition item = itr.next();
             if (item instanceof DbField) {

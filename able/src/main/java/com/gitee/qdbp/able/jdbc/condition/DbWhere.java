@@ -209,7 +209,7 @@ public class DbWhere extends DbItems {
             throw new UnsupportedOperationException("NoneWhere");
         }
 
-        protected void put(DbFields fields) {
+        protected void put(DbConditions fields) {
             throw new UnsupportedOperationException("NoneWhere");
         }
 

@@ -13,12 +13,23 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
  * @author zhaohuihua
  * @version 181221
  */
-abstract class DbItems implements DbFields, Serializable {
+abstract class DbItems implements DbConditions, Serializable {
 
     /** SerialVersionUID **/
     private static final long serialVersionUID = 1L;
 
     private List<DbCondition> items = new ArrayList<>();
+
+    /** 默认构造函数 **/
+    protected DbItems() {
+    }
+
+    /** 带条件的构造函数 **/
+    protected DbItems(List<DbCondition> conditions) {
+        VerifyTools.requireNonNull(conditions, "conditions");
+        this.items.clear();
+        this.items.addAll(conditions);
+    }
 
     /**
      * 增加条件
@@ -44,19 +55,21 @@ abstract class DbItems implements DbFields, Serializable {
     /**
      * 增加条件
      * 
-     * @param field 条件
+     * @param condition 条件
      */
-    protected void put(DbField field) {
-        this.items.add(field);
+    protected void put(DbField condition) {
+        VerifyTools.requireNonNull(condition, "condition");
+        this.items.add(condition);
     }
 
     /**
      * 增加条件
      * 
-     * @param fields 容器类型的条件, 如SubWhere
+     * @param condition 容器类型的条件, 如SubWhere
      */
-    protected void put(DbFields fields) {
-        this.items.add(fields);
+    protected void put(DbConditions condition) {
+        VerifyTools.requireNonNull(condition, "condition");
+        this.items.add(condition);
     }
 
     /**
@@ -65,12 +78,14 @@ abstract class DbItems implements DbFields, Serializable {
      * @param condition 自定义条件
      */
     protected void put(DbCondition condition) {
+        VerifyTools.requireNonNull(condition, "condition");
         this.items.add(condition);
     }
 
-    /** 获取内容 **/
-    public List<DbCondition> items() {
-        return this.items;
+    /** 遍历条件 **/
+    @Override
+    public Iterator<DbCondition> iterator() {
+        return this.items.iterator();
     }
 
     /** 是否为空 **/
@@ -90,7 +105,7 @@ abstract class DbItems implements DbFields, Serializable {
 
     /** 清空内容 **/
     public void clear() {
-        this.clear();
+        this.items.clear();
     }
 
     /**
@@ -103,9 +118,9 @@ abstract class DbItems implements DbFields, Serializable {
         VerifyTools.requireNotBlank(field.getFieldName(), "fieldName");
 
         String fieldName = field.getFieldName();
-        Iterator<DbCondition> itr = this.items().iterator();
-        while (itr.hasNext()) {
-            DbCondition item = itr.next();
+        Iterator<DbCondition> iterator = this.iterator();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
             if (item instanceof DbField) {
                 if (((DbField) item).matchesWithField(fieldName)) {
                     DbField target = (DbField) item;
@@ -114,7 +129,7 @@ abstract class DbItems implements DbFields, Serializable {
                 }
             } else if (item instanceof DbItems) {
                 ((DbItems) item).replace(field);
-            } else { // DbFields/DbCondition, 暂不支持替换
+            } else { // DbCondition/DbConditions, 暂不支持替换
             }
         }
     }
@@ -133,8 +148,8 @@ abstract class DbItems implements DbFields, Serializable {
                 if (((DbField) item).matchesWithField(fieldName)) {
                     itr.remove();
                 }
-            } else if (item instanceof DbFields) {
-                ((DbFields) item).remove(fieldName);
+            } else if (item instanceof DbConditions) {
+                ((DbConditions) item).remove(fieldName);
             } else {
                 if (fieldName.contains(".")) {
                     if (fieldName.equals(item.getClass().getName())) {
@@ -159,8 +174,8 @@ abstract class DbItems implements DbFields, Serializable {
                 if (((DbField) item).matchesWithField(fieldName)) {
                     return true;
                 }
-            } else if (item instanceof DbFields) {
-                if (((DbFields) item).contains(fieldName)) {
+            } else if (item instanceof DbConditions) {
+                if (((DbConditions) item).contains(fieldName)) {
                     return true;
                 }
             } else {
