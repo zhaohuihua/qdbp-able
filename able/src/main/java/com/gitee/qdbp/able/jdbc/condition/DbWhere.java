@@ -58,7 +58,7 @@ public class DbWhere extends DbItems {
     private static final long serialVersionUID = 1L;
 
     /** 没有查询条件的空Where **/
-    public static final DbWhere NONE = new NoneWhere();
+    public static final DbWhere NONE = new ReadonlyWhere();
 
     /**
      * Where条件<br>
@@ -224,33 +224,52 @@ public class DbWhere extends DbItems {
     }
 
     /**
-     * 空查询条件
+     * 只读Where条件
      *
      * @author zhaohuihua
      * @version 190310
      */
-    private static class NoneWhere extends EmptiableWhere {
+    private static class ReadonlyWhere extends EmptiableWhere {
 
         /** serialVersionUID **/
         private static final long serialVersionUID = 1L;
 
-        private NoneWhere() {
+        private ReadonlyWhere() {
         }
 
+        @Override
         protected void put(String fieldName, Object fieldValue) {
-            throw new UnsupportedOperationException("NoneWhere");
+            throw new UnsupportedOperationException("ReadonlyWhere");
         }
 
+        @Override
         protected void put(String operateType, String fieldName, Object fieldValue) {
-            throw new UnsupportedOperationException("NoneWhere");
+            throw new UnsupportedOperationException("ReadonlyWhere");
         }
 
+        @Override
+        protected void put(DbField condition) {
+            throw new UnsupportedOperationException("ReadonlyWhere");
+        }
+
+        @Override
         protected void put(DbConditions fields) {
-            throw new UnsupportedOperationException("NoneWhere");
+            throw new UnsupportedOperationException("ReadonlyWhere");
         }
 
+        @Override
         protected void put(DbCondition condition) {
-            throw new UnsupportedOperationException("NoneWhere");
+            throw new UnsupportedOperationException("ReadonlyWhere");
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("ReadonlyWhere");
+        }
+
+        @Override
+        public SubWhere sub(String operate) {
+            throw new UnsupportedOperationException("ReadonlyWhere");
         }
 
     }
