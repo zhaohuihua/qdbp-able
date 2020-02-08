@@ -1,6 +1,6 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
-import java.util.Map;
+import java.util.List;
 import com.gitee.qdbp.able.jdbc.base.DbCondition;
 import com.gitee.qdbp.able.jdbc.base.WhereCondition;
 import com.gitee.qdbp.tools.utils.VerifyTools;
@@ -77,18 +77,42 @@ public class DbWhere extends DbItems {
      * @return 返回容器自身, 用于链式操作
      */
     public DbWhere on(String fieldName, String operate, Object... fieldValues) {
-        DbField condition = parseCondition(fieldName, operate, fieldValues);
+        DbField condition = parseField(fieldName, operate, fieldValues);
         this.put(condition);
         return this;
     }
 
     /** 增加自定义条件 **/
     public DbWhere on(WhereCondition condition) {
-        this.put(condition);
+        super.put(condition);
         return this;
     }
 
-    protected Field parseCondition(String fieldName, String operate, Object... fieldValues) {
+    /**
+     * 增加条件
+     * 
+     * @param condition 条件
+     */
+    protected void put(DbField condition) {
+        VerifyTools.requireNonNull(condition, "condition");
+        super.put(new Field(condition));
+    }
+
+    /**
+     * 增加条件
+     * 
+     * @param condition 自定义条件
+     */
+    protected void put(DbCondition condition) {
+        VerifyTools.requireNonNull(condition, "condition");
+        if (condition instanceof DbField) {
+            super.put(new Field((DbField) condition));
+        } else {
+            super.put(condition);
+        }
+    }
+
+    protected Field parseField(String fieldName, String operate, Object... fieldValues) {
         VerifyTools.nvl(fieldName, "fieldName");
         Field condition = new Field();
         condition.setFieldName(fieldName);
@@ -122,57 +146,34 @@ public class DbWhere extends DbItems {
      * @param fieldName 字段名称
      */
     public void replace(String fieldName, String operate, Object... fieldValues) {
-        DbField condition = parseCondition(fieldName, operate, fieldValues);
+        DbField condition = parseField(fieldName, operate, fieldValues);
         this.replace(condition);
     }
 
     /**
-     * 从map中获取参数构建对象
+     * 通过字段对象列表构造DbWhere对象
      * 
-     * @param map Map参数
-     * @return 对象实例
+     * @param <T> DbWhere泛型
+     * @param fields 字段对象
+     * @param instanceType 实例类型
+     * @return DbWhere对象
      */
-    public static DbWhere parse(Map<String, Object> map) {
-        return parse(map, DbWhere.class);
-    }
-
-    /**
-     * 从map中获取参数构建对象
-     * 
-     * @param map Map参数
-     * @param clazz 对象类型
-     * @return 对象实例
-     */
-    public static <T extends DbWhere> T parse(Map<String, Object> map, Class<T> clazz) {
-        VerifyTools.requireNonNull(clazz, "class");
-
-        T items;
+    public static <T extends DbWhere> T ofFields(List<DbField> fields, Class<T> instanceType) {
+        VerifyTools.requireNonNull(instanceType, "class");
+        T instance;
         try {
-            items = clazz.newInstance();
+            instance = instanceType.newInstance();
         } catch (InstantiationException e) {
-            throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
+            throw new IllegalStateException("Failed to new instance for " + instanceType.getName(), e);
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
+            throw new IllegalStateException("Failed to new instance for " + instanceType.getName(), e);
         }
-
-        if (map != null) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                if (VerifyTools.isAnyBlank(key, value)) {
-                    continue;
-                }
-                int index = key.lastIndexOf('$');
-                if (index < 0) {
-                    items.put(key, value);
-                } else {
-                    String field = key.substring(0, index);
-                    String operate = key.substring(index + 1);
-                    items.put(operate, field, value);
-                }
+        if (fields != null && !fields.isEmpty()) {
+            for (DbField field : fields) {
+                instance.put(field);
             }
         }
-        return items;
+        return instance;
     }
 
     public class Field extends DbField {
@@ -184,6 +185,12 @@ public class DbWhere extends DbItems {
 
         /** 构造函数 **/
         public Field() {
+            this.container = DbWhere.this;
+        }
+
+        /** 构造函数 **/
+        private Field(DbField field) {
+            super(field.getOperateType(), field.getFieldName(), field.getFieldValue());
             this.container = DbWhere.this;
         }
 

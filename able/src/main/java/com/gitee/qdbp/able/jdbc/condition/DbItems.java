@@ -53,7 +53,7 @@ abstract class DbItems implements DbConditions, Serializable {
     }
 
     /**
-     * 增加条件
+     * 增加字段条件
      * 
      * @param condition 条件
      */
@@ -63,7 +63,7 @@ abstract class DbItems implements DbConditions, Serializable {
     }
 
     /**
-     * 增加条件
+     * 增加容器条件
      * 
      * @param condition 容器类型的条件, 如SubWhere
      */
@@ -73,7 +73,7 @@ abstract class DbItems implements DbConditions, Serializable {
     }
 
     /**
-     * 增加条件
+     * 增加自定义条件
      * 
      * @param condition 自定义条件
      */

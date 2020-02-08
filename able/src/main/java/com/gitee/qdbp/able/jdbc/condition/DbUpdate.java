@@ -1,6 +1,6 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
-import java.util.Map;
+import java.util.List;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
@@ -50,55 +50,29 @@ public class DbUpdate extends DbItems {
     }
 
     /**
-     * 从map中获取参数构建对象
+     * 通过字段对象列表构造DbUpdate对象
      * 
-     * @param map Map参数
-     * @return 对象实例
+     * @param <T> DbUpdate泛型
+     * @param fields 字段对象
+     * @param instanceType 实例类型
+     * @return DbUpdate对象
      */
-    public static DbUpdate parse(Map<String, Object> map) {
-        return parse(map, DbUpdate.class);
-    }
-
-    /**
-     * 从map中获取参数构建对象
-     * 
-     * @param map Map参数
-     * @param clazz 对象类型
-     * @return 对象实例
-     */
-    public static <T extends DbUpdate> T parse(Map<String, Object> map, Class<T> clazz) {
-        VerifyTools.requireNonNull(clazz, "class");
-
-        T items;
+    public static <T extends DbUpdate> T ofFields(List<DbField> fields, Class<T> instanceType) {
+        VerifyTools.requireNonNull(instanceType, "class");
+        T instance;
         try {
-            items = clazz.newInstance();
+            instance = instanceType.newInstance();
         } catch (InstantiationException e) {
-            throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
+            throw new IllegalStateException("Failed to new instance for " + instanceType.getName(), e);
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Failed to new instance for " + clazz.getName(), e);
+            throw new IllegalStateException("Failed to new instance for " + instanceType.getName(), e);
         }
-
-        if (map != null && !map.isEmpty()) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                if (VerifyTools.isBlank(key)) {
-                    continue;
-                }
-                int index = key.lastIndexOf('$');
-                if (index < 0) {
-                    if (value == null || "".equals(value)) {
-                        items.put("ToNull", key, value);
-                    } else {
-                        items.put(key, value);
-                    }
-                } else {
-                    String field = key.substring(0, index);
-                    String operate = key.substring(index + 1);
-                    items.put(operate, field, value);
-                }
+        if (fields != null && !fields.isEmpty()) {
+            for (DbField field : fields) {
+                instance.put(field);
             }
         }
-        return items;
+        return instance;
     }
+
 }
