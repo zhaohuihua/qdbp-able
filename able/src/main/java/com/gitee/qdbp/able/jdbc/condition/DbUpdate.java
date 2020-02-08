@@ -1,10 +1,6 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import com.gitee.qdbp.able.jdbc.base.DbCondition;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
@@ -54,30 +50,6 @@ public class DbUpdate extends DbItems {
     }
 
     /**
-     * 查询指定字段所有的条件
-     * 
-     * @param fieldName 指定字段
-     * @return 条件列表
-     */
-    public List<DbField> fields(String fieldName) {
-        List<DbField> result = new ArrayList<>();
-        if (this.isEmpty()) {
-            return result;
-        }
-
-        Iterator<DbCondition> itr = this.iterator();
-        while (itr.hasNext()) {
-            DbCondition item = itr.next();
-            if (item instanceof DbField) {
-                if (((DbField) item).getFieldName().equals(fieldName)) {
-                    result.add((DbField) item);
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
      * 从map中获取参数构建对象
      * 
      * @param map Map参数
@@ -113,12 +85,9 @@ public class DbUpdate extends DbItems {
                 if (VerifyTools.isBlank(key)) {
                     continue;
                 }
-                if (value == null) {
-                    continue;
-                }
                 int index = key.lastIndexOf('$');
                 if (index < 0) {
-                    if (value.equals("")) {
+                    if (value == null || "".equals(value)) {
                         items.put("ToNull", key, value);
                     } else {
                         items.put(key, value);

@@ -88,9 +88,9 @@ public class DbWhere extends DbItems {
         return this;
     }
 
-    private static DbField parseCondition(String fieldName, String operate, Object... fieldValues) {
+    protected Field parseCondition(String fieldName, String operate, Object... fieldValues) {
         VerifyTools.nvl(fieldName, "fieldName");
-        DbField condition = new DbField();
+        Field condition = new Field();
         condition.setFieldName(fieldName);
         condition.setOperateType(operate);
         if (fieldValues != null && fieldValues.length > 0) {
@@ -173,6 +173,35 @@ public class DbWhere extends DbItems {
             }
         }
         return items;
+    }
+
+    public class Field extends DbField {
+
+        /** serialVersionUID **/
+        private static final long serialVersionUID = 1L;
+
+        private final DbWhere container;
+
+        /** 构造函数 **/
+        public Field() {
+            this.container = DbWhere.this;
+        }
+
+        /** 构造函数 **/
+        public Field(String fieldName, Object fieldValue) {
+            super(fieldName, fieldValue);
+            this.container = DbWhere.this;
+        }
+
+        /** 构造函数 **/
+        public Field(String operateType, String fieldName, Object fieldValue) {
+            super(operateType, fieldName, fieldValue);
+            this.container = DbWhere.this;
+        }
+
+        public DbWhere getContainer() {
+            return container;
+        }
     }
 
     /**

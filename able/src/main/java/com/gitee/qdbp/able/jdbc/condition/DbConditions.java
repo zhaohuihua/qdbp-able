@@ -1,6 +1,7 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
 import java.util.Iterator;
+import java.util.List;
 import com.gitee.qdbp.able.jdbc.base.DbCondition;
 
 /**
@@ -11,18 +12,18 @@ import com.gitee.qdbp.able.jdbc.base.DbCondition;
  */
 interface DbConditions extends DbCondition, Iterable<DbCondition> {
 
-    /** 遍历内容 **/
+    /** 遍历条件 **/
     Iterator<DbCondition> iterator();
 
-    /** 是否存在指定的字段 **/
+    /** 是否存在指定的条件 **/
     boolean contains(String fieldName);
 
-    /** 移除内容 **/
-    void remove(String fieldName);
+    /** 移除条件 **/
+    <T extends DbCondition> List<T> remove(String fieldName);
 
     /** 是否为空 **/
     boolean isEmpty();
 
-    /** 清空内容 **/
+    /** 清空条件 **/
     void clear();
 }

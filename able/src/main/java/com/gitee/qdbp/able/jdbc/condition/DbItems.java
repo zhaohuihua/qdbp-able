@@ -25,7 +25,7 @@ abstract class DbItems implements DbConditions, Serializable {
     }
 
     /** 带条件的构造函数 **/
-    protected DbItems(List<DbCondition> conditions) {
+    protected <T extends DbCondition> DbItems(List<T> conditions) {
         VerifyTools.requireNonNull(conditions, "conditions");
         this.items.clear();
         this.items.addAll(conditions);
@@ -93,9 +93,9 @@ abstract class DbItems implements DbConditions, Serializable {
         if (this.items.isEmpty()) {
             return true;
         }
-        Iterator<DbCondition> itr = this.items.iterator();
-        while (itr.hasNext()) {
-            DbCondition item = itr.next();
+        Iterator<DbCondition> iterator = this.items.iterator();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
             if (!item.isEmpty()) {
                 return false;
             }
@@ -139,37 +139,43 @@ abstract class DbItems implements DbConditions, Serializable {
      * 
      * @param fieldName 字段名称
      */
-    public void remove(String fieldName) {
+    public List<DbCondition> remove(String fieldName) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
-        Iterator<DbCondition> itr = this.items.iterator();
-        while (itr.hasNext()) {
-            DbCondition item = itr.next();
+        Iterator<DbCondition> iterator = this.items.iterator();
+        List<DbCondition> removed = new ArrayList<>();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
             if (item instanceof DbField) {
                 if (((DbField) item).matchesWithField(fieldName)) {
-                    itr.remove();
+                    iterator.remove();
+                    removed.add(item);
                 }
             } else if (item instanceof DbConditions) {
-                ((DbConditions) item).remove(fieldName);
+                List<DbCondition> subRemoved = ((DbConditions) item).remove(fieldName);
+                removed.addAll(subRemoved);
             } else {
                 if (fieldName.contains(".")) {
                     if (fieldName.equals(item.getClass().getName())) {
-                        itr.remove();
+                        iterator.remove();
+                        removed.add(item);
                     }
                 } else {
                     if (fieldName.equals(item.getClass().getSimpleName())) {
-                        itr.remove();
+                        iterator.remove();
+                        removed.add(item);
                     }
                 }
             }
         }
+        return removed;
     }
 
     /** 是否存在指定的字段 **/
     public boolean contains(String fieldName) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
-        Iterator<DbCondition> itr = this.items.iterator();
-        while (itr.hasNext()) {
-            DbCondition item = itr.next();
+        Iterator<DbCondition> iterator = this.items.iterator();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
             if (item instanceof DbField) {
                 if (((DbField) item).matchesWithField(fieldName)) {
                     return true;
