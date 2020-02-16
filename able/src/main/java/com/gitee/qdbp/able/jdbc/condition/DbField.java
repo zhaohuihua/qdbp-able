@@ -53,6 +53,7 @@ public class DbField implements DbCondition, Serializable {
 
     /** 字段名 **/
     public void setFieldName(String fieldName) {
+        VerifyTools.requireNotBlank(fieldName, "fieldName");
         this.fieldName = fieldName;
     }
 
