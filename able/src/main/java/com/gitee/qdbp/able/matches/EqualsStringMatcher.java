@@ -17,6 +17,7 @@ public class EqualsStringMatcher implements StringMatcher {
         this.pattern = pattern;
     }
 
+    @Override
     public boolean matches(String source) {
         return pattern.equals(source);
     }
