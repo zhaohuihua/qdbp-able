@@ -1,13 +1,13 @@
 package com.gitee.qdbp.tools.http;
 
-import com.gitee.qdbp.tools.utils.Config;
+import com.gitee.qdbp.tools.property.PropertyContainer;
 
-public abstract class ConfigHttpHandler extends BaseHttpHandler implements Config.Aware {
+public abstract class ConfigHttpHandler extends BaseHttpHandler implements PropertyContainer.Aware {
 
-    protected Config config;
+    protected PropertyContainer config;
 
     @Override
-    public void setConfig(Config config) {
+    public void setPropertyContainer(PropertyContainer config) {
         this.config = config;
     }
 

@@ -29,17 +29,6 @@ public class Config implements PropertyContainer, Serializable {
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Config设置接口
-     *
-     * @author zhaohuihua
-     * @version 160831
-     */
-    public static interface Aware {
-
-        void setConfig(Config config);
-    }
-
     /** 配置项容器 **/
     private final Properties properties;
 

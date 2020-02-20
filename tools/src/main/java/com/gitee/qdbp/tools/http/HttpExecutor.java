@@ -3,7 +3,7 @@ package com.gitee.qdbp.tools.http;
 import java.util.List;
 import java.util.Map;
 import com.gitee.qdbp.able.result.ResponseMessage;
-import com.gitee.qdbp.tools.utils.Config;
+import com.gitee.qdbp.tools.property.PropertyContainer;
 
 /**
  * 接口请求工具类<br>
@@ -36,8 +36,8 @@ public class HttpExecutor {
         this.config = config;
         this.tools = tools;
         this.tools.setHttpHandler(handler);
-        if (handler instanceof Config.Aware) {
-            ((Config.Aware) handler).setConfig(config);
+        if (handler instanceof PropertyContainer.Aware) {
+            ((PropertyContainer.Aware) handler).setPropertyContainer(config);
         }
     }
 

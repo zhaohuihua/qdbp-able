@@ -7,9 +7,20 @@ import com.gitee.qdbp.able.beans.KeyString;
  * 配置项容器
  *
  * @author zhaohuihua
- * @version 200128
+ * @version 160831
  */
 public interface PropertyContainer {
+
+    /**
+     * PropertyContainer设置接口
+     *
+     * @author zhaohuihua
+     * @version 160831
+     */
+    public static interface Aware {
+
+        void setPropertyContainer(PropertyContainer config);
+    }
 
     /**
      * 获取String类型的配置项值(已经trim过了)<br>
