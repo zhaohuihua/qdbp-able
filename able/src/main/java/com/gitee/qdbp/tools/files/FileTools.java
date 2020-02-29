@@ -750,13 +750,12 @@ public abstract class FileTools {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         } finally {
             if (bis != null) {
                 try {
                     bis.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }
