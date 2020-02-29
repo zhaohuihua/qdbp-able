@@ -11,8 +11,10 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
  */
 public class RegexpStringReplacer implements StringReplacer {
 
-    private Pattern pattern;
-    private String replacement;
+    /** 匹配规则 **/
+    private final Pattern pattern;
+    /** 替换内容 **/
+    private final String replacement;
 
     /**
      * 构造函数
@@ -53,7 +55,7 @@ public class RegexpStringReplacer implements StringReplacer {
 
     @Override
     public String toString() {
-        return "regexp:" + pattern;
+        return "regexp:" + pattern + " --> " + replacement;
     }
 
 }
