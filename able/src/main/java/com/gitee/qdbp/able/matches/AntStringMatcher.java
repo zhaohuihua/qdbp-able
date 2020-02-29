@@ -19,6 +19,7 @@
 package com.gitee.qdbp.able.matches;
 
 import com.gitee.qdbp.tools.utils.StringTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * Copy from org.apache.shiro.util.AntPathMatcher.<br>
@@ -62,44 +63,70 @@ import com.gitee.qdbp.tools.utils.StringTools;
  */
 public class AntStringMatcher implements StringMatcher {
     
-    private String pattern;
-    
+    /** 匹配规则 **/
+    private final String pattern;
+    /** 全部匹配还是前缀匹配 **/
+    private final boolean fullMatch;
+    /** 是否反转判断结果 **/
+    private final boolean reverse;
+
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
+     */
     public AntStringMatcher(String pattern) {
+        this(pattern, true, false);
+    }
+    
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
+     * @param fullMatch 全部匹配还是前缀匹配<br>
+     *            如果fullMatch=true, 需要全部匹配; 如果fullMatch=false, 即前缀匹配
+     */
+    public AntStringMatcher(String pattern, boolean fullMatch) {
+        this(pattern, fullMatch, false);
+    }
+    
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
+     * @param fullMatch 全部匹配还是前缀匹配<br>
+     *            如果fullMatch=true, 需要全部匹配; 如果fullMatch=false, 即前缀匹配
+     * @param reverse 是否反转判断结果<br>
+     *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     */
+    public AntStringMatcher(String pattern, boolean fullMatch, boolean reverse) {
+        VerifyTools.requireNotBlank(pattern, "pattern");
         this.pattern = pattern;
+        this.fullMatch = true;
+        this.reverse = false;
     }
 
-    /**
-     * Default path separator: '/'
-     */
+    /** Default path separator: '/' */
     public static final char DEFAULT_PATH_SEPARATOR = '/';
-
     private char pathSeparator = DEFAULT_PATH_SEPARATOR;
 
-
-    /**
-     * Set the path separator to use for pattern parsing.
-     */
+    /** Set the path separator to use for pattern parsing. */
     public void setPathSeparator(char pathSeparator) {
         this.pathSeparator = pathSeparator;
     }
 
-    public boolean isPattern(String path) {
-        return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
-    }
-
+    /**
+     * 判断字符串是否符合匹配规则<br>
+     * 如果fullMatch=true, 需要全部匹配; 如果fullMatch=false, 即前缀匹配<br>
+     * 如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     * 
+     * @param source 字符串
+     * @return 是否匹配
+     */
     @Override
     public boolean matches(String source) {
-        return match(pattern, source);
+        return doMatch(pattern, source, fullMatch) != reverse;
     }
-
-    public boolean match(String pattern, String path) {
-        return doMatch(pattern, path, true);
-    }
-
-    public boolean matchStart(String pattern, String path) {
-        return doMatch(pattern, path, false);
-    }
-
 
     /**
      * Actually match the given <code>path</code> against the given <code>pattern</code>.
@@ -426,7 +453,6 @@ public class AntStringMatcher implements StringMatcher {
         return buffer.toString();
     }
 
-
     private boolean endsWithSeparator(String string) {
         if (string == null || string.length() == 0) return false;
         char lastChar = string.charAt(string.length() - 1);
@@ -441,6 +467,18 @@ public class AntStringMatcher implements StringMatcher {
 
     @Override
     public String toString() {
-        return "ant:" + pattern;
+        if (this.fullMatch) {
+            if (this.reverse) {
+                return "ant!:" + pattern;
+            } else {
+                return "ant:" + pattern;
+            }
+        } else {
+            if (this.reverse) {
+                return "ant!:^" + pattern;
+            } else {
+                return "ant:^" + pattern;
+            }
+        }
     }
 }

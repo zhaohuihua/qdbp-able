@@ -1,26 +1,10 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package com.gitee.qdbp.able.matches;
 
 import java.util.regex.Pattern;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
+ * 正则表达式匹配<br>
  * Copy from org.apache.shiro.util.RegExPatternMatcher.<br>
  * {@code PatternMatcher} implementation that uses standard {@link java.util.regex} objects.
  *
@@ -28,38 +12,74 @@ import java.util.regex.Pattern;
  * @since 1.0
  */
 public class RegexpStringMatcher implements StringMatcher {
-    
-    private Pattern pattern;
+
+    /** 匹配规则 **/
+    private final Pattern pattern;
+    /** 是否反转判断结果 **/
+    private final boolean reverse;
 
     /**
      * 构造函数
      * 
-     * @param pattern the pattern to match against
+     * @param 匹配规则
      */
     public RegexpStringMatcher(String pattern) {
-        if (pattern == null) {
-            throw new IllegalArgumentException("pattern argument cannot be null.");
-        }
-        this.pattern = Pattern.compile(pattern);
+        this(pattern, false);
     }
 
     /**
-     * Simple implementation that merely uses the default pattern comparison logic provided by the
-     * JDK.
-     * <p/>This implementation essentially executes the following:
-     * <pre>
-     * Pattern p = Pattern.compile(pattern);
-     * Matcher m = p.matcher(source);
-     * return m.matches();</pre>
-     * @param source  the source to match
-     * @return {@code true} if the source matches the required pattern, {@code false} otherwise.
+     * 构造函数
+     * 
+     * @param 匹配规则
      */
+    public RegexpStringMatcher(Pattern pattern) {
+        this(pattern, false);
+    }
+
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
+     * @param reverse 是否反转判断结果<br>
+     *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     */
+    public RegexpStringMatcher(String pattern, boolean reverse) {
+        VerifyTools.requireNotBlank(pattern, "pattern");
+        this.pattern = Pattern.compile(pattern);
+        this.reverse = reverse;
+    }
+
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
+     * @param reverse 是否反转判断结果<br>
+     *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     */
+    public RegexpStringMatcher(Pattern pattern, boolean reverse) {
+        VerifyTools.requireNotBlank(pattern, "pattern");
+        this.pattern = pattern;
+        this.reverse = reverse;
+    }
+
+    /**
+     * 判断字符串是否符合匹配规则<br>
+     * 如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     * 
+     * @param source 字符串
+     * @return 是否匹配
+     */
+    @Override
     public boolean matches(String source) {
-        return pattern.matcher(source).matches();
+        return pattern.matcher(source).matches() != reverse;
     }
 
     @Override
     public String toString() {
-        return "regexp:" + pattern;
+        if (reverse) {
+            return "regexp!:" + pattern;
+        } else {
+            return "regexp:" + pattern;
+        }
     }
 }
