@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 再注入spring的ConversionService之中, SpringVarToDbValueConverter会判断XxxEntity能否转换为DbFieldValue
  *
  * @author zhaohuihua
- * @version 200123
+ * @version 20200123
  */
 public class DbFieldValue implements Serializable {
 

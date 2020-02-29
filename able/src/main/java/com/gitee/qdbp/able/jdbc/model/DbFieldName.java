@@ -10,7 +10,7 @@ import java.io.Serializable;
  * where.on("actualCompleteTime", "&gt;", new DbFieldName("plannedCompleteTime"));
  *
  * @author zhaohuihua
- * @version 200123
+ * @version 20200123
  */
 public class DbFieldName implements Serializable {
 

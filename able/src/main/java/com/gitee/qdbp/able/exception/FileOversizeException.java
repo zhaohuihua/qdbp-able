@@ -6,7 +6,7 @@ import java.io.IOException;
  * 文件超出大小限制
  *
  * @author zhaohuihua
- * @version 200119
+ * @version 20200119
  */
 public class FileOversizeException extends IOException {
 

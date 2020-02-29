@@ -7,7 +7,7 @@ package com.gitee.qdbp.able.enums;
  * 因此在基础项目中将枚举改为接口, 由各业务项目提供实际的枚举类
  *
  * @author zhaohuihua
- * @version 200202
+ * @version 20200202
  */
 public interface EnumInterface {
 
