@@ -3,6 +3,8 @@ package com.gitee.qdbp.tools.utils;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
+import com.gitee.qdbp.able.exception.ServiceException;
+import com.gitee.qdbp.able.result.ResultCode;
 
 /**
  * 校验工具类
@@ -21,7 +23,7 @@ public abstract class VerifyTools {
      */
     public static void requireNonNull(Object object, String name) {
         if (object == null) {
-            throw new NullPointerException(name + " must not be null.");
+            throw new ServiceException(ResultCode.PARAMETER_IS_REQUIRED, name + " must not be null.");
         }
     }
 
@@ -34,10 +36,10 @@ public abstract class VerifyTools {
      */
     public static void requireNotBlank(Object object, String name) {
         if (object == null) {
-            throw new NullPointerException(name + " must not be null.");
+            throw new ServiceException(ResultCode.PARAMETER_IS_REQUIRED, name + " must not be null.");
         }
         if (isBlank(object)) {
-            throw new IllegalArgumentException(name + " must not be empty.");
+            throw new ServiceException(ResultCode.PARAMETER_IS_REQUIRED, name + " must not be empty.");
         }
     }
 

@@ -687,7 +687,7 @@ public abstract class ConvertTools {
             // 会多出多少个点, 5 = 84 - 79
             int diff = times - max;
             // 既然会多, 那么有一部分就不能按6个点取一次, 而要按7个点取一次
-            // 那要取多少次才能减少掉5个点呢, 取最大公约数
+            // 那要取多少次才能减少掉5个点呢, 取最小公倍数
             // 就是210 = 5 * 6 * 7
             int end = diff * interval * (interval + 1);
             for (int i = 0; i < total;) {
