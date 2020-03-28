@@ -18,8 +18,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.gitee.qdbp.able.beans.KeyString;
 import com.gitee.qdbp.able.beans.KeyValue;
 import com.gitee.qdbp.able.exception.ResourceNotFoundException;
@@ -43,9 +41,6 @@ import com.gitee.qdbp.tools.files.PathTools;
  * @version 180424
  */
 public abstract class PropertyTools {
-
-    /** 日志对象 **/
-    private static final Logger log = LoggerFactory.getLogger(PropertyTools.class);
 
     /** 导入其他配置文件 **/
     private static final Pattern INCLUDE = Pattern.compile("^<<(include(\\.\\w+)*)>>$");
@@ -80,11 +75,11 @@ public abstract class PropertyTools {
      *
      * @param properties Properties
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    public static String getString(Properties properties, String key, boolean warning) {
-        return getRealValue(properties, key, warning);
+    public static String getString(Properties properties, String key, boolean throwOnNotFound) {
+        return getRealValue(properties, key, throwOnNotFound);
     }
 
     /**
@@ -159,11 +154,12 @@ public abstract class PropertyTools {
      *
      * @param properties Properties
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
+     * @throws NumberFormatException 数字格式错误
      */
-    public static Long getLong(Properties properties, String key, boolean warning) {
-        String value = getString(properties, key, warning);
+    public static Long getLong(Properties properties, String key, boolean throwOnNotFound) {
+        String value = getString(properties, key, throwOnNotFound);
         if (VerifyTools.isBlank(value)) {
             return null;
         }
@@ -171,8 +167,8 @@ public abstract class PropertyTools {
         try {
             return ConvertTools.toLong(value);
         } catch (NumberFormatException e) {
-            log.warn("Property '{}' format error, '{}' can't convert to integer.", key, value);
-            return null;
+            String m = "Property '" + key + "' format error, '" + value + "' can't convert to number.";
+            throw new NumberFormatException(m);
         }
     }
 
@@ -219,11 +215,11 @@ public abstract class PropertyTools {
      *
      * @param properties Properties
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    public static Integer getInteger(Properties properties, String key, boolean warning) {
-        Long number = getLong(properties, key, warning);
+    public static Integer getInteger(Properties properties, String key, boolean throwOnNotFound) {
+        Long number = getLong(properties, key, throwOnNotFound);
         return number == null ? null : number.intValue();
     }
 
@@ -258,11 +254,11 @@ public abstract class PropertyTools {
      *
      * @param properties Properties
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    public static Boolean getBoolean(Properties properties, String key, boolean warning) {
-        String value = getString(properties, key, warning);
+    public static Boolean getBoolean(Properties properties, String key, boolean throwOnNotFound) {
+        String value = getString(properties, key, throwOnNotFound);
         return value == null ? null : StringTools.isPositive(value, false);
     }
 
@@ -298,11 +294,11 @@ public abstract class PropertyTools {
      *
      * @param properties Properties
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    public static String[] getArray(Properties properties, String key, boolean warning) {
-        String value = getString(properties, key, warning);
+    public static String[] getArray(Properties properties, String key, boolean throwOnNotFound) {
+        String value = getString(properties, key, throwOnNotFound);
         return value == null ? null : StringTools.split(value);
     }
 
@@ -391,17 +387,18 @@ public abstract class PropertyTools {
         return p;
     }
 
-    private static String getRealValue(Properties properties, String key, boolean warning) {
+    private static String getRealValue(Properties properties, String key, boolean throwOnNotFound) {
         Object value = properties.get(key);
         if (value == null) {
-            if (warning) {
-                log.warn("Property '{}' not found.", key);
+            if (throwOnNotFound) {
+                throw new IllegalArgumentException("Property '" + key + "' not found.");
             }
             return null;
         }
         if (!(value instanceof String)) {
-            if (warning) {
-                log.warn("Property '{}' value type is {}.", key, value.getClass().getSimpleName());
+            if (throwOnNotFound) {
+                String type = value.getClass().getSimpleName();
+                throw new IllegalArgumentException("Property '" + key + "' value type is " + type + ".");
             }
             return null;
         }
@@ -418,18 +415,18 @@ public abstract class PropertyTools {
             // 配置项内容指向另一个配置项
             String subkey = matcher.group(1).trim();
             if (keys.contains(subkey)) { // 循环引用
-                log.error("Cyclic referenced keys: {}.", keys.toString());
+                throw new IllegalArgumentException("Cyclic referenced keys: " + keys.toString());
             } else {
                 Object subvalue = properties.get(subkey);
                 if (subvalue != null) {
                     if (subvalue instanceof String) {
                         buffer.append(getReferencedValue(properties, subkey, (String) subvalue, keys));
                     } else {
-                        log.warn("Property '{}' referenced object.", subkey);
+                        throw new IllegalArgumentException("Property '" + subkey + "' referenced object.");
                     }
                 } else {
-                    // 这里已经明确指向的配置项必须存在, 不需要判断warning
-                    log.warn("Property '{}' not found.", subkey);
+                    // 这里已经明确指向的配置项必须存在, 不需要判断throwOnNotFound
+                    throw new IllegalArgumentException("Property '" + subkey + "' not found.");
                 }
             }
             index = matcher.end();

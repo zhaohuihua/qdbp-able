@@ -401,6 +401,24 @@ public abstract class StringTools {
         return buffer.toString();
     }
 
+    /** 删除前缀(删除到指定字符为止), removePrefixAt("userName$Equals", '$') = "Equals" **/
+    public static String removePrefixAt(String string, char c) {
+        if (string == null) {
+            return null;
+        }
+        int index = string.lastIndexOf(c);
+        return index < 0 ? string : string.substring(index + 1);
+    }
+
+    /** 删除后缀(从指定字符开始删除), removeSuffixAt("userName$Equals", '$') = "userName" **/
+    public static String removeSuffixAt(String string, char c) {
+        if (string == null) {
+            return null;
+        }
+        int index = string.indexOf(c);
+        return index < 0 ? string : string.substring(0, index);
+    }
+
     /** 删除前缀, removePrefix("userNameEquals", "userName") = "Equals" **/
     public static String removePrefix(String string, String prefix) {
         if (string == null || prefix == null || !string.startsWith(prefix)) {

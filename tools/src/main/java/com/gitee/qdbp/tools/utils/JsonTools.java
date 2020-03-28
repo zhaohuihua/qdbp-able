@@ -41,6 +41,33 @@ import com.gitee.qdbp.able.beans.KeyString;
  */
 public abstract class JsonTools {
 
+    public static <T> T getMapValue(Map<String, Object> map, String key, Class<T> clazz) {
+        Object value = map.get(key);
+        return TypeUtils.castToJavaBean(value, clazz);
+    }
+
+    public static <T> T getMapValue(Map<String, Object> map, String key, T defaults, Class<T> clazz) {
+        Object value = map.get(key);
+        return TypeUtils.castToJavaBean(value == null ? defaults : value, clazz);
+    }
+
+    public static <T> List<T> getMapValues(Map<String, Object> map, String key, Class<T> clazz) {
+        return getMapValues(map, key, false, clazz);
+    }
+
+    public static <T> List<T> getMapValues(Map<String, Object> map, String key, boolean nullToEmpty, Class<T> clazz) {
+        Object value = map.get(key);
+        if (value == null || !(value instanceof Collection)) {
+            return nullToEmpty ? new ArrayList<T>() : null;
+        }
+        Collection<?> collection = (Collection<?>) value;
+        List<T> list = new ArrayList<>();
+        for (Object item : collection) {
+            list.add(TypeUtils.castToJavaBean(item, clazz));
+        }
+        return list;
+    }
+
     /**
      * 将对象转换为以换行符分隔的日志文本<br>
      * 如 newlineLogs(params, operator) 返回 \n\t{paramsJson}\n\t{operatorJson}<br>
@@ -102,7 +129,7 @@ public abstract class JsonTools {
      * @param map Map
      * @param bean 目标Java对象
      */
-    public static void mapFillBean(Map<String, ?> map, Object bean) {
+    public static void mapFillToBean(Map<String, ?> map, Object bean) {
         Class<?> clazz = bean.getClass();
         ParserConfig config = ParserConfig.getGlobalInstance();
         ObjectDeserializer deserializer = config.getDeserializer(clazz);
@@ -111,13 +138,13 @@ public abstract class JsonTools {
         }
         JavaBeanDeserializer javaBeanDeser = (JavaBeanDeserializer) deserializer;
         try {
-            mapFillBean(map, bean, config, javaBeanDeser);
+            mapFillToBean(map, bean, config, javaBeanDeser);
         } catch (Exception e) {
             throw new JSONException(e.getMessage(), e);
         }
     }
 
-    private static void mapFillBean(Map<String, ?> map, Object bean, ParserConfig config,
+    private static void mapFillToBean(Map<String, ?> map, Object bean, ParserConfig config,
             JavaBeanDeserializer javaBeanDeser) throws IllegalArgumentException, IllegalAccessException {
         for (Map.Entry<String, ?> entry : map.entrySet()) {
             String key = entry.getKey();

@@ -34,15 +34,35 @@ public class SnowFlakeIdWorker {
     private static final Logger log = LoggerFactory.getLogger(SnowFlakeIdWorker.class);
 
     private final long epoch;
-    private long workerId;
-    private long datacenterId;
+    private int workerId;
+    private int datacenterId;
     private long sequence;
 
-    public SnowFlakeIdWorker(long workerId, long datacenterId) {
+    /**
+     * 构造函数
+     * 
+     * @param hostIndex 主机编号(最多支持1024个主机:0~1023)
+     */
+    public SnowFlakeIdWorker(int hostIndex) {
+        this(hostIndex % 32, hostIndex / 32);
+    }
+
+    /**
+     * 构造函数
+     * 
+     * @param epoch 初始时间
+     * @param hostIndex 主机编号(最多支持1024个主机:0~1023)
+     */
+    public SnowFlakeIdWorker(long epoch, int hostIndex) {
+        this(epoch, hostIndex % 32, hostIndex / 32);
+    }
+
+    public SnowFlakeIdWorker(int workerId, int datacenterId) {
         // 2010-01-01T00:00Z[UTC]
         this(1262304000000L, workerId, datacenterId);
     }
-    public SnowFlakeIdWorker(long epoch, long workerId, long datacenterId) {
+
+    public SnowFlakeIdWorker(long epoch, int workerId, int datacenterId) {
         if (epoch < 0) {
             throw new IllegalArgumentException("epoch can't be less than 0");
         } else if (epoch > System.currentTimeMillis()) {
@@ -58,7 +78,8 @@ public class SnowFlakeIdWorker {
             throw new IllegalArgumentException(msg);
         }
         if (log.isDebugEnabled()) {
-            String msg = "SnowFlake Starting. timestamp left shift {}, datacenter id bits {}, worker id bits {}, sequence bits {}, workerid {}";
+            String msg =
+                    "SnowFlake Starting. timestamp left shift {}, datacenter id bits {}, worker id bits {}, sequence bits {}, workerid {}";
             log.debug(msg, timestampLeftShift, datacenterIdBits, workerIdBits, sequenceBits, workerId);
         }
 
@@ -91,7 +112,7 @@ public class SnowFlakeIdWorker {
     public long getTimestamp() {
         return System.currentTimeMillis();
     }
-    
+
     public synchronized long nextId() {
         long timestamp = timeGen();
 
@@ -112,7 +133,8 @@ public class SnowFlakeIdWorker {
         }
 
         lastTimestamp = timestamp;
-        return ((timestamp - epoch) << timestampLeftShift) | (datacenterId << datacenterIdShift)  | (workerId << workerIdShift) | sequence;
+        return ((timestamp - epoch) << timestampLeftShift) | (datacenterId << datacenterIdShift)
+                | (workerId << workerIdShift) | sequence;
     }
 
     private long tilNextMillis(long lastTimestamp) {
@@ -125,14 +147,6 @@ public class SnowFlakeIdWorker {
 
     private long timeGen() {
         return System.currentTimeMillis();
-    }
-
-    public static void main(String[] args) {
-        long epoch = 1262304000000L; // 2010-01-01T00:00Z[UTC]
-        SnowFlakeIdWorker worker = new SnowFlakeIdWorker(epoch, 0, 0);
-        for (int i = 0; i < 30; i++) {
-            System.out.println(worker.nextId());
-        }
     }
 
 }

@@ -37,7 +37,9 @@ public abstract class ConvertTools {
      * @return 转换后的数组, 如果list=null则返回null
      */
     public static <T, C extends T> T[] toArray(Collection<C> list, Class<T> clazz) {
-        if (list == null) { return null; }
+        if (list == null) {
+            return null;
+        }
 
         int size = list.size();
         @SuppressWarnings("unchecked")
@@ -289,6 +291,7 @@ public abstract class ConvertTools {
     }
 
     private static final Pattern ptn = Pattern.compile("\\*");
+
     /**
      * 转换为数字
      *
@@ -660,6 +663,24 @@ public abstract class ConvertTools {
     }
 
     /**
+     * 解析请求参数
+     * 
+     * @param params 请求参数
+     * @return Map
+     */
+    public static Map<String, String> parseRequestParams(String params) {
+        Map<String, String> map = new HashMap<>();
+        String[] array = StringTools.split(params, '&');
+        for (String item : array) {
+            String[] kv = StringTools.split(item, '=');
+            if (kv.length >= 2) {
+                map.put(kv[0], kv[1]);
+            }
+        }
+        return map;
+    }
+
+    /**
      * 压缩列表, 保留指定数目
      *
      * @author zhaohuihua
@@ -703,7 +724,6 @@ public abstract class ConvertTools {
         }
         return compressed;
     }
-
 
     /**
      * 过滤数据字段<br>

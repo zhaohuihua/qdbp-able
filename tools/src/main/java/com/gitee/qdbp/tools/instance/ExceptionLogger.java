@@ -124,10 +124,17 @@ public class ExceptionLogger implements ExceptionWatcher {
 
     @Override
     public boolean onCaughtException(String message, Throwable e) {
-        if (details) {
-            log.warn(message, e); // 记录详细警告日志
+        if (log == null) {
+            System.out.println(message);
+            if (details) {
+                e.printStackTrace();
+            }
         } else {
-            log.warn(message); // 记录简要警告日志
+            if (details) {
+                log.warn(message, e); // 记录详细警告日志
+            } else {
+                log.warn(message); // 记录简要警告日志
+            }
         }
         return true; // 发生异常后继续处理
     }
