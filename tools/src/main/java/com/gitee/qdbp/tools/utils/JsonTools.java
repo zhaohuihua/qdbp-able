@@ -41,6 +41,11 @@ import com.gitee.qdbp.able.beans.KeyString;
  */
 public abstract class JsonTools {
 
+    public static String getMapString(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return TypeUtils.castToJavaBean(value, String.class);
+    }
+
     public static <T> T getMapValue(Map<String, Object> map, String key, Class<T> clazz) {
         Object value = map.get(key);
         return TypeUtils.castToJavaBean(value, clazz);

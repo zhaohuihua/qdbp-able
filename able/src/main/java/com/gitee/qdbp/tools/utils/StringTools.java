@@ -356,19 +356,53 @@ public abstract class StringTools {
         return text == null ? null : REGEXP_TRIM_RIGHT.matcher(text).replaceAll("");
     }
 
+    /**
+     * 删除左右两侧的指定字符
+     * 
+     * @param text 原文本
+     * @param chars 待删除的字符
+     * @return 删除后的字符串
+     * @deprecated 方法名含义不明确, 改为removeLeftRight(String text, char... chars)
+     */
+    @Deprecated
     public static String remove(String text, char... chars) {
-        return remove(text, true, true, chars);
+        return removeLeftRight(text, chars);
     }
 
+    /**
+     * 删除左右两侧的指定字符
+     * 
+     * @param text 原文本
+     * @param chars 待删除的字符
+     * @return 删除后的字符串
+     */
+    public static String removeLeftRight(String text, char... chars) {
+        return removeLeftRight(text, true, true, chars);
+    }
+
+    /**
+     * 删除左侧的指定字符
+     * 
+     * @param text 原文本
+     * @param chars 待删除的字符
+     * @return 删除后的字符串
+     */
     public static String removeLeft(String text, char... chars) {
-        return remove(text, true, false, chars);
+        return removeLeftRight(text, true, false, chars);
     }
 
+    /**
+     * 删除右侧的指定字符
+     * 
+     * @param text 原文本
+     * @param chars 待删除的字符
+     * @return 删除后的字符串
+     */
     public static String removeRight(String text, char... chars) {
-        return remove(text, false, true, chars);
+        return removeLeftRight(text, false, true, chars);
     }
 
-    private static String remove(String text, boolean left, boolean right, char... chars) {
+    private static String removeLeftRight(String text, boolean left, boolean right, char... chars) {
         char[] value = text.toCharArray();
         int len = value.length;
         int st = 0;
@@ -387,7 +421,29 @@ public abstract class StringTools {
         return ((st > 0) || (len < value.length)) ? text.substring(st, len) : text;
     }
 
+    /**
+     * 删除左右两侧指定数量的字符
+     * 
+     * @param text 原文本
+     * @param start 左侧删除的数量
+     * @param end 右侧删除的数量
+     * @return 删除后的字符串
+     * @deprecated 方法名含义不明确, 改为removeLeftRight(String text, int start, int end)
+     */
+    @Deprecated
     public static String remove(String string, int start, int end) {
+        return removeLeftRight(string, start, end);
+    }
+
+    /**
+     * 删除左右两侧指定数量的字符
+     * 
+     * @param text 原文本
+     * @param start 左侧删除的数量
+     * @param end 右侧删除的数量
+     * @return 删除后的字符串
+     */
+    public static String removeLeftRight(String string, int start, int end) {
         if (string == null) {
             return null;
         }
@@ -440,6 +496,101 @@ public abstract class StringTools {
             return "";
         }
         return string.substring(0, end);
+    }
+
+    /**
+     * 删除指定的子字符串<br>
+     * 如: removeSubStrings("11223344", "22", "33") 输出 1144<br>
+     * 
+     * @param string 源字符串
+     * @param sub 待删除的字符串
+     * @return 删除后的字符串
+     */
+    public static String removeSubStrings(String string, String... sub) {
+        for (String s : sub) {
+            string = removeSubString(string, s);
+        }
+        return string;
+    }
+
+    /**
+     * 删除指定的子字符串<br>
+     * 如: removeSubString("11223344", "22") 输出 113344<br>
+     * 
+     * @param string 源字符串
+     * @param sub 待删除的字符串
+     * @return 删除后的字符串
+     */
+    public static String removeSubString(String string, String sub) {
+        StringBuilder buffer = new StringBuilder();
+        int index = 0;
+        int startIndex;
+        while ((startIndex = string.indexOf(sub, index)) >= index) {
+            if (index < startIndex) {
+                buffer.append(string.substring(index, startIndex));
+            }
+            index = startIndex + sub.length();
+        }
+        if (index < string.length()) {
+            buffer.append(string.substring(index));
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * 删除指定的字符<br>
+     * 如: removeChars("11223344", '2','3') 输出 1144<br>
+     * 
+     * @param string 源字符串
+     * @param chars 待删除的字符
+     * @return 删除后的字符串
+     */
+    public static String removeChars(String string, char... chars) {
+        StringBuilder buffer = new StringBuilder();
+        char[] sources = string.toCharArray();
+        for (int i = 0; i < sources.length; i++) {
+            int index = -1;
+            for (int j = 0; j < chars.length; j++) {
+                if (sources[i] == chars[j]) {
+                    index = j;
+                    break;
+                }
+            }
+            if (index < 0) {
+                buffer.append(sources[i]);
+            }
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * 删除成对的符号及包含在中间的内容<br>
+     * 如: removeInPairedSymbol("111<!--xxx-->222<!--xxx-->333", "<!--", "-->") 输出 111222333<br>
+     * 如: removeInPairedSymbol("111/&#42;xxx&#42;/222/&#42;xxx&#42;/333", "/&#42;", "&#42;/") 输出 111222333<br>
+     * 
+     * @param string 源字符串
+     * @param leftSymbol 左侧的符号
+     * @param rightSymbol 右侧的符号
+     * @return 删除后的字符串
+     */
+    public static String removeInPairedSymbol(String string, String leftSymbol, String rightSymbol) {
+        StringBuilder buffer = new StringBuilder();
+        int index = 0;
+        int leftIndex;
+        while ((leftIndex = string.indexOf(leftSymbol, index)) >= index) {
+            if (index < leftIndex) {
+                buffer.append(string.substring(index, leftIndex));
+            }
+            int rightIndex = string.indexOf(rightSymbol, leftIndex);
+            if (rightIndex < 0) {
+                return buffer.toString();
+            }
+            index = rightIndex + rightSymbol.length();
+        }
+        if (index < string.length()) {
+            buffer.append(string.substring(index));
+        }
+        return buffer.toString();
     }
 
     private static boolean inArray(char c, char[] array) {
@@ -513,7 +664,6 @@ public abstract class StringTools {
         }
         return count;
     }
-
 
     /** 是不是肯定的 **/
     public static boolean isPositive(String value, boolean defValue) {

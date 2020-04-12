@@ -726,6 +726,88 @@ public abstract class ConvertTools {
     }
 
     /**
+     * 获取字符串类型的MAP值
+     * 
+     * @param map MAP容器
+     * @param key KEY
+     * @return 字符串
+     */
+    public static String getMapString(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value instanceof String ? (String) value : null;
+    }
+
+    /**
+     * 获取指定类型的MAP值
+     * 
+     * @param map MAP容器
+     * @param key KEY
+     * @param clazz 指定类型
+     * @return MAP值
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getMapValue(Map<String, Object> map, String key, Class<T> clazz) {
+        Object value = map.get(key);
+        return value != null && clazz.isAssignableFrom(value.getClass()) ? (T) value : null;
+    }
+
+    /**
+     * 获取指定类型的MAP值
+     * 
+     * @param map MAP容器
+     * @param key KEY
+     * @param defaults 值不存在或值类型不匹配时返回的默认值
+     * @param clazz 指定类型
+     * @return MAP值
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getMapValue(Map<String, Object> map, String key, T defaults, Class<T> clazz) {
+        Object value = map.get(key);
+        return value != null && clazz.isAssignableFrom(value.getClass()) ? (T) value : defaults;
+    }
+
+    /**
+     * 获取指定类型的MAP值列表
+     * 
+     * @param map MAP容器
+     * @param key KEY
+     * @param clazz 指定类型
+     * @return MAP值列表, 值不存在或值类型不匹配时返回null
+     */
+    public static <T> List<T> getMapValues(Map<String, Object> map, String key, Class<T> clazz) {
+        return getMapValues(map, key, false, clazz);
+    }
+
+    /**
+     * 获取指定类型的MAP值列表
+     * 
+     * @param map MAP容器
+     * @param key KEY
+     * @param nullToEmpty 值不存在或值类型不匹配时是否返回空列表
+     * @param clazz 指定类型
+     * @return MAP值列表
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> getMapValues(Map<String, Object> map, String key, boolean nullToEmpty, Class<T> clazz) {
+        Object value = map.get(key);
+        if (value == null || !(value instanceof Collection)) {
+            return nullToEmpty ? new ArrayList<T>() : null;
+        }
+        Collection<?> collection = (Collection<?>) value;
+        List<T> list = new ArrayList<>();
+        for (Object item : collection) {
+            if (item == null) {
+                list.add(null);
+            } else if (clazz.isAssignableFrom(item.getClass())) {
+                list.add((T) item);
+            } else {
+                return nullToEmpty ? new ArrayList<T>() : null; // 存在类型不匹配的元素, 返回空对象
+            }
+        }
+        return list;
+    }
+
+    /**
      * 过滤数据字段<br>
      * <pre>
         Map&lt;String, Object&gt; list = [ { main:{}, detail:{}, subject:{}, finance:[], target:[] } ];
