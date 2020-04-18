@@ -4,7 +4,7 @@
 
 	<groupId>com.gitee.qdbp</groupId>
 	<artifactId>qdbp-parent</artifactId>
-	<version>3.3.2-SNAPSHOT</version>
+	<version>3.3.2</version>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
 	<url>https://gitee.com/qdbp/</url>
@@ -154,12 +154,12 @@
 			<dependency>
 				<groupId>com.gitee.qdbp</groupId>
 				<artifactId>qdbp-able</artifactId>
-				<version>3.3.2-SNAPSHOT</version>
+				<version>3.3.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.gitee.qdbp</groupId>
 				<artifactId>qdbp-tools</artifactId>
-				<version>3.3.2-SNAPSHOT</version>
+				<version>3.3.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
