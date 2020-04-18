@@ -452,7 +452,7 @@ public abstract class StringTools {
             buffer.append(string.substring(0, start));
         }
         if (end < string.length()) {
-            buffer.append(string.substring(end));
+            buffer.append(string.substring(string.length() - end));
         }
         return buffer.toString();
     }
