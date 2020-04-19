@@ -1,5 +1,7 @@
 package com.gitee.qdbp.tools.crypto;
 
+import com.gitee.qdbp.tools.codec.bytes.Base58Codec;
+
 public class RsaTest {
 
     public static void main(String[] args) {
@@ -8,7 +10,7 @@ public class RsaTest {
     }
 
     protected static void testCipher(String string) {
-        RsaCipher rsaCipher = new RsaCipher(512);
+        RsaCipher rsaCipher = new RsaCipher(512, Base58Codec.INSTANCE);
         System.out.println("公钥: " + rsaCipher.getPublicKey());
         String ciphertext = rsaCipher.encrypt(string);
         System.out.println("加密: " + ciphertext);
