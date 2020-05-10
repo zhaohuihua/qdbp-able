@@ -3,13 +3,18 @@ package com.gitee.qdbp.tools.files;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import com.gitee.qdbp.able.exception.ResourceNotFoundException;
 
 /**
  * zip压缩工具
@@ -18,6 +23,47 @@ import java.util.zip.ZipOutputStream;
  * @version 160223
  */
 public class ZipTools {
+
+    /**
+     * ZIP文件解压
+     * 
+     * @param srcPath 源文件
+     * @param saveFolder 保存文件的路径
+     */
+    public static void decompression(String srcPath, String saveFolder) throws IOException {
+        File srcFile = new File(srcPath);
+        if (!srcFile.exists()) { // 判断源文件是否存在
+            throw new ResourceNotFoundException(srcPath);
+        }
+        String fileName = PathTools.removeExtension(new File(srcPath).getName()) + '/';
+        // 开始解压
+        try (ZipFile zipFile = new ZipFile(srcFile);) {
+            Enumeration<?> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = (ZipEntry) entries.nextElement();
+                String relativePath = entry.getName();
+                // 如果第一级路径与ZIP文件名相同, 则去掉这一级路径
+                if (relativePath.startsWith(fileName)) {
+                    relativePath = relativePath.substring(fileName.length());
+                }
+                if (entry.isDirectory()) {
+                    // 如果是文件夹, 就创建文件夹
+                    String folder = PathTools.concat(saveFolder, relativePath);
+                    FileTools.mkdirsIfNotExists(new File(folder), false);
+                    continue;
+                }
+
+                // 文件保存路径
+                File file = new File(PathTools.concat(saveFolder, relativePath));
+                FileTools.mkdirsIfNotExists(file, true);
+                // 将压缩文件内容写入文件中
+                try (InputStream is = zipFile.getInputStream(entry);
+                        FileOutputStream os = new FileOutputStream(file);) {
+                    FileTools.copy(is, os);
+                }
+            }
+        }
+    }
 
     /**
      * 通过URL下载文件并压缩保存到指定位置
