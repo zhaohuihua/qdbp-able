@@ -36,7 +36,7 @@ public abstract class FileTools {
 
     /** buffer size used for reading and writing **/
     private static final int BUFFER_SIZE = 8192;
-
+    /** 默认的文件编码格式 **/
     private static String CHARSET = "UTF-8";
 
     /**
