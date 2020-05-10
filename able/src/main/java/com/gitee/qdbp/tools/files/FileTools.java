@@ -2,11 +2,14 @@ package com.gitee.qdbp.tools.files;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.nio.file.CopyOption;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
@@ -33,6 +36,53 @@ public abstract class FileTools {
 
     /** buffer size used for reading and writing **/
     private static final int BUFFER_SIZE = 8192;
+
+    private static String CHARSET = "UTF-8";
+
+    /**
+     * 读取文件的文本内容
+     * 
+     * @param file 待读取的文件
+     * @return 文本内容
+     */
+    public static String readTextContent(File file) throws IOException {
+        byte[] bytes;
+        try (FileInputStream fis = new FileInputStream(file);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();) {
+            copy(fis, bos);
+            bytes = bos.toByteArray();
+        }
+
+        try {
+            String charset = getEncoding(file);
+            return new String(bytes, charset);
+        } catch (UnsupportedEncodingException e) {
+            return new String(bytes, Charset.forName(CHARSET));
+        }
+    }
+
+    /**
+     * 读取文件的文本内容
+     * 
+     * @param file 待读取的文件
+     * @param maxSize 允许读取的最大字节数, 0表示无限制
+     * @return 文本内容
+     */
+    public static String readTextContent(File file, long maxSize) throws IOException {
+        byte[] bytes;
+        try (FileInputStream fis = new FileInputStream(file);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();) {
+            copy(fis, bos, maxSize);
+            bytes = bos.toByteArray();
+        }
+
+        try {
+            String charset = getEncoding(file);
+            return new String(bytes, charset);
+        } catch (UnsupportedEncodingException e) {
+            return new String(bytes, Charset.forName(CHARSET));
+        }
+    }
 
     /**
      * 从输入流复制到输出流
