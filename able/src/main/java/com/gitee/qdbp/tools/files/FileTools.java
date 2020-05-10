@@ -744,10 +744,8 @@ public abstract class FileTools {
      * @version 2010-10-05
      */
     public static String getEncoding(File file) {
-        String encoding = "GBK";
-        BufferedInputStream bis = null;
-        try {
-            bis = new BufferedInputStream(new FileInputStream(file));
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+            String encoding = "GBK";
             bis.mark(0);
 
             // 带BOM信息的情况, 根据前三位判断编码
@@ -799,16 +797,9 @@ public abstract class FileTools {
                     }
                 }
             }
+            return encoding;
         } catch (Exception e) {
             return null;
-        } finally {
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException e) {
-                }
-            }
         }
-        return encoding;
     }
 }
