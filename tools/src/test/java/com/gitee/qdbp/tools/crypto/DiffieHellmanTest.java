@@ -8,7 +8,7 @@ import com.gitee.qdbp.tools.codec.bytes.HexCodec;
 public class DiffieHellmanTest {
 
     public static void main(String[] args) {
-        String string = "Diffie-Hellman 测试";
+        String string = "[Diffie-Hellman 测试]";
         testCipher(string);
         testTools(string);
     }

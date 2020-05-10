@@ -33,7 +33,6 @@ public class RsaCipher implements CipherService {
         KeyPair keyPair = RsaTools.generateKeyPair(keySize);
         this.privateKey = keyPair.getPrivate().getEncoded();
         this.publicKey = keyPair.getPublic().getEncoded();
-        System.out.println("私钥: " + byteCodec.encode(privateKey));
     }
 
     public RsaCipher(String publicKey, String privateKey) {

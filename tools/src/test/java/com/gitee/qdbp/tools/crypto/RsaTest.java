@@ -5,7 +5,7 @@ import com.gitee.qdbp.tools.codec.bytes.Base58Codec;
 public class RsaTest {
 
     public static void main(String[] args) {
-        String string = "RSA 加密解密 测试";
+        String string = "[RSA 加密解密 测试]";
         testCipher(string);
     }
 

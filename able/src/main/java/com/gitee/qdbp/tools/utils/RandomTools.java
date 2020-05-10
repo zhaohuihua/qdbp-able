@@ -22,6 +22,9 @@ public final class RandomTools {
 
     /** 可读性强的字符串(没有EIOZ) **/
     private static final String READABLE = "0123456789ABCDFGHJKLMNPQRSTUVWXY";
+    
+    /** 16进制源字符串 **/
+    private static final String HEX_SOURCE = "0123456789ABCDEF";
 
     private static final Random RANDOM = new Random();
 
@@ -96,6 +99,17 @@ public final class RandomTools {
      */
     public static String generateNumber(final int length) {
         return generateString(NUMBER_SOURCE, length);
+    }
+
+    /**
+     * 生成指定长度的16进制随机数
+     *
+     * @author zhaohuihua
+     * @param length 随机数长度
+     * @return 随机数
+     */
+    public static String generateHexNumber(final int length) {
+        return generateString(HEX_SOURCE, length);
     }
 
     /**
