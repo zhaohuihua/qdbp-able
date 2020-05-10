@@ -109,5 +109,9 @@ public class ZipTools {
             this.url = url;
         }
 
+        @Override
+        public String toString() {
+            return this.path;
+        }
     }
 }

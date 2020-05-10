@@ -578,7 +578,7 @@ public abstract class FileTools {
      * @author zhaohuihua
      * @version 161224
      */
-    private static abstract class AllFileVisitor implements FileVisitor<Path> {
+    public static abstract class AllFileVisitor implements FileVisitor<Path> {
 
         protected ExceptionWatcher exceptionWatcher;
 
