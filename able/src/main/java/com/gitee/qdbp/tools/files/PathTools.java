@@ -662,11 +662,33 @@ public abstract class PathTools {
     }
 
     /**
+     * 获取绝对路径文件
+     * 
+     * @param path 文件路径
+     * @param paths 文件路径列表
+     * @return 绝对路径文件
+     */
+    public static String getAbsoluteFile(String path, String... paths) {
+        return PathTools.concat(new File(PathTools.concat(true, path, paths)).getAbsolutePath());
+    }
+
+    /**
+     * 获取绝对路径文件夹
+     * 
+     * @param path 文件路径
+     * @param paths 文件路径列表
+     * @return 绝对路径文件夹
+     */
+    public static String getAbsoluteFolder(String path, String... paths) {
+        return PathTools.concat(new File(PathTools.concat(true, path, paths)).getAbsolutePath(), "/");
+    }
+
+    /**
      * 连接
      *
      * @param folder 文件夹
      * @param paths 文件路径
-     * @return
+     * @return 连接后的路径
      */
     public static String concat(String folder, String... paths) {
         return concat(false, folder, paths);
@@ -678,7 +700,7 @@ public abstract class PathTools {
      * @param format 要不要格式化
      * @param folder 文件夹
      * @param paths 文件路径
-     * @return
+     * @return 连接后的路径
      */
     public static String concat(boolean format, String folder, String... paths) {
 
