@@ -16,6 +16,9 @@ public class DateToolsTest {
     }
 
     private static void testParse() {
+        testParseDate("2018年7月8日");
+        testParseDate("7月8日2018年");
+        testParseDate("8日7月2018年");
         testParseDate("2018/0/0");
         testParseDate("2018/0/8");
         testParseDate("2018/7/8");
@@ -35,6 +38,13 @@ public class DateToolsTest {
         testParseTime("23:59:59");
         testParseTime("4:5:6.999");
         testParseTime("23:59:59.999999");
+        testParseDateTime("2018年7月8日20时30分40秒");
+        testParseDateTime("7月8日2018年4时5分6秒999毫秒");
+        testParseDateTime("7月8日2018年4时5分6秒999");
+        testParseDateTime("8日7月2018年23时59分59秒999999");
+        testParseDateTime("2018年7月8日 20:30:40");
+        testParseDateTime("7月8日2018年 4:5:6.999");
+        testParseDateTime("8日7月2018年 23:59:59.999999");
         testParseDateTime("2018/7/8 20:30:40");
         testParseDateTime("2018/7/8 4:5:6.999");
         testParseDateTime("2018/7/8 23:59:59.999999");
@@ -51,7 +61,7 @@ public class DateToolsTest {
 
     private static void testParseDate(String string) {
         Date date = DateTools.parse(string);
-        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toDateString(date));
+        System.out.println(StringTools.pad(string, ' ', false, 16) + DateTools.toNormativeString(date));
     }
 
     private static void testParseTime(String string) {

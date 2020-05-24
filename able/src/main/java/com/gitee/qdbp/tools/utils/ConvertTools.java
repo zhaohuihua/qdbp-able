@@ -27,6 +27,28 @@ import com.gitee.qdbp.able.beans.DepthMap;
  */
 public abstract class ConvertTools {
 
+    public static Map<String, Void> toKeyMaps(String... keys) {
+        Map<String, Void> map = new HashMap<>();
+        for (String item : keys) {
+            String[] array = StringTools.split(item, ',');
+            for (String key : array) {
+                map.put(key, null);
+            }
+        }
+        return map;
+    }
+
+    public static Map<Character, Void> toCharMaps(String... strings) {
+        Map<Character, Void> map = new HashMap<>();
+        for (String string : strings) {
+            char[] chars = string.toCharArray();
+            for (int i = 0, z = chars.length; i < z; i++) {
+                map.put(chars[i], null);
+            }
+        }
+        return map;
+    }
+
     /**
      * List转数组
      * 

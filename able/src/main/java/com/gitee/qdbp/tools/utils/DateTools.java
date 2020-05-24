@@ -5,7 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -171,6 +173,10 @@ public abstract class DateTools {
         }
     }
 
+    private static Map<Character, Void> CHINESE_DATE_UNITS = ConvertTools.toCharMaps("年月日");
+    private static Map<Character, Void> CHINESE_TIME_UNITS = ConvertTools.toCharMaps("时分秒毫秒");
+    private static Pattern CHINESE_PART = Pattern.compile("(\\d+)(年|月|日|时|分|秒|毫秒)");
+
     /**
      * 智能解析日期<br>
      * parse("2000-10-20 15:25:35.450");<br>
@@ -205,6 +211,8 @@ public abstract class DateTools {
         int colonIndex = -1;
         int dotIndex = -1;
         int otherCharIndex = -1;
+        boolean existChineseDateUnits = false;
+        boolean existChineseTimeUnits = false;
         char[] chars = datetime.toCharArray();
         for (char i = 0; i < chars.length; i++) {
             char c = chars[i];
@@ -233,7 +241,70 @@ public abstract class DateTools {
                     otherCharIndex = i;
                 }
             }
+            if (CHINESE_DATE_UNITS.containsKey(c)) {
+                existChineseDateUnits = true;
+            } else if (CHINESE_TIME_UNITS.containsKey(c)) {
+                existChineseTimeUnits = true;
+            }
         }
+
+        if (existChineseDateUnits || existChineseTimeUnits) {
+            // 2018年7月8日10时20分30秒400毫秒
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Matcher matcher = CHINESE_PART.matcher(datetime);
+            int index = 0;
+            Map<String, Void> units = new HashMap<>();
+            while (matcher.find()) {
+                String number = matcher.group(1);
+                String unit = matcher.group(2);
+                if (index < matcher.start()) {
+                    String pending = datetime.substring(index, matcher.start());
+                    if (pending.trim().length() > 0) {
+                        throw new IllegalArgumentException("Date format is not supported [" + datetime + "].");
+                    }
+                }
+                if (units.containsKey(unit)) {
+                    // 单位重复了, 如: 2018年7月8月
+                    throw new IllegalArgumentException("Date format is not supported [" + datetime + "].");
+                }
+                units.put(unit, null);
+                int n = Integer.parseInt(number);
+                if ("年".equals(unit)) {
+                    calendar.set(Calendar.YEAR, n);
+                } else if ("月".equals(unit)) {
+                    calendar.set(Calendar.MONTH, n - 1);
+                } else if ("日".equals(unit)) {
+                    calendar.set(Calendar.DAY_OF_MONTH, n);
+                } else if ("时".equals(unit)) {
+                    calendar.set(Calendar.HOUR_OF_DAY, n);
+                } else if ("分".equals(unit)) {
+                    calendar.set(Calendar.MINUTE, n);
+                } else if ("秒".equals(unit)) {
+                    calendar.set(Calendar.SECOND, n);
+                } else if ("毫秒".equals(unit)) {
+                    calendar.set(Calendar.MILLISECOND, n);
+                } else {
+                    throw new IllegalArgumentException("Date format is not supported [" + datetime + "].");
+                }
+                index = matcher.end();
+            }
+            if (index >= datetime.length()) {
+                return calendar.getTime();
+            }
+            String pending = datetime.substring(index);
+            if (!units.containsKey("毫秒") && StringTools.isDigit(pending)) {
+                calendar.set(Calendar.MILLISECOND, Math.min(Integer.parseInt(pending), 999));
+                return calendar.getTime();
+            } else if (!existChineseTimeUnits) {
+                // 2018年7月8日 10:20:30.400
+                return parseTime(calendar.getTime(), pending);
+            }
+        }
+
         if (otherCharIndex >= 0) {
             return PARSERS.parse(datetime);
         } else if (spaceIndex > 0) {

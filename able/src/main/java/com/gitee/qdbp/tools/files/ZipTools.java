@@ -8,13 +8,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import com.gitee.qdbp.able.exception.ResourceNotFoundException;
+import com.gitee.qdbp.able.matches.AntStringMatcher;
+import com.gitee.qdbp.able.matches.StringMatcher;
+import com.gitee.qdbp.tools.files.FileTools.AllFileVisitor;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * zip压缩工具
@@ -62,6 +71,110 @@ public class ZipTools {
                     FileTools.copy(is, os);
                 }
             }
+        }
+    }
+
+    /**
+     * 收集可压缩的文件
+     *
+     * @param rootFolder 文件夹路径
+     * @param relativePaths 相对路径, 可以是文件或文件夹(文件夹将会遍历所有子文件)
+     * @return 压缩项列表
+     */
+    public static List<UrlItem> collectFiles(String rootFolder, String filter) {
+        String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
+        CollectZipFileVisitor visitor = new CollectZipFileVisitor(rootAbsoluteFolder, filter);
+        try {
+            Path path = Paths.get(rootFolder);
+            Files.walkFileTree(path, visitor);
+            return visitor.getItems();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * 收集可压缩的文件
+     *
+     * @param rootFolder 文件夹路径
+     * @param relativePaths 相对路径, 可以是文件或文件夹(文件夹将会遍历所有子文件)
+     * @return 压缩项列表
+     */
+    public static List<UrlItem> collectFiles(String rootFolder, List<String> relativePaths) {
+        List<UrlItem> items = new ArrayList<>();
+        String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
+        for (String relativePath : relativePaths) {
+            if (PathTools.isPathOutOfBounds(relativePath)) {
+                continue;
+            }
+            String absolutePath = PathTools.concat(rootAbsoluteFolder, relativePath);
+            File file = new File(absolutePath);
+            if (file.isFile()) {
+                String url = fileToUrl(file);
+                if (url != null) {
+                    items.add(new UrlItem(relativePath, url));
+                }
+            } else if (file.isDirectory()) {
+                CollectZipFileVisitor visitor = new CollectZipFileVisitor(rootAbsoluteFolder, "*.*");
+                try {
+                    Files.walkFileTree(file.toPath(), visitor);
+                    items.addAll(visitor.getItems());
+                } catch (IOException e) {
+                    continue;
+                }
+            }
+        }
+        return items;
+    }
+
+    private static String fileToUrl(File file) {
+        try {
+            return file.toURI().toURL().toString();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
+    public static UrlItem newFileItem(String rootFolder, File file) {
+        String relativePath = PathTools.relativize(rootFolder, file.getAbsolutePath());
+        String url = fileToUrl(file);
+        return url == null ? null : new UrlItem(relativePath, url);
+    }
+
+    /**
+     * 从文件夹下递归查找可压缩的文件
+     *
+     * @author zhaohuihua
+     * @version 20200519
+     */
+    private static class CollectZipFileVisitor extends AllFileVisitor {
+
+        private String rootFolder;
+        private StringMatcher fileNameMatcher;
+        private List<UrlItem> items = new ArrayList<>();
+
+        public CollectZipFileVisitor(String rootFolder, String filter) {
+            super(null);
+            this.rootFolder = rootFolder;
+            this.fileNameMatcher = new AntStringMatcher(VerifyTools.nvl(filter, "*.*"));
+        }
+
+        public List<UrlItem> getItems() {
+            return items;
+        }
+
+        @Override
+        protected boolean onVisitFile(Path path) {
+            File file = path.toFile();
+            if (file.isDirectory() || !fileNameMatcher.matches(file.getName())) {
+                return true; // 继续
+            }
+
+            UrlItem item = newFileItem(rootFolder, file);
+            if (item != null) {
+                items.add(item);
+            }
+            return true; // 继续
         }
     }
 
