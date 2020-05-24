@@ -12,7 +12,7 @@ import com.gitee.qdbp.tools.utils.PropertyTools.Options;
  * 加载配置文件<br>
  * 根据文件扩展名决定加载方式, 支持:txt|xml|properties, 其他都按properties处理<br>
  * 支持引用其他配置项<br>
- * key.a = {config:key.b}<br>
+ * key.a = {property:key.b}<br>
  * 可以通过&lt;&lt;include&gt;&gt;标签导入其他配置文件<br>
  * &lt;&lt;include&gt;&gt; = rules.txt<br>
  * &lt;&lt;include.rules&gt;&gt; = rules.txt<br>
