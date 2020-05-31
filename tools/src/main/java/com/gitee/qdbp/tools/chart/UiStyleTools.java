@@ -45,8 +45,8 @@ public class UiStyleTools {
         Font[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
         for (Font font : fonts) {
             for (String fontName : chooseNames) {
-                if (fontName.equalsIgnoreCase(font.getFontName(Locale.ENGLISH))
-                        || fontName.equalsIgnoreCase(font.getFontName(Locale.CHINESE))) {
+                if (fontName.equalsIgnoreCase(font.getName())
+                        || fontName.equalsIgnoreCase(font.getFontName(Locale.ENGLISH))) {
                     return fontName;
                 }
             }

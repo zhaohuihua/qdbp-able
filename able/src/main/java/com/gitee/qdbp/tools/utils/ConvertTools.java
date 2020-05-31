@@ -1,6 +1,8 @@
 package com.gitee.qdbp.tools.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -691,12 +693,37 @@ public abstract class ConvertTools {
      * @return Map
      */
     public static Map<String, String> parseRequestParams(String params) {
+        return parseRequestParams(params, null);
+    }
+
+    /**
+     * 解析请求参数
+     * 
+     * @param params 请求参数
+     * @param charset 字符编码: 如果不为空, 将对value执行URLDecoder.decode(value, charset)
+     * @return Map
+     */
+    public static Map<String, String> parseRequestParams(String params, String charset) {
         Map<String, String> map = new HashMap<>();
         String[] array = StringTools.split(params, '&');
         for (String item : array) {
-            String[] kv = StringTools.split(item, '=');
-            if (kv.length >= 2) {
-                map.put(kv[0], kv[1]);
+            // 不能用StringTools.split('=');
+            // 因为有可能存在多个等号: contentType=application/json;charset=UTF-8
+            int index = item.indexOf('=');
+            if (index < 0) {
+                map.put(item, null);
+            } else if (index == 0) {
+                map.put(item, "");
+            } else {
+                String key = item.substring(0, index);
+                String value = item.substring(index + 1);
+                if (charset != null) {
+                    try {
+                        value = URLDecoder.decode(value, charset);
+                    } catch (UnsupportedEncodingException ignore) {
+                    }
+                }
+                map.put(key, value);
             }
         }
         return map;
