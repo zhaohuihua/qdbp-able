@@ -598,7 +598,7 @@ public abstract class ConvertTools {
      * @return 合并后的字符串
      */
     public static String joinToString(Collection<?> list) {
-        return joinToString(list, ",");
+        return joinToString(list, ",", false);
     }
 
     /**
@@ -609,6 +609,50 @@ public abstract class ConvertTools {
      * @return 合并后的字符串
      */
     public static String joinToString(Collection<?> list, String seprator) {
+        return joinToString(list, seprator, false);
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param array 数组
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Object[] array) {
+        return joinToString(array, ",", false);
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param array 数组
+     * @param seprator 分隔符, 可为空
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Object[] array, String seprator) {
+        return joinToString(array, seprator, false);
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param list 数组
+     * @param wrap 是否用括号包起来
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Collection<?> list, boolean wrap) {
+        return joinToString(list, ",", wrap);
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param list 数组
+     * @param seprator 分隔符, 可为空
+     * @param wrap 是否用括号包起来
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Collection<?> list, String seprator, boolean wrap) {
         if (list == null) {
             return null;
         }
@@ -621,6 +665,10 @@ public abstract class ConvertTools {
                 buffer.append(tmp);
             }
         }
+        if (wrap) {
+            buffer.insert(0, '[');
+            buffer.append(']');
+        }
         return buffer.toString();
     }
 
@@ -628,10 +676,11 @@ public abstract class ConvertTools {
      * 将数组合并为字符串
      *
      * @param array 数组
+     * @param wrap 是否用括号包起来
      * @return 合并后的字符串
      */
-    public static String joinToString(Object[] array) {
-        return joinToString(array, ",");
+    public static String joinToString(Object[] array, boolean wrap) {
+        return joinToString(array, ",", wrap);
     }
 
     /**
@@ -639,9 +688,10 @@ public abstract class ConvertTools {
      *
      * @param array 数组
      * @param seprator 分隔符, 可为空
+     * @param wrap 是否用括号包起来
      * @return 合并后的字符串
      */
-    public static String joinToString(Object[] array, String seprator) {
+    public static String joinToString(Object[] array, String seprator, boolean wrap) {
         if (array == null) {
             return null;
         }
@@ -653,6 +703,10 @@ public abstract class ConvertTools {
                 }
                 buffer.append(tmp);
             }
+        }
+        if (wrap) {
+            buffer.insert(0, '[');
+            buffer.append(']');
         }
         return buffer.toString();
     }
