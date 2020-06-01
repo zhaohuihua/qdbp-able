@@ -169,6 +169,80 @@ public abstract class ConvertTools {
     }
 
     /**
+     * 数组转Map: key=数组项, value=null
+     * 
+     * @param array 数组
+     * @param <T> 目标类型
+     * @param <C> 数组内容的类型
+     * @param <V> 值类型
+     * @return 转换后的Map, 如果array=null则返回null
+     */
+    public static <T, C extends T, V> Map<T, V> toMap(List<C> array) {
+        return toMap(array, null);
+    }
+
+    /**
+     * 数组转Map: key=数组项
+     * 
+     * @param array 数组
+     * @param value 值
+     * @param <T> 目标类型
+     * @param <C> 数组内容的类型
+     * @param <V> 值类型
+     * @return 转换后的Map, 如果array=null则返回null
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, C extends T, V> Map<T, V> toMap(List<C> array, V value) {
+        if (array == null) {
+            return null;
+        } else {
+            Map<C, V> map = new HashMap<>();
+            for (C field : array) {
+                map.put(field, value);
+            }
+            // JDK1.7必须强转, JDK1.8不需要
+            return (Map<T, V>) map;
+        }
+    }
+
+    /**
+     * 数组转Map: key=数组项, value=null
+     * 
+     * @param array 数组
+     * @param <T> 目标类型
+     * @param <C> 数组内容的类型
+     * @param <V> 值类型
+     * @return 转换后的Map, 如果array=null则返回EmptySet
+     */
+    public static <T, C extends T, V> Map<T, V> toMapIfNullToEmpty(List<C> array) {
+        return toMapIfNullToEmpty(array, null);
+    }
+
+    /**
+     * 数组转Map: key=数组项
+     * 
+     * @param array 数组
+     * @param value 值
+     * @param <T> 目标类型
+     * @param <C> 数组内容的类型
+     * @param <V> 值类型
+     * @return 转换后的Map, 如果array=null则返回EmptySet
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, C extends T, V> Map<T, V> toMapIfNullToEmpty(List<C> array, V value) {
+        if (array == null) {
+            return Collections.emptyMap();
+        } else {
+            Map<C, V> map = new HashMap<>();
+            for (C field : array) {
+                map.put(field, value);
+            }
+            // JDK1.7必须强转, JDK1.8不需要
+            return (Map<T, V>) map;
+        }
+    }
+
+    /**
      * 对象转换为字符串<br>
      * 与String.valueOf()的区别是如果对象为null则返回null
      *

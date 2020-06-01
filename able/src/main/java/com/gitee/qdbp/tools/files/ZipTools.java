@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,7 +82,7 @@ public class ZipTools {
      * @param relativePaths 相对路径, 可以是文件或文件夹(文件夹将会遍历所有子文件)
      * @return 压缩项列表
      */
-    public static List<UrlItem> collectFiles(String rootFolder, String filter) {
+    public static List<FileItem> collectFiles(String rootFolder, String filter) {
         String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
         CollectZipFileVisitor visitor = new CollectZipFileVisitor(rootAbsoluteFolder, filter);
         try {
@@ -100,8 +101,8 @@ public class ZipTools {
      * @param relativePaths 相对路径, 可以是文件或文件夹(文件夹将会遍历所有子文件)
      * @return 压缩项列表
      */
-    public static List<UrlItem> collectFiles(String rootFolder, List<String> relativePaths) {
-        List<UrlItem> items = new ArrayList<>();
+    public static List<FileItem> collectFiles(String rootFolder, List<String> relativePaths) {
+        List<FileItem> items = new ArrayList<>();
         String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
         for (String relativePath : relativePaths) {
             if (PathTools.isPathOutOfBounds(relativePath)) {
@@ -110,10 +111,7 @@ public class ZipTools {
             String absolutePath = PathTools.concat(rootAbsoluteFolder, relativePath);
             File file = new File(absolutePath);
             if (file.isFile()) {
-                String url = fileToUrl(file);
-                if (url != null) {
-                    items.add(new UrlItem(relativePath, url));
-                }
+                items.add(new FileItem(relativePath, file));
             } else if (file.isDirectory()) {
                 CollectZipFileVisitor visitor = new CollectZipFileVisitor(rootAbsoluteFolder, "*.*");
                 try {
@@ -127,18 +125,9 @@ public class ZipTools {
         return items;
     }
 
-    private static String fileToUrl(File file) {
-        try {
-            return file.toURI().toURL().toString();
-        } catch (MalformedURLException e) {
-            return null;
-        }
-    }
-
-    public static UrlItem newFileItem(String rootFolder, File file) {
+    public static FileItem newFileItem(String rootFolder, File file) {
         String relativePath = PathTools.relativize(rootFolder, file.getAbsolutePath());
-        String url = fileToUrl(file);
-        return url == null ? null : new UrlItem(relativePath, url);
+        return new FileItem(relativePath, file);
     }
 
     /**
@@ -151,7 +140,7 @@ public class ZipTools {
 
         private String rootFolder;
         private StringMatcher fileNameMatcher;
-        private List<UrlItem> items = new ArrayList<>();
+        private List<FileItem> items = new ArrayList<>();
 
         public CollectZipFileVisitor(String rootFolder, String filter) {
             super(null);
@@ -159,7 +148,7 @@ public class ZipTools {
             this.fileNameMatcher = new AntStringMatcher(VerifyTools.nvl(filter, "*.*"));
         }
 
-        public List<UrlItem> getItems() {
+        public List<FileItem> getItems() {
             return items;
         }
 
@@ -170,7 +159,7 @@ public class ZipTools {
                 return true; // 继续
             }
 
-            UrlItem item = newFileItem(rootFolder, file);
+            FileItem item = newFileItem(rootFolder, file);
             if (item != null) {
                 items.add(item);
             }
@@ -181,26 +170,27 @@ public class ZipTools {
     /**
      * 通过URL下载文件并压缩保存到指定位置
      *
-     * @param urls 待压缩的文件信息
+     * @param items 待压缩的文件信息
      * @param savePath 保存路径
      * @throws IOException
      */
-    public static void compression(List<UrlItem> urls, String savePath) throws IOException {
+    //
+    public static <T extends ZipItem> void compression(List<T> items, String savePath) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(savePath);) {
-            compression(urls, fos);
+            compression(items, fos);
         }
     }
 
     /**
      * 通过URL下载文件并压缩
      *
-     * @param urls 待压缩的文件信息
+     * @param items 待压缩的文件信息
      * @return 压缩文件的二进制数据
      * @throws IOException
      */
-    public static byte[] compression(List<UrlItem> urls) throws IOException {
+    public static <T extends ZipItem> byte[] compression(List<T> items) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();) {
-            compression(urls, baos);
+            compression(items, baos);
             return baos.toByteArray();
         }
     }
@@ -208,45 +198,47 @@ public class ZipTools {
     /**
      * 通过URL下载文件并压缩到OutputStream中
      *
-     * @param urls 待压缩的文件信息
+     * @param items 待压缩的文件信息
      * @param original OutputStream
      * @throws IOException
      */
-    private static void compression(List<UrlItem> urls, OutputStream original) throws IOException {
+    private static <T extends ZipItem> void compression(List<T> items, OutputStream original) throws IOException {
         try (ZipOutputStream zos = new ZipOutputStream(original);
                 BufferedOutputStream output = new BufferedOutputStream(zos);) {
-
-            for (UrlItem i : urls) {
-                zos.putNextEntry(new ZipEntry(i.getPath()));
-                URL url = new URL(i.getUrl());
-                try (BufferedInputStream input = new BufferedInputStream(url.openStream());) {
-                    FileTools.copy(input, output);
+            for (ZipItem i : items) {
+                ZipEntry entry = new ZipEntry(i.getPath());
+                zos.putNextEntry(entry);
+                if (i instanceof UrlItem) {
+                    UrlItem item = (UrlItem) i;
+                    URL url = item.getUrl();
+                    try (BufferedInputStream input = new BufferedInputStream(url.openStream());) {
+                        FileTools.copy(input, zos);
+                    }
+                } else if (i instanceof FileItem) {
+                    FileItem item = (FileItem) i;
+                    File file = item.getFile();
+                    try (FileInputStream fis = new FileInputStream(file);
+                            BufferedInputStream input = new BufferedInputStream(fis);) {
+                        entry.setTime(file.lastModified());
+                        FileTools.copy(input, zos);
+                    }
+                } else {
+                    throw new IllegalArgumentException("UnsupportedZipItem: {}" + i.getClass().getSimpleName());
                 }
-                output.flush();
             }
         }
     }
 
     /**
-     * URL配置
+     * zip配置
      *
      * @author zhaohuihua
      * @version 160223
      */
-    public static class UrlItem {
+    public static abstract class ZipItem {
 
         /** 保存路径 **/
         private String path;
-        /** 下载地址 **/
-        private String url;
-
-        public UrlItem() {
-        }
-
-        public UrlItem(String path, String url) {
-            this.path = path;
-            this.url = url;
-        }
 
         /** 保存路径 **/
         public String getPath() {
@@ -257,20 +249,81 @@ public class ZipTools {
         public void setPath(String path) {
             this.path = path;
         }
+    }
+
+    /**
+     * URL配置
+     *
+     * @author zhaohuihua
+     * @version 160223
+     */
+    public static class UrlItem extends ZipItem {
 
         /** 下载地址 **/
-        public String getUrl() {
+        private URL url;
+
+        public UrlItem() {
+        }
+
+        public UrlItem(String path, URL url) {
+            super.path = path;
+            this.url = url;
+        }
+
+        public UrlItem(String path, String url) {
+            super.path = path;
+            try {
+                this.url = new URL(url);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("url format error: " + url, e);
+            }
+        }
+
+        /** 下载地址 **/
+        public URL getUrl() {
             return url;
         }
 
         /** 下载地址 **/
-        public void setUrl(String url) {
+        public void setUrl(URL url) {
             this.url = url;
         }
 
-        @Override
-        public String toString() {
-            return this.path;
+    }
+
+    /**
+     * File配置
+     *
+     * @author zhaohuihua
+     * @version 160223
+     */
+    public static class FileItem extends ZipItem {
+
+        /** 下载地址 **/
+        private File file;
+
+        public FileItem() {
         }
+
+        public FileItem(String path, File file) {
+            super.path = path;
+            this.file = file;
+        }
+
+        public FileItem(String path, String file) {
+            super.path = path;
+            this.file = new File(file);
+        }
+
+        /** 下载地址 **/
+        public File getFile() {
+            return file;
+        }
+
+        /** 下载地址 **/
+        public void setFile(File file) {
+            this.file = file;
+        }
+
     }
 }

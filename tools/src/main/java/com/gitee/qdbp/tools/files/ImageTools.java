@@ -1,5 +1,7 @@
 package com.gitee.qdbp.tools.files;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,6 +29,60 @@ import net.coobird.thumbnailator.geometry.Positions;
  * @author zhaohuihua
  */
 public class ImageTools {
+
+    /**
+     * 给图片增加边距
+     * 
+     * @param image 图片
+     * @param top 上边距
+     * @param bottom 下边距
+     * @param left 左边距
+     * @param right 右边距
+     * @return 新图片
+     */
+    public static BufferedImage paddingImage(BufferedImage image, int top, int bottom, int left, int right) {
+        return paddingImage(image, Color.WHITE, top, bottom, left, right);
+    }
+
+    /**
+     * 给图片增加边距
+     * 
+     * @param image 图片
+     * @param color 填充颜色
+     * @param top 上边距
+     * @param bottom 下边距
+     * @param left 左边距
+     * @param right 右边距
+     * @return 新图片
+     */
+    public static BufferedImage paddingImage(BufferedImage image, Color color, int top, int bottom, int left,
+            int right) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        int width = w + left + right;
+        int height = h + top + bottom;
+        BufferedImage background = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        // 背景默认是黑色的, 填充为指定颜色
+        if (color != null) {
+            Graphics g = background.getGraphics();
+            g.setColor(color);
+            if (top > 0) {
+                g.fillRect(0, 0, width, top);
+            }
+            if (bottom > 0) {
+                g.fillRect(0, height - bottom, width, bottom);
+            }
+            if (left > 0) {
+                g.fillRect(0, 0, left, height);
+            }
+            if (right > 0) {
+                g.fillRect(0, width - right, right, height);
+            }
+        }
+        // 复制图片
+        background.getGraphics().drawImage(image, left, top, w, h, null);
+        return background;
+    }
 
     /**
      * 生成缩略图<br>

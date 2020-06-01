@@ -571,6 +571,21 @@ public abstract class DateTools {
     }
 
     /**
+     * 转换为字符串<br>
+     * 如果有时间部分就返回 2012-08-08 20:00:00; 如果没有时间部分返回 2012-08-08<br>
+     *
+     * @param date 待处理的日期
+     * @return 日期字符串
+     */
+    public static String toAutoString(Date date) {
+        if (date == null) {
+            return null;
+        }
+        String string = toDateTimeString(date, false);
+        return string.replace(" 00:00:00", "");
+    }
+
+    /**
      * 转换为日期字符串, 如 2012-08-08
      *
      * @param date 待处理的日期
