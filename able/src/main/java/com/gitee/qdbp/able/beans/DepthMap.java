@@ -15,7 +15,7 @@ import com.gitee.qdbp.tools.utils.ReflectTools;
  * a.b.c, a.b.c.d 不能共存, 保留路径最深的a.b.c.d
  *
  * <pre>
- * DepthPathMap dpm = new DepthPathMap();
+ * DepthMap dpm = new DepthMap();
  * dpm.put("author", "xxx"); // 该设置无效, 会被后面的覆盖掉
  * dpm.put("author.code", 100);
  * dpm.put("author.name", "zhaohuihua");

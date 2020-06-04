@@ -79,7 +79,7 @@ public class ZipTools {
      * 收集可压缩的文件
      *
      * @param rootFolder 文件夹路径
-     * @param relativePaths 相对路径, 可以是文件或文件夹(文件夹将会遍历所有子文件)
+     * @param filter 文件过滤表达式, 如*.docx
      * @return 压缩项列表
      */
     public static List<FileItem> collectFiles(String rootFolder, String filter) {
