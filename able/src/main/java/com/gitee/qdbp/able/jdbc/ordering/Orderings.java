@@ -2,8 +2,11 @@ package com.gitee.qdbp.able.jdbc.ordering;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.regex.Pattern;
 
 /**
@@ -24,7 +27,7 @@ public class Orderings extends ArrayList<Ordering> implements Serializable {
     private static final Pattern GROUP = Pattern.compile(",");
 
     /** 不排序 **/
-    public static final List<Ordering> NONE = Collections.emptyList();
+    public static final Orderings NONE = new EmptyOrderings();
 
     /** 默认构造函数 **/
     public Orderings() {
@@ -83,4 +86,133 @@ public class Orderings extends ArrayList<Ordering> implements Serializable {
         return container;
     }
 
+    private static class EmptyOrderings extends Orderings {
+
+        private static final long serialVersionUID = 8842843931221139166L;
+
+        @Override
+        public Iterator<Ordering> iterator() {
+            return Collections.emptyIterator();
+        }
+
+        @Override
+        public ListIterator<Ordering> listIterator() {
+            return Collections.emptyListIterator();
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return false;
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            return c.isEmpty();
+        }
+
+        @Override
+        public Object[] toArray() {
+            return new Object[0];
+        }
+        @Override
+        public <T> T[] toArray(T[] a) {
+            if (a.length > 0) a[0] = null;
+            return a;
+        }
+        @Override
+        public Ordering get(int index) {
+            throw new IndexOutOfBoundsException("Index: " + index);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return (o instanceof List) && ((List<?>) o).isEmpty();
+        }
+
+        @Override
+        public int hashCode() {
+            return 1;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public List<Ordering> subList(int fromIndex, int toIndex) {
+            return (List<Ordering>) Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public void trimToSize() {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public void ensureCapacity(int minCapacity) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public Ordering set(int index, Ordering e) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public boolean add(Ordering e) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public void add(int index, Ordering e) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public Ordering remove(int index) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends Ordering> c) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends Ordering> c) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        protected void removeRange(int fromIndex, int toIndex) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException("read only");
+        }
+
+        // Preserves singleton property
+        private Object readResolve() {
+            return Collections.EMPTY_LIST;
+        }
+    }
 }
