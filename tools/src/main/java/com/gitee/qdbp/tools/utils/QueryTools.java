@@ -334,11 +334,11 @@ public class QueryTools {
      * @param orderings 排序参数, e.g. new Orderings("score desc, userId asc");
      */
     public static void sort(List<Map<String, Object>> list, Orderings orderings) {
-        if (list == null || list.isEmpty() || orderings == null || orderings.getOrderings() == null) {
+        if (list == null || list.isEmpty() || orderings == null || orderings.isEmpty()) {
             return;
         }
         ComplexComparator<Map<String, Object>> comparator = new ComplexComparator<>();
-        for (Ordering ordering : orderings.getOrderings()) {
+        for (Ordering ordering : orderings) {
             String fieldName = ordering.getOrderBy();
             boolean ascending = !OrderType.DESC.equals(ordering.getOrderType());
             comparator.addComparator(new MapFieldComparator<String, Object>(fieldName, ascending));
@@ -358,11 +358,11 @@ public class QueryTools {
         if (!list.isEmpty()) {
             copied.addAll(list);
         }
-        if (list.isEmpty() || orderings == null || orderings.getOrderings() == null) {
+        if (list.isEmpty() || orderings == null || orderings.isEmpty()) {
             return copied;
         }
         ComplexComparator<Map<String, Object>> comparator = new ComplexComparator<>();
-        for (Ordering ordering : orderings.getOrderings()) {
+        for (Ordering ordering : orderings) {
             String fieldName = ordering.getOrderBy();
             boolean ascending = !OrderType.DESC.equals(ordering.getOrderType());
             comparator.addComparator(new MapFieldComparator<String, Object>(fieldName, ascending));

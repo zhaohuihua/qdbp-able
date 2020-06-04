@@ -22,15 +22,15 @@ public class OrderPaging extends Paging {
     public static final OrderPaging COUNT = new ReadOnlyOrderPaging(Paging.COUNT);
 
     /** 排序字段和排序类型 **/
-    private List<Ordering> orderings;
+    private Orderings orderings;
 
     /** 获取排序字段列表 **/
-    public List<Ordering> getOrderings() {
+    public Orderings getOrderings() {
         return orderings;
     }
 
     /** 设置排序字段列表 **/
-    public void setOrderings(List<Ordering> orderings) {
+    public void setOrderings(Orderings orderings) {
         this.orderings = orderings;
     }
 
@@ -46,7 +46,7 @@ public class OrderPaging extends Paging {
      * @return 查询条件
      */
     public static OrderPaging of(Paging paging) {
-        return of(paging, (List<Ordering>) null);
+        return of(paging, (Orderings) null);
     }
 
     /**
@@ -76,7 +76,7 @@ public class OrderPaging extends Paging {
      * @param orderings 排序规则
      * @return 查询条件
      */
-    public static OrderPaging of(List<Ordering> orderings) {
+    public static OrderPaging of(Orderings orderings) {
         return of(Paging.NONE, orderings);
     }
 
@@ -87,7 +87,7 @@ public class OrderPaging extends Paging {
      * @param orderings 排序规则
      * @return 查询条件
      */
-    public static OrderPaging of(Paging paging, List<Ordering> orderings) {
+    public static OrderPaging of(Paging paging, Orderings orderings) {
         OrderPaging condition = new OrderPaging();
         condition.setPage(paging.getPage());
         condition.setRows(paging.getRows());
@@ -107,7 +107,7 @@ public class OrderPaging extends Paging {
             this(paging, null);
         }
 
-        protected ReadOnlyOrderPaging(Paging paging, List<Ordering> orderings) {
+        protected ReadOnlyOrderPaging(Paging paging, Orderings orderings) {
             super.setPage(paging.getPage());
             super.setRows(paging.getRows());
             super.setOffset(paging.getOffset());

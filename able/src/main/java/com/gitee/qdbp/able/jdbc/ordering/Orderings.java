@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * @author zhaohuihua
  * @version 160411
  */
-public class Orderings implements Serializable {
+public class Orderings extends ArrayList<Ordering> implements Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
@@ -26,15 +26,13 @@ public class Orderings implements Serializable {
     /** 不排序 **/
     public static final List<Ordering> NONE = Collections.emptyList();
 
-    private List<Ordering> orderings = new ArrayList<>();
-
     /** 默认构造函数 **/
     public Orderings() {
     }
 
     /** 构造函数, orderings=排序字段 **/
     public Orderings(String orderings) {
-        this.orderings = of(orderings);
+        this.addAll(of(orderings));
     }
 
     /** 增加升序排序字段 **/
@@ -42,7 +40,7 @@ public class Orderings implements Serializable {
         Ordering ordering = new Ordering();
         ordering.setOrderBy(orderBy);
         ordering.setOrderType(OrderType.ASC);
-        orderings.add(ordering);
+        this.add(ordering);
         return this;
     }
 
@@ -51,32 +49,12 @@ public class Orderings implements Serializable {
         Ordering ordering = new Ordering();
         ordering.setOrderBy(orderBy);
         ordering.setOrderType(OrderType.DESC);
-        orderings.add(ordering);
+        this.add(ordering);
         return this;
     }
 
-    /** 获取排序字段列表 **/
-    public List<Ordering> list() {
-        return orderings.isEmpty() ? null : orderings;
-    }
-
-    /** 获取排序字段列表 **/
-    public List<Ordering> getOrderings() {
-        return orderings;
-    }
-
-    /** 设置排序字段列表 **/
-    public void setOrderings(List<Ordering> orderings) {
-        this.orderings = orderings;
-    }
-
-    /** 以文本形式设置排序字段 **/
-    public void setOrdering(String text) {
-        this.orderings = Orderings.of(text);
-    }
-
     /** 解析排序字段 **/
-    public static List<Ordering> of(String text) {
+    public static Orderings of(String text) {
         if (text == null || text.length() == 0) {
             return null;
         }
@@ -102,7 +80,7 @@ public class Orderings implements Serializable {
                 }
             }
         }
-        return container.list();
+        return container;
     }
 
 }
