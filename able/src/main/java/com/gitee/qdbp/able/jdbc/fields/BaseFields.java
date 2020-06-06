@@ -31,9 +31,11 @@ abstract class BaseFields implements Fields, Serializable {
         this.fields = new ArrayList<>();
         for (String field : fields) {
             VerifyTools.requireNotBlank(field, "fieldName");
-            String[] array = StringTools.split(",");
+            String[] array = StringTools.split(field, ',');
             for (String item : array) {
-                this.fields.add(item);
+                if (item.length() > 0) {
+                    this.fields.add(item);
+                }
             }
         }
     }
