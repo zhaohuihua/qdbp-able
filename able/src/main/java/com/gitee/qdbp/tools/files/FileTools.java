@@ -20,11 +20,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.gitee.qdbp.able.exception.ExceptionWatcher;
 import com.gitee.qdbp.able.exception.FileOversizeException;
 import com.gitee.qdbp.tools.utils.ConvertTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * 文件工具类
@@ -37,7 +37,7 @@ public abstract class FileTools {
     /** buffer size used for reading and writing **/
     private static final int BUFFER_SIZE = 8192;
     /** 默认的文件编码格式 **/
-    private static String CHARSET = "UTF-8";
+    private static Charset CHARSET = Charset.forName("UTF-8");
 
     /**
      * 读取文件的文本内容
@@ -57,7 +57,7 @@ public abstract class FileTools {
             String charset = getEncoding(file);
             return new String(bytes, charset);
         } catch (UnsupportedEncodingException e) {
-            return new String(bytes, Charset.forName(CHARSET));
+            return new String(bytes, CHARSET);
         }
     }
 
@@ -80,7 +80,7 @@ public abstract class FileTools {
             String charset = getEncoding(file);
             return new String(bytes, charset);
         } catch (UnsupportedEncodingException e) {
-            return new String(bytes, Charset.forName(CHARSET));
+            return new String(bytes, CHARSET);
         }
     }
 
@@ -146,6 +146,33 @@ public abstract class FileTools {
     }
 
     /**
+     * 将文本内容保存到文件
+     *
+     * @param data 数据
+     * @param path 文件路径
+     * @throws IOException 失败
+     */
+    public static void saveFile(String data, String path) throws IOException {
+        saveFile(data, path, CHARSET);
+    }
+
+    /**
+     * 将文本内容保存到文件
+     *
+     * @param data 数据
+     * @param path 文件路径
+     * @param charset 编码格式
+     * @throws IOException 失败
+     */
+    public static void saveFile(String data, String path, Charset charset) throws IOException {
+        Path target = Paths.get(path);
+        mkdirsIfNotExists(target);
+        try (InputStream in = new ByteArrayInputStream(data.getBytes(charset));) {
+            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    /**
      * 将InputStream数据保存到文件
      *
      * @param data 数据
@@ -181,7 +208,7 @@ public abstract class FileTools {
     // code copy from Files.copy(InputStream, Path, CopyOption)
     private static long copy(InputStream in, Path target, long maxSize, CopyOption... options) throws IOException {
         // ensure not null before opening file
-        Objects.requireNonNull(in);
+        VerifyTools.requireNonNull(in, "inputStream");
 
         // check for REPLACE_EXISTING
         boolean replaceExisting = false;
