@@ -22,7 +22,7 @@ public final class RandomTools {
 
     /** 可读性强的字符串(没有EIOZ) **/
     private static final String READABLE = "0123456789ABCDFGHJKLMNPQRSTUVWXY";
-    
+
     /** 16进制源字符串 **/
     private static final String HEX_SOURCE = "0123456789ABCDEF";
 
@@ -98,7 +98,15 @@ public final class RandomTools {
      * @return 随机数
      */
     public static String generateNumber(final int length) {
-        return generateString(NUMBER_SOURCE, length);
+        StringBuilder buffer = new StringBuilder();
+        if (length > 0) {
+            // 确保第1位不是0
+            buffer.append(generateNumber(1, 9));
+        }
+        if (length > 1) {
+            buffer.append(generateString(NUMBER_SOURCE, length - 1));
+        }
+        return buffer.toString();
     }
 
     /**
