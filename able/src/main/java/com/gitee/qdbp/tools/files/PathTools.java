@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -270,6 +271,17 @@ public abstract class PathTools {
      * @throws ResourceNotFoundException 资源不存在
      */
     private static URL findClasspathResource(String path, Class<?>... classes) throws ResourceNotFoundException {
+        File pathToFile = new File(path);
+        if (pathToFile.exists()) {
+            // 如果根据文件路径能直接获取到文件, 则直接返回此文件(一般是命令行模式)
+            URI uri = pathToFile.toURI();
+            try {
+                return uri.toURL();
+            } catch (MalformedURLException e) {
+                String desc = "Resource location [" + uri.toString() + "]";
+                throw new ResourceNotFoundException(desc + " is not a well-formed path");
+            }
+        }
 
         Set<String> locations = new LinkedHashSet<>();
         ClassLoader cl = getDefaultClassLoader();
@@ -350,7 +362,19 @@ public abstract class PathTools {
         if (prefix == null) { // 相对路径
             // mmm/nnn.txt
             // D:/mmm/nnn.txt(unix)
-            return findClasspathResource(path, classes);
+            File pathToFile = new File(path);
+            if (pathToFile.exists()) {
+                // 如果根据文件路径能直接获取到文件, 则直接返回此文件(一般是命令行模式)
+                URI uri = pathToFile.toURI();
+                try {
+                    return uri.toURL();
+                } catch (MalformedURLException e) {
+                    String desc = "Resource location [" + uri.toString() + "]";
+                    throw new ResourceNotFoundException(desc + " is not a well-formed path");
+                }
+            } else {
+                return findClasspathResource(path, classes);
+            }
         } else if (prefix.equals(CLASSPATH_URL_PREFIX)) {
             // classpath:/mmm/nnn.txt or classpath:mmm/nnn.txt
             String temp = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
@@ -669,7 +693,7 @@ public abstract class PathTools {
      * @return 绝对路径文件
      */
     public static String getAbsoluteFile(String path, String... paths) {
-        return PathTools.concat(new File(PathTools.concat(true, path, paths)).getAbsolutePath());
+        return PathTools.concat(true, new File(PathTools.concat(true, path, paths)).getAbsolutePath());
     }
 
     /**
@@ -680,7 +704,7 @@ public abstract class PathTools {
      * @return 绝对路径文件夹
      */
     public static String getAbsoluteFolder(String path, String... paths) {
-        return PathTools.concat(new File(PathTools.concat(true, path, paths)).getAbsolutePath(), "/");
+        return PathTools.concat(true, new File(PathTools.concat(true, path, paths)).getAbsolutePath(), "/");
     }
 
     /**
