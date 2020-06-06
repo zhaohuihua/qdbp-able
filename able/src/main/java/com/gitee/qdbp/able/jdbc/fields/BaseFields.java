@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.gitee.qdbp.able.jdbc.utils.FieldTools;
 import com.gitee.qdbp.tools.utils.ConvertTools;
+import com.gitee.qdbp.tools.utils.StringTools;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
@@ -30,7 +31,10 @@ abstract class BaseFields implements Fields, Serializable {
         this.fields = new ArrayList<>();
         for (String field : fields) {
             VerifyTools.requireNotBlank(field, "fieldName");
-            this.fields.add(field);
+            String[] array = StringTools.split(",");
+            for (String item : array) {
+                this.fields.add(item);
+            }
         }
     }
 

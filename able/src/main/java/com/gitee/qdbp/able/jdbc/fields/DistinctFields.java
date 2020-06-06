@@ -3,21 +3,21 @@ package com.gitee.qdbp.able.jdbc.fields;
 import java.util.List;
 
 /**
- * 排除型字段子集
+ * Distinct字段子集
  *
  * @author zhaohuihua
- * @version 180503
+ * @version 20200605
  */
-public class ExcludeFields extends BaseFields {
+public class DistinctFields extends IncludeFields {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    public ExcludeFields(String... fields) {
+    public DistinctFields(String... fields) {
         super(fields);
     }
 
-    public ExcludeFields(List<String> fields) {
+    public DistinctFields(List<String> fields) {
         super(fields);
     }
 }

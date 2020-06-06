@@ -9,12 +9,12 @@ import java.util.List;
  * @author zhaohuihua
  * @version 180503
  */
-public class AllFields implements Fields, Serializable {
+public final class AllFields implements Fields, Serializable {
 
     /** 版本序列号 **/
     private static final long serialVersionUID = 1L;
 
-    public AllFields() {
+    AllFields() {
     }
 
     @Override
