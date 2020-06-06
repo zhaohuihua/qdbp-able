@@ -138,6 +138,7 @@ abstract class DbItems implements DbConditions, Serializable {
      * 根据字段名称删除
      * 
      * @param fieldName 字段名称
+     * @return 已被删除的条件
      */
     public List<DbCondition> remove(String fieldName) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
@@ -165,6 +166,34 @@ abstract class DbItems implements DbConditions, Serializable {
                         removed.add(item);
                     }
                 }
+            }
+        }
+        return removed;
+    }
+
+    /**
+     * 根据字段名称和字段值删除
+     * 
+     * @param fieldName 字段名称
+     * @param fieldValue 字段值
+     * @return 已被删除的条件
+     */
+    public List<DbCondition> remove(String fieldName, Object fieldValue) {
+        VerifyTools.requireNotBlank(fieldName, "fieldName");
+        Iterator<DbCondition> iterator = this.items.iterator();
+        List<DbCondition> removed = new ArrayList<>();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
+            if (item instanceof DbField) {
+                DbField field = ((DbField) item);
+                if (field.matchesWithField(fieldName) && VerifyTools.equals(fieldValue, field.getFieldValue())) {
+                    iterator.remove();
+                    removed.add(item);
+                }
+            } else if (item instanceof DbConditions) {
+                List<DbCondition> subRemoved = ((DbConditions) item).remove(fieldName);
+                removed.addAll(subRemoved);
+            } else { // DbCondition/DbConditions, 暂不支持替换
             }
         }
         return removed;
