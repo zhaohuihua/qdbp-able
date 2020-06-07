@@ -135,6 +135,26 @@ public abstract class PathTools {
     }
 
     /**
+     * 获取文件名, 即获取最后的路径分隔符之后的字符串<br>
+     * /image/abc.def.png, .jpg --&gt; abc.def.png<br>
+     * /image/abcdef/png --&gt; png<br>
+     * /image/abc.def/png --&gt; png<br>
+     * /image --&gt; image<br>
+     * image --&gt; image<br>
+     * /image/ --&gt; ""<br>
+     * 
+     * @param path 原始路径
+     * @return 文件名
+     */
+    public static String getFileName(String path) {
+        if (path == null) {
+            return null;
+        }
+        int i = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+        return i < 0 ? path : path.substring(i + 1);
+    }
+
+    /**
      * 替换文件名<br>
      * /image/abc.def.png, new.jpg --&gt; /image/new.jpg<br>
      * /image/abcdef/xxx, yyy --&gt; /image/abcdef/yyy<br>
