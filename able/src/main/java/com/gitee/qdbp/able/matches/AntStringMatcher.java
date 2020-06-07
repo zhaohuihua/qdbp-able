@@ -65,7 +65,7 @@ public class AntStringMatcher implements StringMatcher {
     
     /** 匹配规则 **/
     private final String pattern;
-    /** 全部匹配还是前缀匹配 **/
+    /** 是否开启全部匹配模式 **/
     private final boolean fullMatch;
     /** 是否反转判断结果 **/
     private final boolean reverse;
@@ -83,7 +83,7 @@ public class AntStringMatcher implements StringMatcher {
      * 构造函数
      * 
      * @param pattern 匹配规则
-     * @param fullMatch 全部匹配还是前缀匹配<br>
+     * @param fullMatch 是否开启全部匹配模式<br>
      *            如果fullMatch=true, 需要全部匹配; 如果fullMatch=false, 即前缀匹配
      */
     public AntStringMatcher(String pattern, boolean fullMatch) {
@@ -94,16 +94,15 @@ public class AntStringMatcher implements StringMatcher {
      * 构造函数
      * 
      * @param pattern 匹配规则
-     * @param fullMatch 全部匹配还是前缀匹配<br>
-     *            如果fullMatch=true, 需要全部匹配; 如果fullMatch=false, 即前缀匹配
+     * @param fullMatch 是否开启全部匹配模式
      * @param reverse 是否反转判断结果<br>
      *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
      */
     public AntStringMatcher(String pattern, boolean fullMatch, boolean reverse) {
         VerifyTools.requireNotBlank(pattern, "pattern");
         this.pattern = pattern;
-        this.fullMatch = true;
-        this.reverse = false;
+        this.fullMatch = fullMatch;
+        this.reverse = reverse;
     }
 
     /** Default path separator: '/' */
@@ -117,7 +116,6 @@ public class AntStringMatcher implements StringMatcher {
 
     /**
      * 判断字符串是否符合匹配规则<br>
-     * 如果fullMatch=true, 需要全部匹配; 如果fullMatch=false, 即前缀匹配<br>
      * 如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
      * 
      * @param source 字符串
@@ -475,9 +473,9 @@ public class AntStringMatcher implements StringMatcher {
             }
         } else {
             if (this.reverse) {
-                return "ant!:^" + pattern;
+                return "ant!:" + pattern + " [fullMatch=false]";
             } else {
-                return "ant:^" + pattern;
+                return "ant:" + pattern + " [fullMatch=false]";
             }
         }
     }

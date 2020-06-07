@@ -71,7 +71,7 @@ public class RegexpStringMatcher implements StringMatcher {
      */
     @Override
     public boolean matches(String source) {
-        return pattern.matcher(source).matches() != reverse;
+        return pattern.matcher(source).find() != reverse;
     }
 
     @Override

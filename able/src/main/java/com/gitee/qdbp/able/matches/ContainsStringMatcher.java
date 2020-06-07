@@ -3,12 +3,12 @@ package com.gitee.qdbp.able.matches;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
- * 相等匹配
+ * 是否存在指定字符串的匹配规则
  *
  * @author zhaohuihua
- * @version 190601
+ * @version 20200607
  */
-public class EqualsStringMatcher implements StringMatcher {
+public class ContainsStringMatcher implements StringMatcher {
 
     /** 匹配规则 **/
     private final String pattern;
@@ -20,7 +20,7 @@ public class EqualsStringMatcher implements StringMatcher {
      * 
      * @param pattern 匹配规则
      */
-    public EqualsStringMatcher(String pattern) {
+    public ContainsStringMatcher(String pattern) {
         this(pattern, false);
     }
 
@@ -31,14 +31,14 @@ public class EqualsStringMatcher implements StringMatcher {
      * @param reverse 是否反转判断结果<br>
      *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
      */
-    public EqualsStringMatcher(String pattern, boolean reverse) {
+    public ContainsStringMatcher(String pattern, boolean reverse) {
         VerifyTools.requireNotBlank(pattern, "pattern");
         this.pattern = pattern;
         this.reverse = reverse;
     }
 
     /**
-     * 判断字符串是否符合匹配规则<br>
+     * 判断字符串中是否存在此规则指定的子字符串<br>
      * 如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
      * 
      * @param source 字符串
@@ -46,15 +46,15 @@ public class EqualsStringMatcher implements StringMatcher {
      */
     @Override
     public boolean matches(String source) {
-        return VerifyTools.equals(source, pattern) != reverse;
+        return source.contains(pattern) != reverse;
     }
 
     @Override
     public String toString() {
         if (reverse) {
-            return "equals!:" + pattern;
+            return "contains!:" + pattern;
         } else {
-            return "equals:" + pattern;
+            return "contains:" + pattern;
         }
     }
 }
