@@ -113,7 +113,7 @@ public class ZipTools {
             if (file.isFile()) {
                 items.add(new FileItem(relativePath, file));
             } else if (file.isDirectory()) {
-                CollectZipFileVisitor visitor = new CollectZipFileVisitor(absolutePath, "*.*");
+                CollectZipFileVisitor visitor = new CollectZipFileVisitor(rootAbsoluteFolder, "*.*");
                 try {
                     Files.walkFileTree(file.toPath(), visitor);
                     items.addAll(visitor.getItems());
