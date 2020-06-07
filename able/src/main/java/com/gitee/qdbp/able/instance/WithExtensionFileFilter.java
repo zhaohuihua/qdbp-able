@@ -20,8 +20,6 @@ public class WithExtensionFileFilter implements FileFilter, Serializable {
 
     /** serialVersionUID **/
     private static final long serialVersionUID = 1L;
-    /** 是否递归查询子文件夹 **/
-    private final boolean recursive = false;
     /** 包含模式还是排除模式: true=包含, false=排除 **/
     private final boolean include = true;
     /** 文件扩展名映射表 **/
@@ -64,7 +62,7 @@ public class WithExtensionFileFilter implements FileFilter, Serializable {
     @Override
     public boolean accept(File file) {
         if (file.isDirectory()) {
-            return recursive;
+            return false;
         } else {
             String extension = PathTools.getExtension(file.getName(), false);
             if (extension == null) {

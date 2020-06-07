@@ -17,18 +17,13 @@ public class WithMatcherFileFilter implements FileFilter, Serializable {
 
     /** serialVersionUID **/
     private static final long serialVersionUID = 1L;
-    /** 文件夹匹配规则 **/
-    private StringMatcher folderMatcher;
-    /** 文件名匹配规则 **/
-    private StringMatcher fileMatcher;
-    /** 是否递归查询子文件夹(只在folderMatcher为空时有效) **/
-    private boolean recursive = false;
+    /** 匹配规则 **/
+    private StringMatcher matcher;
     /** 匹配文件路径还是文件名 **/
     private boolean usePath = true;
 
     /** 默认构造函数 **/
     public WithMatcherFileFilter() {
-        this.recursive = false;
     }
 
     /**
@@ -39,52 +34,29 @@ public class WithMatcherFileFilter implements FileFilter, Serializable {
      * contains:开头的解析为ContainsStringMatcher<br>
      * 其余的也解析为ContainsStringMatcher<br>
      * 
-     * @param fileMatcher 文件名匹配规则
+     * @param matcher 文件名匹配规则
      */
-    public WithMatcherFileFilter(String fileMatcher) {
-        this(null, WrapStringMatcher.parseMatcher(fileMatcher));
-    }
-
-    /**
-     * 构造函数<br>
-     * regexp:开头的解析为RegexpStringMatcher<br>
-     * ant:开头的解析为AntStringMatcher<br>
-     * equals:开头的解析为EqualsStringMatcher<br>
-     * contains:开头的解析为ContainsStringMatcher<br>
-     * 其余的也解析为ContainsStringMatcher<br>
-     * 
-     * @param folderMatcher 文件夹匹配规则
-     * @param fileMatcher 文件名匹配规则
-     */
-    public WithMatcherFileFilter(String folderMatcher, String fileMatcher) {
-        this(WrapStringMatcher.parseMatcher(folderMatcher), WrapStringMatcher.parseMatcher(fileMatcher));
+    public WithMatcherFileFilter(String matcher) {
+        this(WrapStringMatcher.parseMatcher(matcher));
     }
 
     /**
      * 构造函数
      * 
-     * @param fileMatcher 文件名匹配规则
+     * @param matcher 文件名匹配规则
      */
-    public WithMatcherFileFilter(StringMatcher fileMatcher) {
-        this(null, fileMatcher);
-    }
-
-    /**
-     * 构造函数
-     * 
-     * @param folderMatcher 文件夹匹配规则
-     * @param fileMatcher 文件名匹配规则
-     */
-    public WithMatcherFileFilter(StringMatcher folderMatcher, StringMatcher fileMatcher) {
-        this.folderMatcher = folderMatcher;
-        this.fileMatcher = fileMatcher;
+    public WithMatcherFileFilter(StringMatcher matcher) {
+        this.matcher = matcher;
     }
 
     @Override
     public boolean accept(File file) {
         boolean isDirectory = file.isDirectory();
-        if (isDirectory && folderMatcher == null) {
-            return recursive;
+        if (isDirectory) {
+            return false;
+        } else if (matcher == null) {
+            // 未设置文件匹配规则就等于遍历所有文件, 因此返回true
+            return true;
         }
         String path;
         if (!usePath) {
@@ -102,42 +74,17 @@ public class WithMatcherFileFilter implements FileFilter, Serializable {
                 path = path.substring(2);
             }
         }
-        if (isDirectory) {
-            return folderMatcher.matches(path);
-        } else {
-            // 未设置文件匹配规则就等于遍历所有文件, 因此返回true
-            return fileMatcher == null ? true : fileMatcher.matches(path);
-        }
-    }
-
-    /** 文件夹匹配规则 **/
-    public StringMatcher getFolderMatcher() {
-        return folderMatcher;
-    }
-
-    /** 文件夹匹配规则 **/
-    public void setFolderMatcher(StringMatcher folderMatcher) {
-        this.folderMatcher = folderMatcher;
+        return matcher.matches(path);
     }
 
     /** 文件名匹配规则 **/
-    public StringMatcher getFileMatcher() {
-        return fileMatcher;
+    public StringMatcher getMatcher() {
+        return matcher;
     }
 
     /** 文件名匹配规则 **/
-    public void setFileMatcher(StringMatcher fileMatcher) {
-        this.fileMatcher = fileMatcher;
-    }
-
-    /** 是否递归查询子文件夹(只在folderMatcher为空时有效) **/
-    public boolean isRecursive() {
-        return recursive;
-    }
-
-    /** 是否递归查询子文件夹(只在folderMatcher为空时有效) **/
-    public void setRecursive(boolean recursive) {
-        this.recursive = recursive;
+    public void setMatcher(StringMatcher matcher) {
+        this.matcher = matcher;
     }
 
     /** 匹配文件路径还是文件名 **/
@@ -152,19 +99,13 @@ public class WithMatcherFileFilter implements FileFilter, Serializable {
 
     @Override
     public String toString() {
-        if (folderMatcher == null && fileMatcher == null) {
-            return "folderMatcher:null, fileMatcher:null";
+        if (matcher == null) {
+            return "matcher=null";
         }
         StringBuilder buffer = new StringBuilder();
-        if (folderMatcher != null) {
-            buffer.append("folder").append('[').append(folderMatcher.toString()).append(']');
-        }
-        if (fileMatcher != null) {
-            if (buffer.length() > 0) {
-                buffer.append(", ");
-            }
-            buffer.append("file").append('[').append(fileMatcher.toString()).append(']');
-        }
+        buffer.append("matcher").append('=').append(matcher.toString());
+        buffer.append(',').append(' ');
+        buffer.append("usePath").append('=').append(usePath);
         return buffer.toString();
     }
 
