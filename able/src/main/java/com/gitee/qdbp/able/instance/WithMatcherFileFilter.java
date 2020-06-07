@@ -51,8 +51,8 @@ public class WithMatcherFileFilter implements FileFilter, Serializable {
 
     @Override
     public boolean accept(File file) {
-        boolean isDirectory = file.isDirectory();
-        if (isDirectory) {
+        boolean isFolder = file.isDirectory();
+        if (isFolder) {
             return false;
         } else if (matcher == null) {
             // 未设置文件匹配规则就等于遍历所有文件, 因此返回true
@@ -65,7 +65,7 @@ public class WithMatcherFileFilter implements FileFilter, Serializable {
             // 路径转换为/分隔符, 方便windows/linux统一处理
             path = PathTools.formatPath(file.getAbsolutePath());
             // 如果是文件夹, 固定以/结尾
-            if (isDirectory && !path.endsWith("/")) {
+            if (isFolder && !path.endsWith("/")) {
                 path += "/";
             }
             if (!path.startsWith("/") && path.charAt(1) == ':') {

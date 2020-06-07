@@ -20,9 +20,13 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.gitee.qdbp.able.exception.ExceptionWatcher;
 import com.gitee.qdbp.able.exception.FileOversizeException;
+import com.gitee.qdbp.able.matches.AntStringMatcher;
+import com.gitee.qdbp.able.matches.StringMatcher;
 import com.gitee.qdbp.tools.utils.ConvertTools;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
@@ -758,6 +762,124 @@ public abstract class FileTools {
                 String msg = String.format("Caught exception on delete directory: [%s]. %s", directory, e);
                 return handleException(msg, e, exceptionWatcher);
             }
+        }
+    }
+
+    /**
+     * 收集符合条件的文件
+     *
+     * @param rootFolder 文件夹路径
+     * @param usePath 按文件路径还是文件名匹配
+     * @param matcher 匹配规则
+     * @return 文件列表
+     */
+    public static List<File> treelist(String rootFolder, boolean usePath, StringMatcher matcher) {
+        CollectFileVisitor visitor = new CollectFileVisitor(usePath, matcher, null);
+        try {
+            Path path = Paths.get(rootFolder);
+            Files.walkFileTree(path, visitor);
+            return visitor.getItems();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * 收集符合条件的文件
+     *
+     * @param rootFolder 文件夹路径
+     * @param filter 文件名过滤表达式, 如*.docx
+     * @return 文件列表
+     */
+    public static List<File> collect(String rootFolder, String filter) {
+        StringMatcher matcher = filter == null ? null : new AntStringMatcher(filter);
+        return treelist(rootFolder, false, matcher);
+    }
+
+    /**
+     * 收集符合条件的文件
+     *
+     * @param rootFolder 文件夹路径
+     * @param relativePaths 相对路径, 可以是文件或文件夹(文件夹将会遍历所有子文件)
+     * @return 文件列表
+     */
+    public static List<File> collect(String rootFolder, List<String> relativePaths) {
+        List<File> items = new ArrayList<>();
+        String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
+        for (String relativePath : relativePaths) {
+            if (PathTools.isPathOutOfBounds(relativePath)) {
+                continue;
+            }
+            String absolutePath = PathTools.concat(rootAbsoluteFolder, relativePath);
+            File file = new File(absolutePath);
+            if (file.isFile()) {
+                items.add(file);
+            } else if (file.isDirectory()) {
+                List<File> buffer = treelist(absolutePath, false, (StringMatcher) null);
+                if (buffer != null && !buffer.isEmpty()) {
+                    items.addAll(buffer);
+                }
+            }
+        }
+        return items;
+    }
+
+    /**
+     * 从文件夹下递归查找符合规则的文件
+     *
+     * @author zhaohuihua
+     * @version 20200519
+     */
+    private static class CollectFileVisitor extends AllFileVisitor {
+
+        /** 匹配规则 **/
+        private StringMatcher matcher;
+        /** 匹配文件路径还是文件名 **/
+        private boolean usePath = true;
+        private List<File> items = new ArrayList<>();
+
+        public CollectFileVisitor(boolean usePath, StringMatcher matcher, ExceptionWatcher exceptionWatcher) {
+            super(exceptionWatcher);
+            this.matcher = matcher;
+            this.usePath = usePath;
+        }
+
+        public List<File> getItems() {
+            return items;
+        }
+
+        protected String formatFilePath(File file) {
+            if (!usePath) {
+                return file.getName();
+            }
+            // 路径转换为/分隔符, 方便windows/linux统一处理
+            String filePath = PathTools.formatPath(file.getAbsolutePath());
+            // 如果是文件夹, 固定以/结尾
+            if (file.isDirectory() && !filePath.endsWith("/")) {
+                filePath += "/";
+            }
+            if (!filePath.startsWith("/") && filePath.charAt(1) == ':') {
+                // windows文件, 去掉盘符, 如D:/home/files, 只取/home/files
+                // 如果保留盘符, ant规则不好处理
+                filePath = filePath.substring(2);
+            }
+            return filePath;
+        }
+
+        @Override
+        protected boolean onVisitFile(Path path) {
+            File file = path.toFile();
+            if (matcher == null) {
+                // 未设置文件匹配规则就等于遍历所有文件
+                items.add(file);
+                return true;
+            }
+
+            String filePath = formatFilePath(file);
+            if (matcher.matches(filePath)) {
+                items.add(file);
+            }
+            return true; // 继续
         }
     }
 

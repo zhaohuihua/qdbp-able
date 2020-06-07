@@ -22,7 +22,7 @@ public class WrapStringMatcher implements StringMatcher {
     private LogicType logicType;
 
     public WrapStringMatcher(String... patterns) {
-        this.logicType = LogicType.OR;
+        this.logicType = LogicType.AND;
         this.addMatchers(patterns);
     }
 
