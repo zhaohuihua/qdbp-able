@@ -10,6 +10,8 @@
 
 	<artifactId>qdbp-tools</artifactId>
 	<packaging>jar</packaging>
+	<description>qdbp tools library, https://gitee.com/qdbp/qdbp-able/</description>
+	<url>https://gitee.com/qdbp/qdbp-able/</url>
 
 	<dependencies>
 

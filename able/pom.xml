@@ -11,5 +11,7 @@
 	<artifactId>qdbp-able</artifactId>
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
+	<description>qdbp able library, https://gitee.com/qdbp/qdbp-able/</description>
+	<url>https://gitee.com/qdbp/qdbp-able/</url>
 
 </project>
