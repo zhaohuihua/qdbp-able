@@ -10,6 +10,10 @@
 	<url>https://gitee.com/qdbp/</url>
 	<description>qdbp parent library</description>
 
+    <organization>
+        <name>zhaohuihua</name>
+        <url>https://gitee.com/qdbp/</url>
+    </organization>
 	<developers>
 		<developer>
 			<name>zhaohuihua</name>
