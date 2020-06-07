@@ -870,7 +870,7 @@ public abstract class PathTools {
      * relativize("", "home/index.html"); // home/index.html
      * </pre>
      * 
-     * @param root 根路径
+     * @param root 根路径, <b>如果是文件夹, 必须以/结尾</b>
      * @param path 绝对路径
      * @return 相对路径
      */
