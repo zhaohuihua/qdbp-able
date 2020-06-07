@@ -11,9 +11,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -21,10 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import com.gitee.qdbp.able.exception.ResourceNotFoundException;
-import com.gitee.qdbp.able.matches.AntStringMatcher;
 import com.gitee.qdbp.able.matches.StringMatcher;
-import com.gitee.qdbp.tools.files.FileTools.AllFileVisitor;
-import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * zip压缩工具
@@ -83,15 +77,8 @@ public class ZipTools {
      * @return 压缩项列表
      */
     public static List<FileItem> collectFiles(String rootFolder, String filter) {
-        String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
-        CollectZipFileVisitor visitor = new CollectZipFileVisitor(rootAbsoluteFolder, filter);
-        try {
-            Path path = Paths.get(rootFolder);
-            Files.walkFileTree(path, visitor);
-            return visitor.getItems();
-        } catch (IOException e) {
-            return null;
-        }
+        List<File> files = FileTools.collect(rootFolder, filter);
+        return toFileItems(rootFolder, files);
     }
 
     /**
@@ -102,69 +89,41 @@ public class ZipTools {
      * @return 压缩项列表
      */
     public static List<FileItem> collectFiles(String rootFolder, List<String> relativePaths) {
-        List<FileItem> items = new ArrayList<>();
-        String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
-        for (String relativePath : relativePaths) {
-            if (PathTools.isPathOutOfBounds(relativePath)) {
-                continue;
-            }
-            String absolutePath = PathTools.concat(rootAbsoluteFolder, relativePath);
-            File file = new File(absolutePath);
-            if (file.isFile()) {
-                items.add(new FileItem(relativePath, file));
-            } else if (file.isDirectory()) {
-                CollectZipFileVisitor visitor = new CollectZipFileVisitor(rootAbsoluteFolder, "*.*");
-                try {
-                    Files.walkFileTree(file.toPath(), visitor);
-                    items.addAll(visitor.getItems());
-                } catch (IOException e) {
-                    continue;
-                }
-            }
-        }
-        return items;
-    }
-
-    public static FileItem newFileItem(String rootFolder, File file) {
-        String relativePath = PathTools.relativize(rootFolder, file.getAbsolutePath());
-        return new FileItem(relativePath, file);
+        List<File> files = FileTools.collect(rootFolder, relativePaths);
+        return toFileItems(rootFolder, files);
     }
 
     /**
-     * 从文件夹下递归查找可压缩的文件
+     * 收集可压缩的文件
      *
-     * @author zhaohuihua
-     * @version 20200519
+     * @param rootFolder 文件夹路径
+     * @param usePath 按文件路径还是文件名匹配
+     * @param matcher 匹配规则
+     * @return 压缩项列表
      */
-    private static class CollectZipFileVisitor extends AllFileVisitor {
+    public static List<FileItem> collectFiles(String rootFolder, boolean usePath, StringMatcher matcher) {
+        List<File> files = FileTools.treelist(rootFolder, usePath, matcher);
+        return toFileItems(rootFolder, files);
+    }
 
-        private String rootFolder;
-        private StringMatcher fileNameMatcher;
-        private List<FileItem> items = new ArrayList<>();
-
-        public CollectZipFileVisitor(String rootFolder, String filter) {
-            super(null);
-            this.rootFolder = rootFolder;
-            this.fileNameMatcher = new AntStringMatcher(VerifyTools.nvl(filter, "*.*"));
+    /**
+     * 将文件列表转换为压缩项列表
+     * 
+     * @param rootFolder 文件夹路径
+     * @param files 文件列表
+     * @return 压缩项列表
+     */
+    public static List<FileItem> toFileItems(String rootFolder, List<File> files) {
+        String rootAbsoluteFolder = PathTools.getAbsoluteFolder(rootFolder);
+        if (files == null) {
+            return null;
         }
-
-        public List<FileItem> getItems() {
-            return items;
+        List<FileItem> items = new ArrayList<>();
+        for (File file : files) {
+            String relativePath = PathTools.relativize(rootAbsoluteFolder, file.getAbsolutePath());
+            items.add(new FileItem(relativePath, file));
         }
-
-        @Override
-        protected boolean onVisitFile(Path path) {
-            File file = path.toFile();
-            if (file.isDirectory() || !fileNameMatcher.matches(file.getName())) {
-                return true; // 继续
-            }
-
-            FileItem item = newFileItem(rootFolder, file);
-            if (item != null) {
-                items.add(item);
-            }
-            return true; // 继续
-        }
+        return items;
     }
 
     /**
