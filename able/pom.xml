@@ -11,7 +11,12 @@
 	<artifactId>qdbp-able</artifactId>
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
-	<description>qdbp able library, https://gitee.com/qdbp/qdbp-able/</description>
 	<url>https://gitee.com/qdbp/qdbp-able/</url>
+	<description>qdbp able library</description>
+
+    <organization>
+        <name>zhaohuihua</name>
+        <url>https://gitee.com/qdbp/qdbp-able/</url>
+    </organization>
 
 </project>

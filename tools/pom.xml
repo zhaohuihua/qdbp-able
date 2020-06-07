@@ -10,8 +10,13 @@
 
 	<artifactId>qdbp-tools</artifactId>
 	<packaging>jar</packaging>
-	<description>qdbp tools library, https://gitee.com/qdbp/qdbp-able/</description>
 	<url>https://gitee.com/qdbp/qdbp-able/</url>
+	<description>qdbp tools library</description>
+
+    <organization>
+        <name>zhaohuihua</name>
+        <url>https://gitee.com/qdbp/qdbp-able/</url>
+    </organization>
 
 	<dependencies>
 
