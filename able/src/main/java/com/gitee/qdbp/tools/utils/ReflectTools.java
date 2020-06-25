@@ -129,7 +129,7 @@ public abstract class ReflectTools {
      * @param throwOnNotFound 如果字段不存在是否抛出异常
      */
     public static Field findField(Class<?> clazz, String fieldName, boolean throwOnNotFound) {
-        VerifyTools.requireNotBlank(clazz, "clazz");
+        VerifyTools.requireNonNull(clazz, "clazz");
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
         Class<?> temp = clazz;
@@ -158,8 +158,8 @@ public abstract class ReflectTools {
      * @param value 字段值
      */
     public static void setFieldValue(Object target, Field field, Object value) {
-        VerifyTools.requireNotBlank(target, "target");
-        VerifyTools.requireNotBlank(field, "field");
+        VerifyTools.requireNonNull(target, "target");
+        VerifyTools.requireNonNull(field, "field");
         try {
             field.set(target, value);
         } catch (IllegalAccessException e) {
@@ -175,8 +175,8 @@ public abstract class ReflectTools {
      * @param value 字段值
      */
     public static void setFieldValueIfAbsent(Object target, Field field, Object value) {
-        VerifyTools.requireNotBlank(target, "target");
-        VerifyTools.requireNotBlank(field, "field");
+        VerifyTools.requireNonNull(target, "target");
+        VerifyTools.requireNonNull(field, "field");
 
         if (VerifyTools.isBlank(value)) {
             return;
@@ -198,7 +198,7 @@ public abstract class ReflectTools {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, Field field) {
-        VerifyTools.requireNotBlank(field, "field");
+        VerifyTools.requireNonNull(field, "field");
         if (target == null) {
             return null;
         }
@@ -229,7 +229,7 @@ public abstract class ReflectTools {
      * @param throwOnFieldNotFound 如果字段不存在是否抛出异常
      */
     public static void setFieldValue(Object target, String fieldName, Object value, boolean throwOnFieldNotFound) {
-        VerifyTools.requireNotBlank(target, "target");
+        VerifyTools.requireNonNull(target, "target");
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
         Class<?> clazz = target.getClass();
@@ -266,7 +266,7 @@ public abstract class ReflectTools {
      */
     public static void setFieldValueIfAbsent(Object target, String fieldName, Object value,
             boolean throwOnFieldNotFound) {
-        VerifyTools.requireNotBlank(target, "target");
+        VerifyTools.requireNonNull(target, "target");
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
         if (VerifyTools.isBlank(value)) {
@@ -333,7 +333,7 @@ public abstract class ReflectTools {
      * @return 方法签名描述
      */
     public static String getMethodLogSignature(Class<?> clazz, String methodName, Class<?>... types) {
-        VerifyTools.requireNotBlank(clazz, "clazz");
+        VerifyTools.requireNonNull(clazz, "clazz");
         VerifyTools.requireNotBlank(methodName, "methodName");
 
         StringBuilder buffer = new StringBuilder();
@@ -390,7 +390,7 @@ public abstract class ReflectTools {
      * @return 方法对象
      */
     public static Method findMethod(Class<?> clazz, String methodName, boolean throwOnNotFound, Class<?>... types) {
-        VerifyTools.requireNotBlank(clazz, "clazz");
+        VerifyTools.requireNonNull(clazz, "clazz");
         VerifyTools.requireNotBlank(methodName, "methodName");
 
         try {
@@ -468,8 +468,8 @@ public abstract class ReflectTools {
      * @return 方法返回结果
      */
     public static <T> T invokeMethod(Object target, Method method) {
-        VerifyTools.requireNotBlank(target, "target");
-        VerifyTools.requireNotBlank(method, "method");
+        VerifyTools.requireNonNull(target, "target");
+        VerifyTools.requireNonNull(method, "method");
 
         return invokeMethod(target, method, new Object[0]);
     }
@@ -484,8 +484,8 @@ public abstract class ReflectTools {
      */
     @SuppressWarnings("unchecked")
     public static <T> T invokeMethod(Object target, Method method, Object... args) {
-        VerifyTools.requireNotBlank(target, "target");
-        VerifyTools.requireNotBlank(method, "method");
+        VerifyTools.requireNonNull(target, "target");
+        VerifyTools.requireNonNull(method, "method");
 
         try {
             return (T) method.invoke(target, args);
@@ -518,7 +518,7 @@ public abstract class ReflectTools {
      * @return 方法返回结果
      */
     public static <T> T invokeMethod(Object target, String methodName, boolean throwOnMethodNotFound) {
-        VerifyTools.requireNotBlank(target, "target");
+        VerifyTools.requireNonNull(target, "target");
         VerifyTools.requireNotBlank(methodName, "methodName");
 
         Class<?> clazz = target.getClass();
@@ -559,7 +559,7 @@ public abstract class ReflectTools {
      */
     @SuppressWarnings("unchecked")
     public static <T> T invokeMethod(Object target, String methodName, boolean throwOnMethodNotFound, Object... args) {
-        VerifyTools.requireNotBlank(target, "target");
+        VerifyTools.requireNonNull(target, "target");
         VerifyTools.requireNotBlank(methodName, "methodName");
 
         int size = args == null ? 0 : args.length;
