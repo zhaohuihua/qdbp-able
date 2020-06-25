@@ -101,6 +101,7 @@ public abstract class JsonTools {
         JSON_CONFIG.put(Double.class, new DoubleSerializer("#.##################"));
     }
 
+    /** 转换为日志字符串, json的key不会有引号, 可以稍微简化一下结构 **/
     public static String toLogString(Object object) {
         if (object == null) {
             return "null";
@@ -343,7 +344,7 @@ public abstract class JsonTools {
         if (CharSequence.class.isAssignableFrom(clazz)) {
             throw new IllegalArgumentException(bean.getClass().getSimpleName() + " can't convert to map.");
         }
-        if (isPrimitive(clazz)) {
+        if (ReflectTools.isPrimitive(clazz, false)) {
             throw new IllegalArgumentException(bean.getClass().getSimpleName() + " can't convert to map.");
         }
         if (clazz.isArray()) {
@@ -432,8 +433,8 @@ public abstract class JsonTools {
         if (CharSequence.class.isAssignableFrom(clazz)) {
             return bean.toString();
         }
-        if (isPrimitive(clazz)) {
-            return bean;
+        if (ReflectTools.isPrimitive(clazz, false)) {
+            return bean; // 保留原始类型及原始类型的包装类型/字符串/日期/枚举/Number的所有子类
         }
 
         if (clazz.isArray()) {
@@ -468,18 +469,6 @@ public abstract class JsonTools {
 
         String text = JSON.toJSONString(bean);
         return JSON.parse(text);
-    }
-
-    private static boolean isPrimitive(Class<?> clazz) {
-        // @formatter:off
-        return clazz.isPrimitive()
-            || clazz.isEnum()
-            || clazz == Boolean.class
-            || clazz == Character.class
-            || clazz == String.class
-            || Number.class.isAssignableFrom(clazz)
-            || Date.class.isAssignableFrom(clazz);
-        // @formatter:on
     }
 
     /**

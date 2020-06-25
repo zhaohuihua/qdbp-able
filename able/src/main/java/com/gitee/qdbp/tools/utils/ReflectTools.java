@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -623,5 +624,44 @@ public abstract class ReflectTools {
             throw (Error) throwable;
         }
         return new UndeclaredThrowableException(throwable);
+    }
+
+    /**
+     * 判断是不是原始类型及其包装类型
+     * 
+     * @param clazz 目标类型
+     * @return 判断结果
+     * @since 4.1.0
+     */
+    public static boolean isPrimitive(Class<?> clazz) {
+        return isPrimitive(clazz, true);
+    }
+
+    /**
+     * 判断是不是原始类型及其包装类型<br>
+     * 如果strict=false, 则字符串/枚举/日期及一切Number的子类都算原始类型
+     * 
+     * @param clazz 目标类型
+     * @param strict 是否严格模式
+     * @return 判断结果
+     * @since 4.1.0
+     */
+    public static boolean isPrimitive(Class<?> clazz, boolean strict) {
+        // @formatter:off
+        return clazz.isPrimitive()
+            || clazz == Boolean.class
+            || clazz == Integer.class
+            || clazz == Long.class
+            || clazz == Double.class
+            || clazz == Float.class
+            || clazz == Character.class
+            || clazz == Byte.class
+            || ( !strict && (
+                clazz == String.class
+                || clazz.isEnum()
+                || Number.class.isAssignableFrom(clazz)
+                || Date.class.isAssignableFrom(clazz)
+            ) );
+        // @formatter:on
     }
 }
