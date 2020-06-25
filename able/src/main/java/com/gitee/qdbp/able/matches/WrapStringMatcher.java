@@ -32,7 +32,7 @@ public class WrapStringMatcher implements StringMatcher {
     }
 
     public WrapStringMatcher(StringMatcher... matchers) {
-        this.logicType = LogicType.OR;
+        this.logicType = LogicType.AND;
         this.addMatcher(matchers);
     }
 
