@@ -23,6 +23,7 @@
 		<dependency>
 			<groupId>com.gitee.qdbp</groupId>
 			<artifactId>qdbp-able</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -198,20 +199,16 @@
 			</testResource>
 			<testResource>
 				<directory>src/test/resources</directory>
-				<includes>
-					<include>**/*.xml</include>
-					<include>**/*.properties</include>
-					<include>**/*.txt</include>
-					<include>**/*.ftl</include>
-					<include>**/*.xlsx</include>
-					<include>**/*.docx</include>
-				</includes>
+				<excludes>
+					<exclude>logback.xml</exclude>
+				</excludes>
 			</testResource>
 			<testResource>
 				<directory>src/test/java</directory>
 				<includes>
 					<include>**/*.xml</include>
 					<include>**/*.properties</include>
+					<include>**/*.json</include>
 					<include>**/*.txt</include>
 					<include>**/*.ftl</include>
 					<include>**/*.xlsx</include>
