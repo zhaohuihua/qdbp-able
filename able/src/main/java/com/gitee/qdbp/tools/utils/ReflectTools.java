@@ -3,10 +3,12 @@ package com.gitee.qdbp.tools.utils;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -322,6 +324,61 @@ public abstract class ReflectTools {
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not access field '" + fieldName + "': " + e.getMessage());
         }
+    }
+
+    /**
+     * 获取指定类的所有字段<br>
+     * 将不会包含静态字段, 会包含父类字段, 如果父类和子类有相同名称的字段, 则只取子类的字段
+     * 
+     * @param clazz 目标类
+     * @return 字段列表
+     * @since 4.1.0
+     */
+    public static Field[] getAllFields(Class<?> clazz) {
+        return getAllFields(clazz, false, true, true);
+    }
+
+    /**
+     * 获取指定类的所有字段(排序为字段声明顺序, 先父类字段后子类字段)
+     * 
+     * @param clazz 目标类
+     * @param includeStatic 是否包含静态字段
+     * @param includeSuper 是否包含父类字段
+     * @param distinct 是否根据字段名去重(去重时, 如果父类和子类有相同名称的字段, 则只取子类的字段)
+     * @return 字段列表
+     * @since 4.1.0
+     */
+    public static Field[] getAllFields(Class<?> clazz, boolean includeStatic, boolean includeSuper, boolean distinct) {
+        VerifyTools.requireNonNull(clazz, "clazz");
+
+        List<Field> allFields = new ArrayList<>();
+        Map<String, Void> fieldNames = new HashMap<>();
+        Class<?> temp = clazz;
+        while (temp != null && temp != Object.class) {
+            Field[] declaredFields = temp.getDeclaredFields();
+            List<Field> fields = new ArrayList<>();
+            for (Field field : declaredFields) {
+                if (!includeStatic && Modifier.isStatic(field.getModifiers())) {
+                    continue; // 不包含静态字段
+                }
+                if (distinct) { // 去重
+                    if (fieldNames.containsKey(field.getName())) {
+                        continue;
+                    }
+                    fieldNames.put(field.getName(), null);
+                }
+                fields.add(field);
+            }
+            if (!fields.isEmpty()) {
+                // 父类字段放在前面
+                allFields.addAll(0, fields);
+            }
+            if (!includeSuper) {
+                break; // 不包含父类字段
+            }
+            temp = temp.getSuperclass();
+        }
+        return ConvertTools.toArray(allFields, Field.class);
     }
 
     /**
