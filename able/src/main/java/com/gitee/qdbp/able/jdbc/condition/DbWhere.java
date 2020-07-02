@@ -239,37 +239,37 @@ public class DbWhere extends DbItems {
 
         @Override
         protected void put(String fieldName, Object fieldValue) {
-            throw new UnsupportedOperationException("ReadonlyWhere");
+            throw new UnsupportedOperationException("read only");
         }
 
         @Override
         protected void put(String operateType, String fieldName, Object fieldValue) {
-            throw new UnsupportedOperationException("ReadonlyWhere");
+            throw new UnsupportedOperationException("read only");
         }
 
         @Override
         protected void put(DbField condition) {
-            throw new UnsupportedOperationException("ReadonlyWhere");
+            throw new UnsupportedOperationException("read only");
         }
 
         @Override
         protected void put(DbConditions fields) {
-            throw new UnsupportedOperationException("ReadonlyWhere");
+            throw new UnsupportedOperationException("read only");
         }
 
         @Override
         protected void put(DbCondition condition) {
-            throw new UnsupportedOperationException("ReadonlyWhere");
+            throw new UnsupportedOperationException("read only");
         }
 
         @Override
         public void clear() {
-            throw new UnsupportedOperationException("ReadonlyWhere");
+            throw new UnsupportedOperationException("read only");
         }
 
         @Override
         public SubWhere sub(String operate) {
-            throw new UnsupportedOperationException("ReadonlyWhere");
+            throw new UnsupportedOperationException("read only");
         }
 
     }
