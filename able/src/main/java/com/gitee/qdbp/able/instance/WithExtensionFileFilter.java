@@ -20,8 +20,10 @@ public class WithExtensionFileFilter implements FileFilter, Serializable {
 
     /** serialVersionUID **/
     private static final long serialVersionUID = 1L;
+    /** 是否递归查询子文件夹 **/
+    private final boolean recursive;
     /** 包含模式还是排除模式: true=包含, false=排除 **/
-    private final boolean include = true;
+    private final boolean include;
     /** 文件扩展名映射表 **/
     private final Map<String, Void> extensions;
 
@@ -53,6 +55,8 @@ public class WithExtensionFileFilter implements FileFilter, Serializable {
      */
     public WithExtensionFileFilter(boolean recursive, boolean include, String... extensions) {
         VerifyTools.requireNotBlank(extensions, "extensions");
+        this.recursive = recursive;
+        this.include = include;
         this.extensions = new HashMap<>();
         for (String extension : extensions) {
             this.extensions.put(StringTools.removeLeft(extension.toLowerCase(), '.'), null);
@@ -62,7 +66,7 @@ public class WithExtensionFileFilter implements FileFilter, Serializable {
     @Override
     public boolean accept(File file) {
         if (file.isDirectory()) {
-            return false;
+            return recursive;
         } else {
             String extension = PathTools.getExtension(file.getName(), false);
             if (extension == null) {
