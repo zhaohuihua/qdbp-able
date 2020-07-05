@@ -144,10 +144,16 @@ public class DbWhere extends DbItems {
      * 根据字段名称替换条件
      * 
      * @param fieldName 字段名称
+     * @return 替换了几个条件
      */
-    public void replace(String fieldName, String operate, Object... fieldValues) {
+    public int replace(String fieldName, String operate, Object... fieldValues) {
         DbField condition = parseField(fieldName, operate, fieldValues);
-        this.replace(condition);
+        int count = this.replace(condition);
+        if (count == 0) {
+            this.put(condition);
+            count ++;
+        }
+        return count;
     }
 
     /**

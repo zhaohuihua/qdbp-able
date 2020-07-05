@@ -113,12 +113,13 @@ abstract class DbItems implements DbConditions, Serializable {
      * 
      * @param field 字段
      */
-    protected void replace(DbField field) {
+    protected int replace(DbField field) {
         VerifyTools.requireNotBlank(field, "field");
         VerifyTools.requireNotBlank(field.getFieldName(), "fieldName");
 
         String fieldName = field.getFieldName();
         Iterator<DbCondition> iterator = this.iterator();
+        int count = 0;
         while (iterator.hasNext()) {
             DbCondition item = iterator.next();
             if (item instanceof DbField) {
@@ -126,12 +127,14 @@ abstract class DbItems implements DbConditions, Serializable {
                     DbField target = (DbField) item;
                     target.setOperateType(field.getOperateType());
                     target.setFieldValue(field.getFieldValue());
+                    count++;
                 }
             } else if (item instanceof DbItems) {
-                ((DbItems) item).replace(field);
+                count += ((DbItems) item).replace(field);
             } else { // DbCondition/DbConditions, 暂不支持替换
             }
         }
+        return count;
     }
 
     /**
