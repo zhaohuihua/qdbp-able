@@ -672,7 +672,7 @@ public abstract class ConvertTools {
      * @return 合并后的字符串
      */
     public static String joinToString(Collection<?> list) {
-        return joinToString(list, ",", false);
+        return joinToString(list, ',', false);
     }
 
     /**
@@ -689,11 +689,22 @@ public abstract class ConvertTools {
     /**
      * 将数组合并为字符串
      *
+     * @param list 数组
+     * @param seprator 分隔符
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Collection<?> list, char seprator) {
+        return joinToString(list, seprator, false);
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
      * @param array 数组
      * @return 合并后的字符串
      */
     public static String joinToString(Object[] array) {
-        return joinToString(array, ",", false);
+        return joinToString(array, ',', false);
     }
 
     /**
@@ -710,12 +721,23 @@ public abstract class ConvertTools {
     /**
      * 将数组合并为字符串
      *
+     * @param array 数组
+     * @param seprator 分隔符
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Object[] array, char seprator) {
+        return joinToString(array, seprator, false);
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
      * @param list 数组
      * @param wrap 是否用括号包起来
      * @return 合并后的字符串
      */
     public static String joinToString(Collection<?> list, boolean wrap) {
-        return joinToString(list, ",", wrap);
+        return joinToString(list, ',', wrap);
     }
 
     /**
@@ -749,12 +771,40 @@ public abstract class ConvertTools {
     /**
      * 将数组合并为字符串
      *
+     * @param list 数组
+     * @param seprator 分隔符
+     * @param wrap 是否用括号包起来
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Collection<?> list, char seprator, boolean wrap) {
+        if (list == null) {
+            return null;
+        }
+        StringBuilder buffer = new StringBuilder();
+        if (VerifyTools.isNotBlank(list)) {
+            for (Object tmp : list) {
+                if (buffer.length() > 0) {
+                    buffer.append(seprator);
+                }
+                buffer.append(tmp);
+            }
+        }
+        if (wrap) {
+            buffer.insert(0, '[');
+            buffer.append(']');
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
      * @param array 数组
      * @param wrap 是否用括号包起来
      * @return 合并后的字符串
      */
     public static String joinToString(Object[] array, boolean wrap) {
-        return joinToString(array, ",", wrap);
+        return joinToString(array, ',', wrap);
     }
 
     /**
@@ -773,6 +823,34 @@ public abstract class ConvertTools {
         if (VerifyTools.isNotBlank(array)) {
             for (Object tmp : array) {
                 if (seprator != null && buffer.length() > 0) {
+                    buffer.append(seprator);
+                }
+                buffer.append(tmp);
+            }
+        }
+        if (wrap) {
+            buffer.insert(0, '[');
+            buffer.append(']');
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * 将数组合并为字符串
+     *
+     * @param array 数组
+     * @param seprator 分隔符
+     * @param wrap 是否用括号包起来
+     * @return 合并后的字符串
+     */
+    public static String joinToString(Object[] array, char seprator, boolean wrap) {
+        if (array == null) {
+            return null;
+        }
+        StringBuilder buffer = new StringBuilder();
+        if (VerifyTools.isNotBlank(array)) {
+            for (Object tmp : array) {
+                if (buffer.length() > 0) {
                     buffer.append(seprator);
                 }
                 buffer.append(tmp);
