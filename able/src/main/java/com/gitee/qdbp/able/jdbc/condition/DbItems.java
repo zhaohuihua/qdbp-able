@@ -108,6 +108,62 @@ abstract class DbItems implements DbConditions, Serializable {
         this.items.clear();
     }
 
+    /** 查找指定的条件 **/
+    public List<DbCondition> find(String fieldName) {
+        VerifyTools.requireNotBlank(fieldName, "fieldName");
+        Iterator<DbCondition> iterator = this.items.iterator();
+        List<DbCondition> list = new ArrayList<>();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
+            if (item instanceof DbField) {
+                if (((DbField) item).matchesWithField(fieldName)) {
+                    list.add(item);
+                }
+            } else if (item instanceof DbConditions) {
+                List<DbCondition> subFound = ((DbConditions) item).find(fieldName);
+                list.addAll(subFound);
+            } else {
+                if (fieldName.contains(".")) {
+                    if (fieldName.equals(item.getClass().getName())) {
+                        list.add(item);
+                    }
+                } else {
+                    if (fieldName.equals(item.getClass().getSimpleName())) {
+                        list.add(item);
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 根据字段名称和字段值查找
+     * 
+     * @param fieldName 字段名称
+     * @param fieldValue 字段值
+     * @return 查找到的条件
+     */
+    public List<DbCondition> find(String fieldName, Object fieldValue) {
+        VerifyTools.requireNotBlank(fieldName, "fieldName");
+        Iterator<DbCondition> iterator = this.items.iterator();
+        List<DbCondition> list = new ArrayList<>();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
+            if (item instanceof DbField) {
+                DbField field = ((DbField) item);
+                if (field.matchesWithField(fieldName) && VerifyTools.equals(fieldValue, field.getFieldValue())) {
+                    list.add(item);
+                }
+            } else if (item instanceof DbItems) {
+                List<DbCondition> subFound = ((DbItems) item).find(fieldName, fieldValue);
+                list.addAll(subFound);
+            } else { // DbCondition/DbConditions, 暂不支持按字段值查找
+            }
+        }
+        return list;
+    }
+
     /**
      * 根据字段名称替换条件
      * 
@@ -193,10 +249,10 @@ abstract class DbItems implements DbConditions, Serializable {
                     iterator.remove();
                     removed.add(item);
                 }
-            } else if (item instanceof DbConditions) {
-                List<DbCondition> subRemoved = ((DbConditions) item).remove(fieldName);
+            } else if (item instanceof DbItems) {
+                List<DbCondition> subRemoved = ((DbItems) item).remove(fieldName, fieldValue);
                 removed.addAll(subRemoved);
-            } else { // DbCondition/DbConditions, 暂不支持替换
+            } else { // DbCondition/DbConditions, 暂不支持按字段值删除
             }
         }
         return removed;

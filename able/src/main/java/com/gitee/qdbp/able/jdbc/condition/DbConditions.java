@@ -18,6 +18,9 @@ interface DbConditions extends DbCondition, Iterable<DbCondition> {
     /** 是否存在指定的条件 **/
     boolean contains(String fieldName);
 
+    /** 查找条件 **/
+    <T extends DbCondition> List<T> find(String fieldName);
+
     /** 移除条件 **/
     <T extends DbCondition> List<T> remove(String fieldName);
 
