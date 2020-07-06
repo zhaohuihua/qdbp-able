@@ -8,7 +8,7 @@ import com.gitee.qdbp.able.jdbc.base.DbCondition;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
- * 数据库操作容器, DbWhere/DbUpdate的父类
+ * 数据库条件容器, DbWhere/DbUpdate的父类
  *
  * @author zhaohuihua
  * @version 181221

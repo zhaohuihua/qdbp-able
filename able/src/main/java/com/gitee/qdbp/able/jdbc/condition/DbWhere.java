@@ -1,6 +1,8 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
+import java.util.Iterator;
 import java.util.List;
+import com.gitee.qdbp.able.beans.Copyable;
 import com.gitee.qdbp.able.jdbc.base.DbCondition;
 import com.gitee.qdbp.able.jdbc.base.WhereCondition;
 import com.gitee.qdbp.tools.utils.VerifyTools;
@@ -52,7 +54,7 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
  * @author zhaohuihua
  * @version 181221
  */
-public class DbWhere extends DbItems {
+public class DbWhere extends DbItems implements Copyable {
 
     /** SerialVersionUID **/
     private static final long serialVersionUID = 1L;
@@ -141,6 +143,56 @@ public class DbWhere extends DbItems {
     }
 
     /**
+     * 克隆为新对象(如果子类有新增字段或没有默认构造函数就应该覆盖该方法)
+     * 
+     * @return 新对象
+     */
+    @Override
+    public DbWhere copy() {
+        DbWhere copies = newCopies();
+        this.copyTo(copies);
+        return copies;
+    }
+
+    protected void copyTo(DbWhere copies) {
+        Iterator<DbCondition> iterator = this.iterator();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
+            if (item instanceof Field) {
+                copies.put((Field) item); // put(Field)只取DbField的字段, 天然具有克隆的效果
+            } else if (item instanceof DbField) {
+                copies.put(((DbField) item).copy());
+            } else if (item instanceof SubWhere) {
+                copies.put(((SubWhere) item).copy(copies));
+            } else if (item instanceof DbWhere) {
+                copies.put(((DbWhere) item).copy());
+            } else if (item instanceof Copyable) {
+                DbCondition newer = (DbCondition) ((Copyable) item).copy();
+                copies.put(newer);
+            } else { // DbCondition/DbConditions
+                copies.put(item); // 无法克隆为副本
+            }
+        }
+    }
+
+    /**
+     * 创建副本对象(如果子类没有默认构造函数就应该覆盖该方法)
+     * 
+     * @return 副本对象
+     */
+    protected DbWhere newCopies() {
+        if (this.getClass() == DbWhere.class) { // 当前类
+            return new DbWhere();
+        } else { // 子类
+            try {
+                return this.getClass().newInstance();
+            } catch (Exception e) {
+                throw new IllegalStateException("CloneNotSupported, FailedToInvokeDefaultConstructor.");
+            }
+        }
+    }
+
+    /**
      * 根据字段名称替换条件
      * 
      * @param fieldName 字段名称
@@ -151,7 +203,7 @@ public class DbWhere extends DbItems {
         int count = this.replace(condition);
         if (count == 0) {
             this.put(condition);
-            count ++;
+            count++;
         }
         return count;
     }
@@ -241,6 +293,11 @@ public class DbWhere extends DbItems {
         private static final long serialVersionUID = 1L;
 
         private ReadonlyWhere() {
+        }
+
+        @Override
+        public ReadonlyWhere clone() {
+            return this;
         }
 
         @Override

@@ -1,10 +1,13 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
+import java.util.Iterator;
 import java.util.List;
+import com.gitee.qdbp.able.beans.Copyable;
+import com.gitee.qdbp.able.jdbc.base.DbCondition;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
- * 数据库更新操作容器<br>
+ * 数据库更新条件容器<br>
  * 支持Set,Add,ToNull操作<br>
  * <pre>
     DbUpdate ud = new DbUpdate();
@@ -21,7 +24,7 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
  * @author zhaohuihua
  * @version 181221
  */
-public class DbUpdate extends DbItems {
+public class DbUpdate extends DbItems implements Copyable {
 
     /** SerialVersionUID **/
     private static final long serialVersionUID = 1L;
@@ -47,6 +50,52 @@ public class DbUpdate extends DbItems {
     @Override
     protected void put(DbConditions fields) {
         throw new UnsupportedOperationException("DbUpdate can't supported put(DbConditions)");
+    }
+
+    /**
+     * 克隆为新对象(如果子类有新增字段或没有默认构造函数就应该覆盖该方法)
+     * 
+     * @return 新对象
+     */
+    @Override
+    public DbUpdate copy() {
+        DbUpdate copies = newCopies();
+        this.copyTo(copies);
+        return copies;
+    }
+
+    protected void copyTo(DbUpdate copies) {
+        Iterator<DbCondition> iterator = this.iterator();
+        while (iterator.hasNext()) {
+            DbCondition item = iterator.next();
+            if (item instanceof DbField) {
+                copies.put(((DbField) item).copy());
+            } else if (item instanceof DbUpdate) {
+                copies.put(((DbUpdate) item).copy());
+            } else if (item instanceof Copyable) {
+                DbCondition newer = (DbCondition) ((Copyable) item).copy();
+                copies.put(newer);
+            } else { // DbCondition/DbConditions
+                copies.put(item); // 无法克隆为副本
+            }
+        }
+    }
+
+    /**
+     * 创建副本对象(如果子类没有默认构造函数就应该覆盖该方法)
+     * 
+     * @return 副本对象
+     */
+    protected DbUpdate newCopies() {
+        if (this.getClass() == DbUpdate.class) { // 当前类
+            return new DbUpdate();
+        } else { // 子类
+            try {
+                return this.getClass().newInstance();
+            } catch (Exception e) {
+                throw new IllegalStateException("CloneNotSupported, FailedToInvokeDefaultConstructor.");
+            }
+        }
     }
 
     /**

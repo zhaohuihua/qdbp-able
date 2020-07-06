@@ -1,6 +1,7 @@
 package com.gitee.qdbp.able.jdbc.condition;
 
 import java.io.Serializable;
+import com.gitee.qdbp.able.beans.Copyable;
 import com.gitee.qdbp.able.jdbc.base.DbCondition;
 import com.gitee.qdbp.able.jdbc.utils.FieldTools;
 import com.gitee.qdbp.tools.utils.VerifyTools;
@@ -11,7 +12,7 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
  * @author zhaohuihua
  * @version 181221
  */
-public class DbField implements DbCondition, Serializable {
+public class DbField implements DbCondition, Copyable, Serializable {
 
     /** SerialVersionUID **/
     private static final long serialVersionUID = 1L;
@@ -27,6 +28,7 @@ public class DbField implements DbCondition, Serializable {
     public DbField() {
     }
 
+    @Override
     public boolean isEmpty() {
         return VerifyTools.isBlank(fieldName);
     }
@@ -87,5 +89,14 @@ public class DbField implements DbCondition, Serializable {
      */
     public boolean matchesWithField(String fieldName) {
         return FieldTools.matches(this.fieldName, fieldName);
+    }
+
+    @Override
+    public DbField copy() {
+        DbField newer = new DbField();
+        newer.setFieldName(this.getFieldName());
+        newer.setOperateType(this.getOperateType());
+        newer.setFieldValue(this.getFieldValue());
+        return newer;
     }
 }
