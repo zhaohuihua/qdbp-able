@@ -254,6 +254,73 @@ public abstract class ConvertTools {
     }
 
     /**
+     * 转换为数字, 自动识别数据类型<br>
+     * 1 -- Integer<br>
+     * 10000000000 -- Long<br>
+     * 1.0 -- Double<br>
+     * 10000000000.0 -- Double<br>
+     * 1.0E10 -- Double<br>
+     *
+     * @param value 源字符串
+     * @return 数字
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static Number toNumber(String value) throws NumberFormatException {
+        if (VerifyTools.isBlank(value)) {
+            throw new NumberFormatException("null");
+        }
+        Number number = toNumber(value, null);
+        if (number == null) {
+            throw new NumberFormatException(value);
+        } else {
+            return number;
+        }
+    }
+
+    /**
+     * 转换为数字, 自动识别数据类型<br>
+     * 1 -- Integer<br>
+     * 10000000000 -- Long<br>
+     * 1.0 -- Double<br>
+     * 10000000000.0 -- Double<br>
+     * 1.0E10 -- Double<br>
+     *
+     * @param value 源字符串
+     * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
+     * @return 数字
+     * @throws NumberFormatException 数字格式错误
+     */
+    public static Number toNumber(String value, Number defaults) throws NumberFormatException {
+        if (VerifyTools.isBlank(value)) {
+            return defaults;
+        }
+        value = value.trim();
+        char firstChar = value.charAt(0);
+        // 再怎么特殊的数字, 首字母也不外乎数字和点: 0x7FFFFFFF, 1.0E10, .001
+        if ((firstChar < '0' || firstChar > '9') && firstChar != '.') {
+            return defaults; // 首字母既不是数字也不是点, 应该就不是数字
+        }
+        if (value.contains(".") || value.contains("E") || value.contains("e")) {
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                return defaults;
+            }
+        } else {
+            try {
+                long n = Long.parseLong(value);
+                if (n < Integer.MIN_VALUE || n > Integer.MAX_VALUE) {
+                    return new Long(n);
+                } else {
+                    return new Integer((int) n);
+                }
+            } catch (NumberFormatException e) {
+                return defaults;
+            }
+        }
+    }
+
+    /**
      * 转换为数字
      *
      * @param value 源字符串, 支持乘法
