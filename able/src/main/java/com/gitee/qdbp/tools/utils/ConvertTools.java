@@ -8,7 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,8 +28,15 @@ import com.gitee.qdbp.able.beans.DepthMap;
  */
 public abstract class ConvertTools {
 
-    public static Map<String, Void> toKeyMaps(String... keys) {
-        Map<String, Void> map = new HashMap<>();
+    /**
+     * 将key转换为map<br>
+     * Map&lt;String, ?&gt; maps = ConvertTools.toKeyMaps("a,b,c");
+     * 
+     * @param keys KEY
+     * @return MAP
+     */
+    public static Map<String, ?> toKeyMaps(String... keys) {
+        Map<String, ?> map = new HashMap<>();
         for (String item : keys) {
             String[] array = StringTools.split(item, ',');
             for (String key : array) {
@@ -40,8 +46,15 @@ public abstract class ConvertTools {
         return map;
     }
 
-    public static Map<Character, Void> toCharMaps(String... strings) {
-        Map<Character, Void> map = new HashMap<>();
+    /**
+     * 将key的字符转换为map<br>
+     * Map&lt;Character, ?&gt; maps = ConvertTools.toKeyMaps("abc");
+     * 
+     * @param keys KEY
+     * @return MAP
+     */
+    public static Map<Character, ?> toCharMaps(String... strings) {
+        Map<Character, ?> map = new HashMap<>();
         for (String string : strings) {
             char[] chars = string.toCharArray();
             for (int i = 0, z = chars.length; i < z; i++) {
@@ -49,6 +62,54 @@ public abstract class ConvertTools {
             }
         }
         return map;
+    }
+
+    /**
+     * 将对象解析为列表
+     * 
+     * @param object 待解析的对象
+     * @return 解析后的列表, 如果object=null则返回null
+     */
+    public static List<Object> parseList(Object object) {
+        if (object == null) {
+            return null;
+        } else {
+            return parseListWithoutNull(object);
+        }
+    }
+
+    /**
+     * 将对象解析为列表
+     * 
+     * @param object 待解析的对象
+     * @return 解析后的列表, 如果object=null则返回空列表
+     */
+    public static List<Object> parseListIfNullToEmpty(Object object) {
+        if (object == null) {
+            return new ArrayList<>();
+        } else {
+            return parseListWithoutNull(object);
+        }
+    }
+
+    private static List<Object> parseListWithoutNull(Object object) {
+        if (object.getClass().isArray()) {
+            return new ArrayList<>(Arrays.asList((Object[]) object));
+        } else if (object instanceof Collection) {
+            return new ArrayList<>((Collection<?>) object);
+        } else if (object instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) object;
+            return new ArrayList<>(map.values());
+        } else if (object instanceof Iterable) {
+            List<Object> values = new ArrayList<Object>();
+            Iterable<?> iterable = (Iterable<?>) object;
+            for (Object temp : iterable) {
+                values.add(temp);
+            }
+            return values;
+        } else {
+            return new ArrayList<>(Arrays.asList(object));
+        }
     }
 
     /**
@@ -116,10 +177,15 @@ public abstract class ConvertTools {
      * @return 转换后的List, 如果array=null则返回EmptyList
      */
     @SafeVarargs
-    @SuppressWarnings("unchecked")
     public static <T, C extends T> List<T> toListIfNullToEmpty(C... array) {
-        // JDK1.7必须强转, JDK1.8不需要
-        return (List<T>) (array == null ? Collections.emptyList() : Arrays.asList(array));
+        if (array == null) {
+            return new ArrayList<>();
+        } else {
+            // JDK1.7必须强转, JDK1.8不需要
+            @SuppressWarnings("unchecked")
+            List<T> temp = (List<T>) new ArrayList<>(Arrays.asList(array));
+            return temp;
+        }
     }
 
     /**
@@ -157,7 +223,7 @@ public abstract class ConvertTools {
     @SuppressWarnings("unchecked")
     public static <T, C extends T> Set<T> toSetIfNullToEmpty(C... array) {
         if (array == null) {
-            return Collections.emptySet();
+            return new HashSet<>();
         } else {
             Set<C> list = new HashSet<>();
             for (C field : array) {
@@ -169,7 +235,9 @@ public abstract class ConvertTools {
     }
 
     /**
-     * 数组转Map: key=数组项, value=null
+     * 数组转Map: key=数组项, value=null<br>
+     * List&lt;String&gt; list = Arrays.asList("a", "b", ...);<br>
+     * Map&lt;String, ?&gt; maps = ConvertTools.toMap(list);
      * 
      * @param array 数组
      * @param <T> 目标类型
@@ -177,12 +245,14 @@ public abstract class ConvertTools {
      * @param <V> 值类型
      * @return 转换后的Map, 如果array=null则返回null
      */
-    public static <T, C extends T, V> Map<T, V> toMap(List<C> array) {
+    public static <T, C extends T, V> Map<T, V> toMap(Collection<C> array) {
         return toMap(array, null);
     }
 
     /**
-     * 数组转Map: key=数组项
+     * 数组转Map: key=数组项, 所有key都会指向同一个value<br>
+     * List&lt;String&gt; list = Arrays.asList("a", "b", ...);<br>
+     * Map&lt;String, Boolean&gt; maps = ConvertTools.toMap(list, true);
      * 
      * @param array 数组
      * @param value 值
@@ -192,7 +262,7 @@ public abstract class ConvertTools {
      * @return 转换后的Map, 如果array=null则返回null
      */
     @SuppressWarnings("unchecked")
-    public static <T, C extends T, V> Map<T, V> toMap(List<C> array, V value) {
+    public static <T, C extends T, V> Map<T, V> toMap(Collection<C> array, V value) {
         if (array == null) {
             return null;
         } else {
@@ -206,7 +276,9 @@ public abstract class ConvertTools {
     }
 
     /**
-     * 数组转Map: key=数组项, value=null
+     * 数组转Map: key=数组项, value=null<br>
+     * List&lt;String&gt; list = Arrays.asList("a", "b", ...);<br>
+     * Map&lt;String, ?&gt; maps = ConvertTools.toMap(list);
      * 
      * @param array 数组
      * @param <T> 目标类型
@@ -214,24 +286,26 @@ public abstract class ConvertTools {
      * @param <V> 值类型
      * @return 转换后的Map, 如果array=null则返回EmptySet
      */
-    public static <T, C extends T, V> Map<T, V> toMapIfNullToEmpty(List<C> array) {
+    public static <T, C extends T, V> Map<T, V> toMapIfNullToEmpty(Collection<C> array) {
         return toMapIfNullToEmpty(array, null);
     }
 
     /**
-     * 数组转Map: key=数组项
+     * 数组转Map: key=数组项, 所有key都会指向同一个value<br>
+     * List&lt;String&gt; list = Arrays.asList("a", "b", ...);<br>
+     * Map&lt;String, Boolean&gt; maps = ConvertTools.toMap(list, true);
      * 
      * @param array 数组
      * @param value 值
      * @param <T> 目标类型
      * @param <C> 数组内容的类型
      * @param <V> 值类型
-     * @return 转换后的Map, 如果array=null则返回EmptySet
+     * @return 转换后的Map, 如果array=null则返回EmptyMap
      */
     @SuppressWarnings("unchecked")
-    public static <T, C extends T, V> Map<T, V> toMapIfNullToEmpty(List<C> array, V value) {
+    public static <T, C extends T, V> Map<T, V> toMapIfNullToEmpty(Collection<C> array, V value) {
         if (array == null) {
-            return Collections.emptyMap();
+            return new HashMap<>();
         } else {
             Map<C, V> map = new HashMap<>();
             for (C field : array) {
