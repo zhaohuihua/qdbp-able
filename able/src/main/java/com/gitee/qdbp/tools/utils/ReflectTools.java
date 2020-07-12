@@ -352,7 +352,7 @@ public abstract class ReflectTools {
         VerifyTools.requireNonNull(clazz, "clazz");
 
         List<Field> allFields = new ArrayList<>();
-        Map<String, Void> fieldNames = new HashMap<>();
+        Map<String, ?> fieldNames = new HashMap<>();
         Class<?> temp = clazz;
         while (temp != null && temp != Object.class) {
             Field[] declaredFields = temp.getDeclaredFields();

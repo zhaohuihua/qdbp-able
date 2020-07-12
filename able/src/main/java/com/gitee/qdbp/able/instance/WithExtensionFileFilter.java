@@ -25,7 +25,7 @@ public class WithExtensionFileFilter implements FileFilter, Serializable {
     /** 包含模式还是排除模式: true=包含, false=排除 **/
     private final boolean include;
     /** 文件扩展名映射表 **/
-    private final Map<String, Void> extensions;
+    private final Map<String, ?> extensions;
 
     /**
      * 构造函数

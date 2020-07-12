@@ -173,8 +173,8 @@ public abstract class DateTools {
         }
     }
 
-    private static Map<Character, Void> CHINESE_DATE_UNITS = ConvertTools.toCharMaps("年月日");
-    private static Map<Character, Void> CHINESE_TIME_UNITS = ConvertTools.toCharMaps("时分秒毫秒");
+    private static Map<Character, ?> CHINESE_DATE_UNITS = ConvertTools.toCharMaps("年月日");
+    private static Map<Character, ?> CHINESE_TIME_UNITS = ConvertTools.toCharMaps("时分秒毫秒");
     private static Pattern CHINESE_PART = Pattern.compile("(\\d+)(年|月|日|时|分|秒|毫秒)");
 
     /**
@@ -257,7 +257,7 @@ public abstract class DateTools {
             calendar.set(Calendar.MILLISECOND, 0);
             Matcher matcher = CHINESE_PART.matcher(datetime);
             int index = 0;
-            Map<String, Void> units = new HashMap<>();
+            Map<String, ?> units = new HashMap<>();
             while (matcher.find()) {
                 String number = matcher.group(1);
                 String unit = matcher.group(2);
