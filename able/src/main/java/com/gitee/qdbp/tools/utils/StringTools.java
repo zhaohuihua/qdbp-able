@@ -363,12 +363,51 @@ public abstract class StringTools {
 
     /** 是不是以指定字符开头 **/
     public static boolean startsWithChar(CharSequence string, char c) {
-        return string.length() > 0 && c == string.charAt(0);
+        if (string == null || string.length() == 0) {
+            return false;
+        }
+        return c == string.charAt(0);
     }
 
     /** 是不是以指定字符结尾 **/
     public static boolean endsWithChar(CharSequence string, char c) {
-        return string.length() > 0 && c == string.charAt(string.length() - 1);
+        if (string == null || string.length() == 0) {
+            return false;
+        }
+        return c == string.charAt(string.length() - 1);
+    }
+
+    /** 是不是以空白字符开头 **/
+    public static boolean startsWithAsciiWhitespace(CharSequence string) {
+        if (string == null || string.length() == 0) {
+            return false;
+        }
+        return isAsciiWhitespace(string.charAt(0));
+    }
+
+    /** 是不是以空白字符结尾 **/
+    public static boolean endsWithAsciiWhitespace(CharSequence string) {
+        if (string == null || string.length() == 0) {
+            return false;
+        }
+        return isAsciiWhitespace(string.charAt(string.length() - 1));
+    }
+    
+    /**
+     * 是不是英文空白字符<br>
+     * Character.isWhitespace('　'); // 中文空格会返回true
+     * 
+     * @param c 指定字符
+     * @return 是不是空白字符
+     */
+    public static boolean isAsciiWhitespace(char c) {
+        // \r=CARRIAGE RETURN,回到行首; \n=LINE FEED,换行; \t=HORIZONTAL TABULATION,水平制表位
+        // \f=FORM FEED,换页, 这个不作处理, 相当于一个不可见字符
+        return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(Character.isWhitespace('　'));
     }
 
     /** 删除左右两侧空白字符 **/
@@ -747,9 +786,9 @@ public abstract class StringTools {
                     return true;
                 }
             } else {
-                if (i != null && i.equalsIgnoreCase(string)) {
+                if (i != null && i.equals(string)) {
                     return true;
-                } else if (string != null && string.equalsIgnoreCase(i)) {
+                } else if (string != null && string.equals(i)) {
                     return true;
                 }
             }
