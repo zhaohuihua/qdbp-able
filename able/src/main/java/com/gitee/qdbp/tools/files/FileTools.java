@@ -57,12 +57,7 @@ public abstract class FileTools {
             bytes = bos.toByteArray();
         }
 
-        try {
-            String charset = getEncoding(file);
-            return new String(bytes, charset);
-        } catch (UnsupportedEncodingException e) {
-            return new String(bytes, CHARSET);
-        }
+        return bytesToString(bytes);
     }
 
     /**
@@ -80,9 +75,21 @@ public abstract class FileTools {
             bytes = bos.toByteArray();
         }
 
-        try {
-            String charset = getEncoding(file);
-            return new String(bytes, charset);
+        return bytesToString(bytes);
+    }
+
+    private static String bytesToString(byte[] bytes) throws IOException {
+        try (InputStream input = new ByteArrayInputStream(bytes)) {
+            // 解析内容的字符集
+            CharsetAndBomIndex result = parseEncoding(input);
+            int bomLength = result.getBomLength();
+            byte[] readyBytes = bytes;
+            if (bomLength > 0) { // 清除前置的bom字符
+                byte[] temp = new byte[bytes.length - bomLength];
+                System.arraycopy(bytes, bomLength, temp, 0, temp.length);
+                readyBytes = temp;
+            }
+            return new String(readyBytes, result.getCharset());
         } catch (UnsupportedEncodingException e) {
             return new String(bytes, CHARSET);
         }
@@ -884,36 +891,71 @@ public abstract class FileTools {
     }
 
     /**
-     * 判断文件的编码格式<br>
-     * 来源: http://www.chsi.com.cn/xy/com/200902/20090218/17570775.html<br>
-     * BOM参考: http://www.bitscn.com/pdb/java/200605/20811.html
+     * 判断文件的编码格式
      * 
      * @param file 指定文件
      * @return 编码格式
      * @version 2010-10-05
      */
     public static String getEncoding(File file) {
-        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-            String encoding = "GBK";
-            bis.mark(0);
+        try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(file))) {
+            CharsetAndBomIndex result = parseEncoding(input);
+            return result.getCharset().displayName();
+        } catch (Exception e) {
+            return CHARSET.displayName();
+        }
+    }
 
-            // 带BOM信息的情况, 根据前三位判断编码
-            byte[] bytes = new byte[3];
-            int read = bis.read(bytes, 0, 3);
+    /**
+     * 判断InputStream的编码格式<br>
+     * 来源: http://www.chsi.com.cn/xy/com/200902/20090218/17570775.html<br>
+     * BOM参考: http://www.unicode.org/faq/utf_bom.html#bom4
+     * 
+     * @param file 指定文件
+     * @return 编码格式
+     * @version 2010-10-05
+     */
+    public static String getEncoding(InputStream input) {
+        CharsetAndBomIndex result = parseEncoding(input);
+        return result.getCharset().displayName();
+    }
+
+    private static CharsetAndBomIndex parseEncoding(InputStream input) {
+        try {
+            input.mark(0);
+
+            // 带BOM信息的情况, 根据前4位判断编码
+            byte[] bytes = new byte[4];
+            int read = input.read(bytes, 0, bytes.length);
             if (read == -1) {
-                return encoding;
+                return new CharsetAndBomIndex(CHARSET, 0);
             }
-            if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xFE) {
-                return "UTF-16LE"; // Little-Endian
-            } else if (bytes[0] == (byte) 0xFE && bytes[1] == (byte) 0xFF) {
-                return "UTF-16BE"; // Big-Endian
-            } else if (bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
-                return "UTF-8";
+            // http://www.unicode.org/faq/utf_bom.html#bom4
+            // Bytes       Encoding Form
+            // 00 00 FE FF UTF-32, big-endian
+            // FF FE 00 00 UTF-32, little-endian
+            // FE FF       UTF-16, big-endian
+            // FF FE       UTF-16, little-endian
+            // EF BB BF    UTF-8
+            if (bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
+                return new CharsetAndBomIndex("UTF-8", 3); //    EF BB BF    UTF-8
+            }
+            byte FF = (byte) 0xFF;
+            byte FE = (byte) 0xFE;
+            if (bytes[0] == FE && bytes[1] == FF) {
+                return new CharsetAndBomIndex("UTF-16BE", 3); // FE FF       UTF-16, big-endian
+            } else if (bytes[0] == FF && bytes[1] == FE) {
+                return new CharsetAndBomIndex("UTF-16LE", 3); // FF FE       UTF-16, little-endian
+            } else if (bytes[0] == 0 && bytes[1] == 0 && bytes[2] == FE && bytes[3] == FF) {
+                return new CharsetAndBomIndex("UTF-32BE", 4); // 00 00 FE FF UTF-32, big-endian
+            } else if (bytes[0] == FF && bytes[1] == FE && bytes[2] == 0 && bytes[3] == 0) {
+                return new CharsetAndBomIndex("UTF-32LE", 4); // FF FE 00 00 UTF-32, little-endian
             }
 
+            String encoding = "GBK";
             // 根据BOM信息未判断出编码的情况
-            bis.reset();
-            while ((read = bis.read()) != -1) {
+            input.reset();
+            while ((read = input.read()) != -1) {
                 if (read >= 0xF0) {
                     break;
                 }
@@ -922,7 +964,7 @@ public abstract class FileTools {
                     break;
                 }
                 if (0xC0 <= read && read <= 0xDF) {
-                    read = bis.read();
+                    read = input.read();
                     // 双字节 (0xC0 - 0xDF)(0x80 - 0xBF), 也可能在GB编码内
                     if (0x80 <= read && read <= 0xBF) {
                         continue;
@@ -932,9 +974,9 @@ public abstract class FileTools {
                 }
                 // 也有可能出错, 但是几率较小
                 else if (0xE0 <= read && read <= 0xEF) {
-                    read = bis.read();
+                    read = input.read();
                     if (0x80 <= read && read <= 0xBF) {
-                        read = bis.read();
+                        read = input.read();
                         if (0x80 <= read && read <= 0xBF) {
                             encoding = "UTF-8";
                             break;
@@ -946,9 +988,32 @@ public abstract class FileTools {
                     }
                 }
             }
-            return encoding;
+            return new CharsetAndBomIndex(encoding, 0);
         } catch (Exception e) {
-            return null;
+            return new CharsetAndBomIndex(CHARSET, 0);
+        }
+    }
+
+    private static class CharsetAndBomIndex {
+
+        private Charset charset;
+        private int bomLength;
+
+        public CharsetAndBomIndex(String charset, int bomLength) {
+            this(Charset.forName(charset), bomLength);
+        }
+
+        public CharsetAndBomIndex(Charset charset, int bomLength) {
+            this.charset = charset;
+            this.bomLength = bomLength;
+        }
+
+        public Charset getCharset() {
+            return charset;
+        }
+
+        public int getBomLength() {
+            return bomLength;
         }
     }
 }
