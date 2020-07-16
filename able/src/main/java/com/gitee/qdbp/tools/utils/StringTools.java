@@ -42,86 +42,86 @@ public abstract class StringTools {
     private static final Pattern REGEXP_TRIM_RIGHT = Pattern.compile("\\s+$");
 
     /** 是否存在表情字符 **/
-    public static boolean existEmoji(String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean existEmoji(String string) {
+        if (string == null || string.length() == 0) {
             return false;
         }
-        return UTF8MB4.matcher(str).find();
+        return UTF8MB4.matcher(string).find();
     }
 
     /** 清除表情字符 **/
-    public static String clearEmoji(String str) {
-        return UTF8MB4.matcher(str).replaceAll("?");
+    public static String clearEmoji(String string) {
+        return UTF8MB4.matcher(string).replaceAll("?");
     }
 
     /**
      * 判断字符串是不是手机号码
      *
      * @author zhaohuihua
-     * @param str 字符串
+     * @param string 字符串
      * @return 是不是手机号码, 如果字符串等于null或空字符串, 返回false
      */
-    public static boolean isPhone(String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isPhone(String string) {
+        if (string == null || string.length() == 0) {
             return false;
         }
-        return PHONE.matcher(str).matches();
+        return PHONE.matcher(string).matches();
     }
 
     /**
      * 判断字符串是不是邮箱地址
      *
      * @author zhaohuihua
-     * @param str 字符串
+     * @param string 字符串
      * @return 是不是邮箱地址, 如果字符串等于null或空字符串, 返回false
      */
-    public static boolean isEmail(String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isEmail(String string) {
+        if (string == null || string.length() == 0) {
             return false;
         }
-        return EMAIL.matcher(str).matches();
+        return EMAIL.matcher(string).matches();
     }
 
     /**
      * 判断字符串是不是网址
      *
      * @author zhaohuihua
-     * @param str 字符串
+     * @param string 字符串
      * @return 是不是网址, 如果字符串等于null或空字符串, 返回false
      */
-    public static boolean isUrl(String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isUrl(String string) {
+        if (string == null || string.length() == 0) {
             return false;
         }
-        return URL.matcher(str).matches();
+        return URL.matcher(string).matches();
     }
 
     /**
      * 判断字符串是不是数字
      *
      * @author zhaohuihua
-     * @param str 字符串
+     * @param string 字符串
      * @return 是不是数字, 如果字符串等于null或空字符串, 返回false
      */
-    public static boolean isDigit(String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isDigit(String string) {
+        if (string == null || string.length() == 0) {
             return false;
         }
-        return DIGIT.matcher(str).matches();
+        return DIGIT.matcher(string).matches();
     }
 
     /**
      * 判断字符串是不是英文字符
      *
      * @author zhaohuihua
-     * @param str 字符串
+     * @param string 字符串
      * @return 是不是英文字符, 如果字符串等于null或空字符串, 返回false
      */
-    public static boolean isAscii(String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isAscii(String string) {
+        if (string == null || string.length() == 0) {
             return false;
         }
-        return ASCII.matcher(str).matches();
+        return ASCII.matcher(string).matches();
     }
 
     /**
@@ -286,22 +286,22 @@ public abstract class StringTools {
      * 如: 诺贝尔奖是以瑞典著名的 ... 基金创立的
      *
      * @author zhaohuihua
-     * @param text 长文本
+     * @param string 长文本
      * @param length 指定长度
      * @return 省略中间部分的字符
      */
-    public static String ellipsis(String text, int length) {
-        if (text == null || text.length() <= length || length == 0) {
-            return text;
+    public static String ellipsis(String string, int length) {
+        if (string == null || string.length() <= length || length == 0) {
+            return string;
         }
         String flag = " ... ";
         if (length < 20) {
-            return text.substring(0, length) + flag;
+            return string.substring(0, length) + flag;
         }
         int suffix = (length - flag.length()) / 4;
         int prefix = length - flag.length() - suffix;
-        int end = text.length() - suffix;
-        return text.substring(0, prefix) + flag + text.substring(end);
+        int end = string.length() - suffix;
+        return string.substring(0, prefix) + flag + string.substring(end);
     }
 
     /**
@@ -372,68 +372,68 @@ public abstract class StringTools {
     }
 
     /** 删除左右两侧空白字符 **/
-    public static String trim(String text) {
-        return text == null ? null : REGEXP_TRIM.matcher(text).replaceAll("");
+    public static String trim(String string) {
+        return string == null ? null : REGEXP_TRIM.matcher(string).replaceAll("");
     }
 
     /** 删除左侧空白字符 **/
-    public static String trimLeft(String text) {
-        return text == null ? null : REGEXP_TRIM_LEFT.matcher(text).replaceAll("");
+    public static String trimLeft(String string) {
+        return string == null ? null : REGEXP_TRIM_LEFT.matcher(string).replaceAll("");
     }
 
     /** 删除右侧空白字符 **/
-    public static String trimRight(String text) {
-        return text == null ? null : REGEXP_TRIM_RIGHT.matcher(text).replaceAll("");
+    public static String trimRight(String string) {
+        return string == null ? null : REGEXP_TRIM_RIGHT.matcher(string).replaceAll("");
     }
 
     /**
      * 删除左右两侧的指定字符
      * 
-     * @param text 原文本
+     * @param string 原文本
      * @param chars 待删除的字符
      * @return 删除后的字符串
-     * @deprecated 方法名含义不明确, 改为removeLeftRight(String text, char... chars)
+     * @deprecated 方法名含义不明确, 改为removeLeftRight(String string, char... chars)
      */
     @Deprecated
-    public static String remove(String text, char... chars) {
-        return removeLeftRight(text, chars);
+    public static String remove(String string, char... chars) {
+        return removeLeftRight(string, chars);
     }
 
     /**
      * 删除左右两侧的指定字符
      * 
-     * @param text 原文本
+     * @param string 原文本
      * @param chars 待删除的字符
      * @return 删除后的字符串
      */
-    public static String removeLeftRight(String text, char... chars) {
-        return removeLeftRight(text, true, true, chars);
+    public static String removeLeftRight(String string, char... chars) {
+        return removeLeftRight(string, true, true, chars);
     }
 
     /**
      * 删除左侧的指定字符
      * 
-     * @param text 原文本
+     * @param string 原文本
      * @param chars 待删除的字符
      * @return 删除后的字符串
      */
-    public static String removeLeft(String text, char... chars) {
-        return removeLeftRight(text, true, false, chars);
+    public static String removeLeft(String string, char... chars) {
+        return removeLeftRight(string, true, false, chars);
     }
 
     /**
      * 删除右侧的指定字符
      * 
-     * @param text 原文本
+     * @param string 原文本
      * @param chars 待删除的字符
      * @return 删除后的字符串
      */
-    public static String removeRight(String text, char... chars) {
-        return removeLeftRight(text, false, true, chars);
+    public static String removeRight(String string, char... chars) {
+        return removeLeftRight(string, false, true, chars);
     }
 
-    private static String removeLeftRight(String text, boolean left, boolean right, char... chars) {
-        char[] value = text.toCharArray();
+    private static String removeLeftRight(String string, boolean left, boolean right, char... chars) {
+        char[] value = string.toCharArray();
         int len = value.length;
         int st = 0;
         char[] val = value;
@@ -448,17 +448,17 @@ public abstract class StringTools {
                 len--;
             }
         }
-        return ((st > 0) || (len < value.length)) ? text.substring(st, len) : text;
+        return ((st > 0) || (len < value.length)) ? string.substring(st, len) : string;
     }
 
     /**
      * 删除左右两侧指定数量的字符
      * 
-     * @param text 原文本
+     * @param string 原文本
      * @param start 左侧删除的数量
      * @param end 右侧删除的数量
      * @return 删除后的字符串
-     * @deprecated 方法名含义不明确, 改为removeLeftRight(String text, int start, int end)
+     * @deprecated 方法名含义不明确, 改为removeLeftRight(String string, int start, int end)
      */
     @Deprecated
     public static String remove(String string, int start, int end) {
@@ -468,7 +468,7 @@ public abstract class StringTools {
     /**
      * 删除左右两侧指定数量的字符
      * 
-     * @param text 原文本
+     * @param string 原文本
      * @param start 左侧删除的数量
      * @param end 右侧删除的数量
      * @return 删除后的字符串
@@ -764,24 +764,24 @@ public abstract class StringTools {
     /**
      * 隐藏手机号码邮箱或名字
      *
-     * @param text 手机号码邮箱或名字
+     * @param string 手机号码邮箱或名字
      * @return 隐藏后的字符串, 如: 139****1382, zh****ua@126.com, <br>
      *         黄山-〇山, 昆仑山-〇〇山, 黄山毛峰-〇〇毛峰
      */
-    public static String hidden(String text) {
-        if (text == null || text.length() == 0) {
-            return text;
+    public static String hidden(String string) {
+        if (string == null || string.length() == 0) {
+            return string;
         }
 
         String ahide = "****";
         String uhide = "\u3007"; // 〇
 
-        Matcher phone = PHONE.matcher(text);
+        Matcher phone = PHONE.matcher(string);
         if (phone.matches()) {
             return phone.group(1) + ahide + phone.group(3);
         }
 
-        Matcher email = EMAIL.matcher(text);
+        Matcher email = EMAIL.matcher(string);
         if (email.matches()) {
             String prefix = email.group(1);
             String at = email.group(2);
@@ -789,23 +789,23 @@ public abstract class StringTools {
             return hiddenAscii(prefix, ahide) + at + suffix;
         }
 
-        Matcher ascii = ASCII.matcher(text);
+        Matcher ascii = ASCII.matcher(string);
         if (ascii.matches()) {
-            return hiddenAscii(text, ahide);
+            return hiddenAscii(string, ahide);
         } else {
-            if (text.length() == 1) {
-                return uhide + text;
+            if (string.length() == 1) {
+                return uhide + string;
             }
-            if (text.length() == 2) {
-                return uhide + text.substring(text.length() - 1);
-            } else if (text.length() == 3) {
-                return uhide + uhide + text.substring(text.length() - 1);
-            } else if (text.length() == 4) {
-                return uhide + uhide + text.substring(text.length() - 2);
-            } else if (text.length() == 5) {
-                return uhide + uhide + text.substring(text.length() - 3);
+            if (string.length() == 2) {
+                return uhide + string.substring(string.length() - 1);
+            } else if (string.length() == 3) {
+                return uhide + uhide + string.substring(string.length() - 1);
+            } else if (string.length() == 4) {
+                return uhide + uhide + string.substring(string.length() - 2);
+            } else if (string.length() == 5) {
+                return uhide + uhide + string.substring(string.length() - 3);
             } else {
-                return uhide + uhide + text.substring(text.length() - 4);
+                return uhide + uhide + string.substring(string.length() - 4);
             }
         }
     }
