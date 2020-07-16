@@ -313,14 +313,13 @@ public abstract class StringTools {
     }
 
     public static String concat(char c, String prefix, String[] paths, int start, int end) {
-
         StringBuilder buffer = new StringBuilder();
-        if (VerifyTools.isNotBlank(prefix)) {
+        if (prefix != null && prefix.length() > 0) {
             buffer.append(prefix);
         }
         for (int i = Math.max(start, 0), len = Math.min(end, paths.length); i < len; i++) {
             String path = paths[i];
-            if (VerifyTools.isBlank(path)) {
+            if (path == null || path.length() == 0) {
                 continue;
             }
             if (buffer.length() == 0) {
@@ -336,12 +335,12 @@ public abstract class StringTools {
         return buffer.toString();
     }
 
-    public static boolean endsWithChar(CharSequence string, char c) {
-        return string.length() > 0 && c == string.charAt(string.length() - 1);
-    }
-
     public static boolean startsWithChar(CharSequence string, char c) {
         return string.length() > 0 && c == string.charAt(0);
+    }
+
+    public static boolean endsWithChar(CharSequence string, char c) {
+        return string.length() > 0 && c == string.charAt(string.length() - 1);
     }
 
     public static String trim(String text) {
@@ -667,7 +666,7 @@ public abstract class StringTools {
 
     /** 是不是肯定的 **/
     public static boolean isPositive(String value, boolean defValue) {
-        if (VerifyTools.isBlank(value)) {
+        if (value == null || value.length() == 0) {
             return defValue;
         } else {
             if (isExists(true, value, "Y", "yes", "true", "on", "1")) {
@@ -682,7 +681,7 @@ public abstract class StringTools {
 
     /** 是不是否定的 **/
     public static boolean isNegative(String value, boolean defValue) {
-        if (VerifyTools.isBlank(value)) {
+        if (value == null || value.length() == 0) {
             return defValue;
         } else {
             if (isExists(true, value, "Y", "yes", "true", "on", "1")) {
@@ -717,9 +716,9 @@ public abstract class StringTools {
                     return true;
                 }
             } else {
-                if (i != null && i.equals(string)) {
+                if (i != null && i.equalsIgnoreCase(string)) {
                     return true;
-                } else if (string != null && string.equals(i)) {
+                } else if (string != null && string.equalsIgnoreCase(i)) {
                     return true;
                 }
             }
