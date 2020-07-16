@@ -304,53 +304,84 @@ public abstract class StringTools {
         return text.substring(0, prefix) + flag + text.substring(end);
     }
 
-    public static String concat(char c, String... paths) {
-        return concat(c, null, paths, 0, paths.length);
+    /**
+     * 连接字符串
+     * 
+     * @param c 分隔符
+     * @param parts 字符串片断
+     * @return 完整字符串
+     */
+    public static String concat(char c, String... parts) {
+        return concat(c, null, parts, 0, parts.length);
     }
 
-    public static String concat(char c, String[] paths, int start, int end) {
-        return concat(c, null, paths, start, end);
+    /**
+     * 连接字符串
+     * 
+     * @param c 分隔符
+     * @param parts 字符串片断
+     * @param start 起始位置
+     * @param end 结束位置
+     * @return 完整字符串
+     */
+    public static String concat(char c, String[] parts, int start, int end) {
+        return concat(c, null, parts, start, end);
     }
 
-    public static String concat(char c, String prefix, String[] paths, int start, int end) {
+    /**
+     * 连接字符串
+     * 
+     * @param c 分隔符
+     * @param prefix 前缀
+     * @param parts 字符串片断
+     * @param start 起始位置
+     * @param end 结束位置
+     * @return 完整字符串
+     */
+    public static String concat(char c, String prefix, String[] parts, int start, int end) {
         StringBuilder buffer = new StringBuilder();
         if (prefix != null && prefix.length() > 0) {
             buffer.append(prefix);
         }
-        for (int i = Math.max(start, 0), len = Math.min(end, paths.length); i < len; i++) {
-            String path = paths[i];
-            if (path == null || path.length() == 0) {
+        for (int i = Math.max(start, 0), len = Math.min(end, parts.length); i < len; i++) {
+            String part = parts[i];
+            if (part == null || part.length() == 0) {
                 continue;
             }
             if (buffer.length() == 0) {
-                buffer.append(path);
-            } else if (!endsWithChar(buffer, c) && !startsWithChar(path, c)) {
-                buffer.append(c).append(path);
-            } else if (endsWithChar(buffer, c) && endsWithChar(path, c)) {
-                buffer.append(path.substring(1));
+                buffer.append(part);
+            } else if (!endsWithChar(buffer, c) && !startsWithChar(part, c)) {
+                buffer.append(c).append(part);
+            } else if (endsWithChar(buffer, c) && endsWithChar(part, c)) {
+                buffer.append(part.substring(1));
             } else {
-                buffer.append(path);
+                buffer.append(part);
             }
         }
         return buffer.toString();
     }
 
+    /** 是不是以指定字符开头 **/
     public static boolean startsWithChar(CharSequence string, char c) {
         return string.length() > 0 && c == string.charAt(0);
     }
 
+    /** 是不是以指定字符结尾 **/
     public static boolean endsWithChar(CharSequence string, char c) {
         return string.length() > 0 && c == string.charAt(string.length() - 1);
     }
 
+    /** 删除左右两侧空白字符 **/
     public static String trim(String text) {
         return text == null ? null : REGEXP_TRIM.matcher(text).replaceAll("");
     }
 
+    /** 删除左侧空白字符 **/
     public static String trimLeft(String text) {
         return text == null ? null : REGEXP_TRIM_LEFT.matcher(text).replaceAll("");
     }
 
+    /** 删除右侧空白字符 **/
     public static String trimRight(String text) {
         return text == null ? null : REGEXP_TRIM_RIGHT.matcher(text).replaceAll("");
     }
