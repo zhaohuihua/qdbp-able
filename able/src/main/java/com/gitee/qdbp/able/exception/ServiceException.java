@@ -114,7 +114,12 @@ public class ServiceException extends RuntimeException implements IResultMessage
         buffer.append('[').append(code).append(']');
         buffer.append(getMessage());
         if (details != null && details.length() > 0) {
-            buffer.append('(').append(details).append(')');
+            int nlIndex = details.indexOf('\n');
+            if (nlIndex < 0) {
+                buffer.append('(').append(details).append(')');
+            } else {
+                buffer.append(' ').append(details);
+            }
         }
         return buffer.toString();
     }
