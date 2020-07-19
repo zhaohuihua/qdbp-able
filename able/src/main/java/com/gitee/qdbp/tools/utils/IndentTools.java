@@ -44,6 +44,7 @@ public class IndentTools {
                 continue;
             } else if (c == '\r' || c == '\n') {
                 position = i;
+                break; // 位置找到了
             } else {
                 break; // 还没找到换行符就遇到了非空字符
             }
@@ -52,9 +53,12 @@ public class IndentTools {
             string.append(' ').append(message).append(' ');
         } else { // 换行模式
             int indent = findLastIndentSize(string, position);
-            message.insert(0, getIndenTabs(indent));
+            if (indent > 0) {
+                message.insert(0, getIndenTabs(indent));
+            }
             message.append('\n');
-            string.insert(position, message);
+            // +1是为了插入到换行符之后
+            string.insert(position + 1, message);
         }
     }
 
