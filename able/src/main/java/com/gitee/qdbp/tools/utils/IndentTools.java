@@ -12,14 +12,67 @@ public class IndentTools {
 
     /** 获取缩进字符 **/
     public static char[] getIndenTabs(int size) {
-        if (size == 1) {
-            return new char[] { '\t' };
-        } else {
-            char[] tabs = new char[size];
-            for (int i = 0; i < size; i++) {
-                tabs[i] = '\t';
+        return getIndenTabs(size, false);
+    }
+
+    /** 获取缩进字符 **/
+    public static char[] getIndenTabs(int size, boolean useTab) {
+        if (size <= 0) {
+            return new char[0];
+        }
+        if (useTab) {
+            if (size == 1) {
+                return new char[] { '\t' };
+            } else {
+                char[] tabs = new char[size];
+                for (int i = 0; i < size; i++) {
+                    tabs[i] = '\t';
+                }
+                return tabs;
             }
-            return tabs;
+        } else {
+            char[] spaces = new char[] { ' ', ' ', ' ', ' ' };
+            if (size == 1) {
+                return spaces;
+            } else {
+                int length = spaces.length;
+                char[] tabs = new char[size * length];
+                for (int i = 0, z = tabs.length; i < z; i += length) {
+                    System.arraycopy(spaces, 0, tabs, i, length);
+                }
+                return tabs;
+            }
+        }
+    }
+
+    /**
+     * 所有内容缩进n个TAB
+     * 
+     * @param size 缩进多少个TAB
+     * @return 处理后的字符串
+     */
+    public static String indentAll(String string, int size) {
+        return indentAll(string, size, true);
+    }
+
+    /**
+     * 所有内容缩进n个TAB
+     * 
+     * @param size 缩进多少个TAB
+     * @param leading 开头要不要缩进
+     * @return 处理后的字符串
+     */
+    public static String indentAll(String string, int size, boolean leading) {
+        if (size <= 0) {
+            return string;
+        } else {
+            String nl = "\n";
+            String tabs = new String(getIndenTabs(size));
+            string = StringTools.replace(string, nl, nl + tabs);
+            if (leading) {
+                string = tabs + string;
+            }
+            return string;
         }
     }
 
@@ -116,12 +169,12 @@ public class IndentTools {
         return calcSpacesToTabSize(string, position + 1, lastIndex + 1);
     }
 
-    /** 计算空白字符等于多少缩进量(余1个空格不算缩进,余2个空格算1个缩进) **/
+    /** 计算空白字符等于多少缩进量(余1个空格不算缩进,余2个空格以上算1个缩进) **/
     public static int calcSpacesToTabSize(CharSequence string) {
         return calcSpacesToTabSize(string, 0, string.length());
     }
 
-    /** 计算空白字符等于多少缩进量(余1个空格不算缩进,余2个空格算1个缩进) **/
+    /** 计算空白字符等于多少缩进量(余1个空格不算缩进,余2个空格以上算1个缩进) **/
     public static int calcSpacesToTabSize(CharSequence string, int start, int end) {
         int size = 0;
         int pending = 0;
