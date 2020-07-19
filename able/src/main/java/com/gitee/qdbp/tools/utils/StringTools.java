@@ -307,6 +307,26 @@ public abstract class StringTools {
     /**
      * 连接字符串
      * 
+     * @param parts 字符串片断
+     * @return 完整字符串
+     */
+    public static String concat(String... parts) {
+        if (parts == null) {
+            return null;
+        }
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0, len = parts.length; i < len; i++) {
+            String part = parts[i];
+            if (part != null && part.length() > 0) {
+                buffer.append(part);
+            }
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * 连接字符串
+     * 
      * @param c 分隔符
      * @param parts 字符串片断
      * @return 完整字符串
@@ -392,10 +412,10 @@ public abstract class StringTools {
         }
         return isAsciiWhitespace(string.charAt(string.length() - 1));
     }
-    
+
     /**
      * 是不是英文空白字符<br>
-     * Character.isWhitespace('　'); // 中文空格会返回true
+     * Character.isWhitespace(' '); // 中文空格会返回true
      * 
      * @param c 指定字符
      * @return 是不是空白字符
@@ -405,7 +425,7 @@ public abstract class StringTools {
         // \f=FORM FEED,换页, 这个不作处理, 相当于一个不可见字符
         return c == ' ' || c == '\t' || c == '\r' || c == '\n';
     }
-    
+
     public static void main(String[] args) {
         System.out.println(Character.isWhitespace('　'));
     }
