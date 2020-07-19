@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.gitee.qdbp.able.beans.KeyString;
 
 /**
  * 字符串工具
@@ -426,10 +427,6 @@ public abstract class StringTools {
         return c == ' ' || c == '\t' || c == '\r' || c == '\n';
     }
 
-    public static void main(String[] args) {
-        System.out.println(Character.isWhitespace('　'));
-    }
-
     /** 删除左右两侧空白字符 **/
     public static String trim(String string) {
         return string == null ? null : REGEXP_TRIM.matcher(string).replaceAll("");
@@ -680,6 +677,227 @@ public abstract class StringTools {
             buffer.append(string.substring(index));
         }
         return buffer.toString();
+    }
+
+    /**
+     * 字符串替换(非正则)<br>
+     * 例如: \t替换为空格, \r\n替换为\n<br>
+     * StringTools.replace("abc\tdef\r\nxyz", "\t", " ", "\r\n", "\n");
+     * 
+     * @param string 源字符串
+     * @param patterns 替换规则
+     * @return 替换后的字符串
+     */
+    public static String replace(String string, String... patterns) {
+        if (string == null || patterns == null || patterns.length == 0) {
+            return string;
+        }
+
+        List<KeyString> list = parseReplaceKeyValue(patterns);
+        if (list == null || list.isEmpty()) {
+            return string;
+        }
+
+        StringBuilder buffer = new StringBuilder(string);
+        doReplace(buffer, list);
+        return buffer.toString();
+    }
+    
+    public static void main(String[] args) {
+        String m = StringTools.replace("ABC\tDEF\n\r\nMN\nOPQ\rXYZ", "\t", "t", "\r\n", "_", "\n", "n", "\r", "");
+        System.out.println(m);
+        String n = StringTools.replace("ABC\t\tDEF\n\r\n\r\nMN\n\nOPQ\r\rXYZ", "\t", "t", "\r\n", "_", "\n", "n", "\r", "");
+        System.out.println(n);
+    }
+
+    /**
+     * 字符串替换(非正则)<br>
+     * 例如: \t替换为空格, \r\n替换为\n<br>
+     * StringTools.replace("abc\tdef\r\nxyz", "\t", " ", "\r\n", "\n");
+     * 
+     * @param string 源字符串
+     * @param patterns 替换规则
+     */
+    public static void replace(StringBuilder string, String... patterns) {
+        if (string == null || patterns == null || patterns.length == 0) {
+            return;
+        }
+
+        List<KeyString> list = parseReplaceKeyValue(patterns);
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        doReplace(string, list);
+    }
+
+    /**
+     * 字符串替换(非正则)<br>
+     * 例如: \t替换为空格, \r\n替换为\n<br>
+     * StringTools.replace("abc\tdef\r\nxyz", "\t", " ", "\r\n", "\n");
+     * 
+     * @param string 源字符串
+     * @param patterns 替换规则
+     */
+    public static void replace(StringBuffer string, String... patterns) {
+        if (string == null || patterns == null || patterns.length == 0) {
+            return;
+        }
+        List<KeyString> list = parseReplaceKeyValue(patterns);
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        doReplace(string, list);
+    }
+
+    /**
+     * 字符串替换(非正则)
+     * 
+     * @param string 源字符串
+     * @param patterns 替换规则
+     */
+    public static String replace(String string, List<KeyString> patterns) {
+        if (string == null || string.length() == 0) {
+            return string;
+        }
+        if (patterns == null || patterns.isEmpty()) {
+            return string;
+        }
+
+        StringBuilder buffer = new StringBuilder(string);
+        doReplace(buffer, patterns);
+        return buffer.toString();
+    }
+
+    /**
+     * 字符串替换(非正则)
+     * 
+     * @param string 源字符串
+     * @param patterns 替换规则
+     */
+    public static void replace(StringBuilder string, List<KeyString> patterns) {
+        if (string == null || string.length() == 0) {
+            return;
+        }
+        if (patterns == null || patterns.isEmpty()) {
+            return;
+        }
+
+        doReplace(string, patterns);
+    }
+
+    private static void doReplace(StringBuilder string, List<KeyString> patterns) {
+        for (KeyString kv : patterns) {
+            replace(string, kv.getKey(), kv.getValue());
+        }
+    }
+
+    /**
+     * 字符串替换(非正则)
+     * 
+     * @param string 源字符串
+     * @param patterns 替换规则
+     */
+    public static void replace(StringBuffer string, List<KeyString> patterns) {
+        if (string == null || string.length() == 0) {
+            return;
+        }
+        if (patterns == null || patterns.isEmpty()) {
+            return;
+        }
+
+        doReplace(string, patterns);
+    }
+
+    private static void doReplace(StringBuffer string, List<KeyString> patterns) {
+        for (KeyString kv : patterns) {
+            replace(string, kv.getKey(), kv.getValue());
+        }
+    }
+
+    /**
+     * 字符串替换(非正则)
+     * 
+     * @param string 源字符串
+     * @param pattern 替换规则
+     * @param replacement 替换目标
+     */
+    public static void replace(StringBuilder string, String pattern, String replacement) {
+        if (string == null || string.length() == 0) {
+            return;
+        }
+        if (pattern == null || pattern.isEmpty()) {
+            return;
+        }
+
+        doReplace(string, pattern, replacement);
+    }
+
+    private static void doReplace(StringBuilder string, String pattern, String replacement) {
+        int index = 0;
+        while (true) {
+            int nextIndex = string.indexOf(pattern, index);
+            if (nextIndex < 0) {
+                break;
+            }
+            if (replacement == null || replacement.isEmpty()) {
+                string.delete(nextIndex, nextIndex + pattern.length());
+                index = nextIndex;
+            } else {
+                string.replace(nextIndex, nextIndex + pattern.length(), replacement);
+                index = nextIndex + replacement.length();
+            }
+        }
+    }
+
+    /**
+     * 字符串替换(非正则)
+     * 
+     * @param string 源字符串
+     * @param pattern 替换规则
+     * @param replacement 替换目标
+     */
+    public static void replace(StringBuffer string, String pattern, String replacement) {
+        if (string == null || string.length() == 0) {
+            return;
+        }
+        if (pattern == null || pattern.isEmpty()) {
+            return;
+        }
+
+        doReplace(string, pattern, replacement);
+    }
+
+    private static void doReplace(StringBuffer string, String pattern, String replacement) {
+        if (pattern == null || pattern.isEmpty()) {
+            return;
+        }
+        int index = 0;
+        while (true) {
+            int nextIndex = string.indexOf(pattern, index);
+            if (nextIndex < 0) {
+                break;
+            }
+            if (replacement == null || replacement.isEmpty()) {
+                string.delete(nextIndex, pattern.length());
+                index = nextIndex;
+            } else {
+                string.replace(nextIndex, nextIndex + pattern.length(), replacement);
+                index = nextIndex + replacement.length();
+            }
+        }
+    }
+
+    private static List<KeyString> parseReplaceKeyValue(String... patterns) {
+        if (patterns.length % 2 != 0) {
+            throw new IllegalArgumentException("参数必须是键值对, 参数个数必须是2的倍数");
+        }
+
+        List<KeyString> list = new ArrayList<>();
+        for (int i = 0; i < patterns.length;) {
+            list.add(new KeyString(patterns[i++], patterns[i++]));
+        }
+
+        return list;
     }
 
     private static boolean inArray(char c, char[] array) {
