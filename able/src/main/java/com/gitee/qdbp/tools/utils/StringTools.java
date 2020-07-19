@@ -702,13 +702,6 @@ public abstract class StringTools {
         doReplace(buffer, list);
         return buffer.toString();
     }
-    
-    public static void main(String[] args) {
-        String m = StringTools.replace("ABC\tDEF\n\r\nMN\nOPQ\rXYZ", "\t", "t", "\r\n", "_", "\n", "n", "\r", "");
-        System.out.println(m);
-        String n = StringTools.replace("ABC\t\tDEF\n\r\n\r\nMN\n\nOPQ\r\rXYZ", "\t", "t", "\r\n", "_", "\n", "n", "\r", "");
-        System.out.println(n);
-    }
 
     /**
      * 字符串替换(非正则)<br>
