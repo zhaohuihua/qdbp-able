@@ -14,7 +14,7 @@ public class PkEntity implements Serializable {
     /** SerialVersionUID **/
     private static final long serialVersionUID = 1L;
 
-    /** 主键 **/
+    /** 主键值 **/
     private String primaryKey;
     /** 实体内容 **/
     private Map<String, Object> entity;
@@ -27,12 +27,12 @@ public class PkEntity implements Serializable {
         this.entity = entity;
     }
 
-    /** 主键 **/
+    /** 主键值 **/
     public String getPrimaryKey() {
         return primaryKey;
     }
 
-    /** 主键 **/
+    /** 主键值 **/
     public void setPrimaryKey(String primaryKey) {
         this.primaryKey = primaryKey;
     }
