@@ -37,7 +37,7 @@ public class WithMatcherFileFilter implements FileFilter, Serializable {
      * @param matcher 文件名匹配规则
      */
     public WithMatcherFileFilter(String matcher) {
-        this(WrapStringMatcher.parseMatcher(matcher));
+        this(WrapStringMatcher.parseMatcher(matcher, false));
     }
 
     /**

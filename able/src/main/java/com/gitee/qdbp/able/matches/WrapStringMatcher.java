@@ -99,7 +99,7 @@ public class WrapStringMatcher implements StringMatcher {
         }
         if (patterns != null && patterns.length > 0) {
             for (String pattern : patterns) {
-                this.matchers.add(parseMatcher(pattern));
+                this.matchers.add(parseMatcher(pattern, true));
             }
         }
     }
@@ -132,12 +132,13 @@ public class WrapStringMatcher implements StringMatcher {
      * ant:开头的解析为AntStringMatcher<br>
      * equals:开头的解析为EqualsStringMatcher<br>
      * contains:开头的解析为ContainsStringMatcher<br>
-     * 其余的也解析为ContainsStringMatcher<br>
+     * 其余的, 严格模式下解析为EqualsStringMatcher, 否则解析为ContainsStringMatcher<br>
      * 
      * @param pattern 匹配规则
+     * @param strict 是否使用严格格式
      * @return StringMatcher
      */
-    public static StringMatcher parseMatcher(String pattern) {
+    public static StringMatcher parseMatcher(String pattern, boolean strict) {
         if (pattern.startsWith("regexp:")) {
             String value = StringTools.removePrefix(pattern, "regexp:");
             return new RegexpStringMatcher(value, false);
@@ -163,7 +164,11 @@ public class WrapStringMatcher implements StringMatcher {
             String value = StringTools.removePrefix(pattern, "contains!:");
             return new ContainsStringMatcher(value, true);
         } else {
-            return new ContainsStringMatcher(pattern, false);
+            if (strict) {
+                return new EqualsStringMatcher(pattern, false);
+            } else {
+                return new ContainsStringMatcher(pattern, false);
+            }
         }
     }
 
