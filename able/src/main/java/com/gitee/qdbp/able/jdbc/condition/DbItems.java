@@ -108,7 +108,13 @@ abstract class DbItems implements DbConditions, Serializable {
         this.items.clear();
     }
 
-    /** 查找指定的条件 **/
+    /**
+     * 根据字段名称查找字符列表
+     * 
+     * @param fieldName 字段名称
+     * @return 查找到的条件
+     * @since 5.0
+     */
     public List<DbCondition> find(String fieldName) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
         Iterator<DbCondition> iterator = this.items.iterator();
@@ -143,6 +149,7 @@ abstract class DbItems implements DbConditions, Serializable {
      * @param fieldName 字段名称
      * @param fieldValue 字段值
      * @return 查找到的条件
+     * @since 5.0
      */
     public List<DbCondition> find(String fieldName, Object fieldValue) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
@@ -168,6 +175,7 @@ abstract class DbItems implements DbConditions, Serializable {
      * 根据字段名称替换条件
      * 
      * @param field 字段
+	 * @param int 被替换的次数
      */
     protected int replace(DbField field) {
         VerifyTools.requireNotBlank(field, "field");

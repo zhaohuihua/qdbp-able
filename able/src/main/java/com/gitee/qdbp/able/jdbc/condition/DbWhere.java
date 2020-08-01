@@ -146,6 +146,7 @@ public class DbWhere extends DbItems implements Copyable {
      * 克隆为新对象(如果子类有新增字段或没有默认构造函数就应该覆盖该方法)
      * 
      * @return 新对象
+     * @since 5.0
      */
     @Override
     public DbWhere copy() {
@@ -179,6 +180,7 @@ public class DbWhere extends DbItems implements Copyable {
      * 创建副本对象(如果子类没有默认构造函数就应该覆盖该方法)
      * 
      * @return 副本对象
+     * @since 5.0
      */
     protected DbWhere newCopies() {
         if (this.getClass() == DbWhere.class) { // 当前类
@@ -296,7 +298,7 @@ public class DbWhere extends DbItems implements Copyable {
         }
 
         @Override
-        public ReadonlyWhere clone() {
+        public ReadonlyWhere copy() {
             return this;
         }
 

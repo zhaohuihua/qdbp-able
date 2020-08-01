@@ -14,6 +14,7 @@ import com.gitee.qdbp.able.beans.KeyString;
  *
  * @author zhaohuihua
  * @version 150913
+ * @since 5.0
  */
 public abstract class StringTools {
 
@@ -921,10 +922,10 @@ public abstract class StringTools {
      * 左侧补字符<br>
      * pad("12345", '_', 10) 返回 _____12345<br>
      * 
-     * @param string
-     * @param c
-     * @param length
-     * @return
+     * @param string 原字符串
+     * @param c 补充的字符
+     * @param length 目标长度
+     * @return 目标字符串
      */
     public static String pad(String string, char c, int length) {
         return pad(string, c, true, length);
@@ -934,11 +935,11 @@ public abstract class StringTools {
      * 左侧或右侧补字符<br>
      * pad("12345", '_', false, 10) 返回 12345_____<br>
      * 
-     * @param string
-     * @param c
+     * @param string 原字符串
+     * @param c 补充的字符
      * @param left 左侧补(true)还是右侧补(false)
-     * @param length
-     * @return
+     * @param length 目标长度
+     * @return 目标字符串
      */
     public static String pad(String string, char c, boolean left, int length) {
         if (string == null || string.length() >= length) {
@@ -995,14 +996,17 @@ public abstract class StringTools {
         }
     }
 
+    /** 判断字符串是否存在数组中 **/
     public static boolean isExists(String string, String... strings) {
         return isExists(false, string, strings);
     }
 
+    /** 判断字符串是否存在数组中 **/
     public static boolean isNotExists(String string, String... strings) {
         return !isExists(false, string, strings);
     }
 
+    /** 判断字符串是否存在数组中 **/
     public static boolean isExists(boolean ignoreCase, String string, String... strings) {
         if (strings == null || strings.length == 0) {
             return false;
@@ -1027,6 +1031,7 @@ public abstract class StringTools {
         return false;
     }
 
+    /** 判断字符串是否存在数组中 **/
     public static boolean isNotExists(boolean ignoreCase, String string, String... strings) {
         return !isExists(ignoreCase, string, strings);
     }
