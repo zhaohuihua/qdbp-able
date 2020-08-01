@@ -4,16 +4,16 @@
 
 	<groupId>com.gitee.qdbp</groupId>
 	<artifactId>qdbp-parent</artifactId>
-	<version>4.1.0</version>
+	<version>5.0.0</version>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
 	<url>https://gitee.com/qdbp/</url>
 	<description>qdbp parent library</description>
 
-    <organization>
-        <name>zhaohuihua</name>
-        <url>https://gitee.com/qdbp/</url>
-    </organization>
+	<organization>
+		<name>zhaohuihua</name>
+		<url>https://gitee.com/qdbp/</url>
+	</organization>
 	<developers>
 		<developer>
 			<name>zhaohuihua</name>

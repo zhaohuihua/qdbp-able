@@ -2,10 +2,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
+	<parent>	
 		<groupId>com.gitee.qdbp</groupId>
 		<artifactId>qdbp-parent</artifactId>
-		<version>4.1.0</version>
+		<version>5.0.0</version>
 	</parent>
 
 	<artifactId>qdbp-able</artifactId>
