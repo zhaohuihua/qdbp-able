@@ -69,6 +69,7 @@ public abstract class ConvertTools {
      * 
      * @param object 待解析的对象
      * @return 解析后的列表, 如果object=null则返回null
+     * @since 4.1
      */
     public static List<Object> parseList(Object object) {
         if (object == null) {
@@ -83,6 +84,7 @@ public abstract class ConvertTools {
      * 
      * @param object 待解析的对象
      * @return 解析后的列表, 如果object=null则返回空列表
+     * @since 4.1.0
      */
     public static List<Object> parseListIfNullToEmpty(Object object) {
         if (object == null) {
@@ -338,6 +340,7 @@ public abstract class ConvertTools {
      * @param value 源字符串
      * @return 数字
      * @throws NumberFormatException 数字格式错误
+     * @since 4.1.0
      */
     public static Number toNumber(String value) throws NumberFormatException {
         if (VerifyTools.isBlank(value)) {
@@ -363,6 +366,7 @@ public abstract class ConvertTools {
      * @param defaults 默认值, 在表达式为空/表达式格式错误/表达式结果不是数字时返回默认值
      * @return 数字
      * @throws NumberFormatException 数字格式错误
+     * @since 4.1.0
      */
     public static Number toNumber(String value, Number defaults) throws NumberFormatException {
         if (VerifyTools.isBlank(value)) {
@@ -833,6 +837,7 @@ public abstract class ConvertTools {
      * @param list 数组
      * @param seprator 分隔符
      * @return 合并后的字符串
+     * @since 4.1.0
      */
     public static String joinToString(Collection<?> list, char seprator) {
         return joinToString(list, seprator, false);
@@ -865,6 +870,7 @@ public abstract class ConvertTools {
      * @param array 数组
      * @param seprator 分隔符
      * @return 合并后的字符串
+     * @since 4.1.0
      */
     public static String joinToString(Object[] array, char seprator) {
         return joinToString(array, seprator, false);
@@ -983,6 +989,7 @@ public abstract class ConvertTools {
      * @param seprator 分隔符
      * @param wrap 是否用括号包起来
      * @return 合并后的字符串
+     * @since 4.1.0
      */
     public static String joinToString(Object[] array, char seprator, boolean wrap) {
         if (array == null) {

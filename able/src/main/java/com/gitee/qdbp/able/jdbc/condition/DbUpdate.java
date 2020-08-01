@@ -56,6 +56,7 @@ public class DbUpdate extends DbItems implements Copyable {
      * 克隆为新对象(如果子类有新增字段或没有默认构造函数就应该覆盖该方法)
      * 
      * @return 新对象
+     * @since 5.0
      */
     @Override
     public DbUpdate copy() {
@@ -85,6 +86,7 @@ public class DbUpdate extends DbItems implements Copyable {
      * 创建副本对象(如果子类没有默认构造函数就应该覆盖该方法)
      * 
      * @return 副本对象
+     * @since 5.0
      */
     protected DbUpdate newCopies() {
         if (this.getClass() == DbUpdate.class) { // 当前类
