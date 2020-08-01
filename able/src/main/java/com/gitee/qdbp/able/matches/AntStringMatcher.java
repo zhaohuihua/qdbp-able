@@ -76,18 +76,7 @@ public class AntStringMatcher implements StringMatcher {
      * @param pattern 匹配规则
      */
     public AntStringMatcher(String pattern) {
-        this(pattern, true, false);
-    }
-    
-    /**
-     * 构造函数
-     * 
-     * @param pattern 匹配规则
-     * @param fullMatch 是否开启全部匹配模式<br>
-     *            如果fullMatch=true, 需要全部匹配; 如果fullMatch=false, 即前缀匹配
-     */
-    public AntStringMatcher(String pattern, boolean fullMatch) {
-        this(pattern, fullMatch, false);
+        this(pattern, true, Matches.Positive);
     }
     
     /**
@@ -95,14 +84,23 @@ public class AntStringMatcher implements StringMatcher {
      * 
      * @param pattern 匹配规则
      * @param fullMatch 是否开启全部匹配模式
-     * @param reverse 是否反转判断结果<br>
-     *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
      */
-    public AntStringMatcher(String pattern, boolean fullMatch, boolean reverse) {
+    public AntStringMatcher(String pattern, boolean fullMatch) {
+        this(pattern, fullMatch, Matches.Positive);
+    }
+    
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
+     * @param fullMatch 是否开启全部匹配模式
+     * @param mode 匹配模式: Positive=肯定模式, 符合条件为匹配; Negative=否定模式, 不符合条件为匹配
+     */
+    public AntStringMatcher(String pattern, boolean fullMatch, Matches mode) {
         VerifyTools.requireNotBlank(pattern, "pattern");
         this.pattern = pattern;
         this.fullMatch = fullMatch;
-        this.reverse = reverse;
+        this.reverse = mode == Matches.Negative;
     }
 
     /** Default path separator: '/' */
@@ -116,7 +114,7 @@ public class AntStringMatcher implements StringMatcher {
 
     /**
      * 判断字符串是否符合匹配规则<br>
-     * 如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     * 与匹配模式有关: Positive=肯定模式, 符合条件为匹配; Negative=否定模式, 不符合条件为匹配
      * 
      * @param source 字符串
      * @return 是否匹配

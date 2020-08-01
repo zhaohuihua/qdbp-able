@@ -21,25 +21,24 @@ public class ContainsStringMatcher implements StringMatcher {
      * @param pattern 匹配规则
      */
     public ContainsStringMatcher(String pattern) {
-        this(pattern, false);
+        this(pattern, Matches.Positive);
     }
 
     /**
      * 构造函数
      * 
      * @param pattern 匹配规则
-     * @param reverse 是否反转判断结果<br>
-     *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     * @param mode 匹配模式: Positive=肯定模式, 符合条件为匹配; Negative=否定模式, 不符合条件为匹配
      */
-    public ContainsStringMatcher(String pattern, boolean reverse) {
+    public ContainsStringMatcher(String pattern, Matches mode) {
         VerifyTools.requireNotBlank(pattern, "pattern");
         this.pattern = pattern;
-        this.reverse = reverse;
+        this.reverse = mode == Matches.Negative;
     }
 
     /**
      * 判断字符串中是否存在此规则指定的子字符串<br>
-     * 如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     * 与匹配模式有关: Positive=肯定模式, 符合条件为匹配; Negative=否定模式, 不符合条件为匹配
      * 
      * @param source 字符串
      * @return 是否匹配

@@ -141,33 +141,33 @@ public class WrapStringMatcher implements StringMatcher {
     public static StringMatcher parseMatcher(String pattern, boolean strict) {
         if (pattern.startsWith("regexp:")) {
             String value = StringTools.removePrefix(pattern, "regexp:");
-            return new RegexpStringMatcher(value, false);
+            return new RegexpStringMatcher(value, Matches.Positive);
         } else if (pattern.startsWith("regexp!:")) {
             String value = StringTools.removePrefix(pattern, "regexp!:");
-            return new RegexpStringMatcher(value, true);
+            return new RegexpStringMatcher(value, Matches.Negative);
         } else if (pattern.startsWith("ant:")) {
             String value = StringTools.removePrefix(pattern, "ant:");
-            return new AntStringMatcher(value, true, false);
+            return new AntStringMatcher(value, true, Matches.Positive);
         } else if (pattern.startsWith("ant!:")) {
             String value = StringTools.removePrefix(pattern, "ant!:");
-            return new AntStringMatcher(value, true, true);
+            return new AntStringMatcher(value, true, Matches.Negative);
         } else if (pattern.startsWith("equals:")) {
             String value = StringTools.removePrefix(pattern, "equals:");
-            return new EqualsStringMatcher(value, false);
+            return new EqualsStringMatcher(value, Matches.Positive);
         } else if (pattern.startsWith("equals!:")) {
             String value = StringTools.removePrefix(pattern, "equals!:");
-            return new EqualsStringMatcher(value, true);
+            return new EqualsStringMatcher(value, Matches.Negative);
         } else if (pattern.startsWith("contains:")) {
             String value = StringTools.removePrefix(pattern, "contains:");
-            return new ContainsStringMatcher(value, false);
+            return new ContainsStringMatcher(value, Matches.Positive);
         } else if (pattern.startsWith("contains!:")) {
             String value = StringTools.removePrefix(pattern, "contains!:");
-            return new ContainsStringMatcher(value, true);
+            return new ContainsStringMatcher(value, Matches.Negative);
         } else {
             if (strict) {
-                return new EqualsStringMatcher(pattern, false);
+                return new EqualsStringMatcher(pattern, Matches.Positive);
             } else {
-                return new ContainsStringMatcher(pattern, false);
+                return new ContainsStringMatcher(pattern, Matches.Positive);
             }
         }
     }

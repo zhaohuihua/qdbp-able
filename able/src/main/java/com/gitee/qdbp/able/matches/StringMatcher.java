@@ -29,6 +29,14 @@ package com.gitee.qdbp.able.matches;
  * @since 0.9 RC2
  */
 public interface StringMatcher {
+    
+    /** 匹配模式 **/
+    enum Matches {
+        /** 肯定模式, 符合条件为匹配 **/
+        Positive,
+        /** 否定模式, 不符合条件为匹配 **/
+        Negative
+    }
 
     /**
      * Returns <code>true</code> if the given <code>source</code> matches the specified <code>pattern</code>,
