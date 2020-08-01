@@ -8,6 +8,7 @@ import java.util.List;
  *
  * @author zhaohuihua
  * @version 20200711
+ * @since 5.0.0
  */
 public class VersionCodeTools {
 
