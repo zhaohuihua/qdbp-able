@@ -14,7 +14,7 @@ import com.gitee.qdbp.able.beans.KeyString;
  *
  * @author zhaohuihua
  * @version 150913
- * @since 5.0
+ * @since 5.0.0
  */
 public abstract class StringTools {
 

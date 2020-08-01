@@ -113,7 +113,7 @@ abstract class DbItems implements DbConditions, Serializable {
      * 
      * @param fieldName 字段名称
      * @return 查找到的条件
-     * @since 5.0
+     * @since 5.0.0
      */
     public List<DbCondition> find(String fieldName) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
@@ -149,7 +149,7 @@ abstract class DbItems implements DbConditions, Serializable {
      * @param fieldName 字段名称
      * @param fieldValue 字段值
      * @return 查找到的条件
-     * @since 5.0
+     * @since 5.0.0
      */
     public List<DbCondition> find(String fieldName, Object fieldValue) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");

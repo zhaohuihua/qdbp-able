@@ -24,7 +24,7 @@ interface DbConditions extends DbCondition, Iterable<DbCondition> {
      * @param <T> 条件类型
      * @param fieldName 查找的字段名
      * @return 条件列表
-     * @since 5.0
+     * @since 5.0.0
      */
     <T extends DbCondition> List<T> find(String fieldName);
 

@@ -95,7 +95,7 @@ public class DbField implements DbCondition, Copyable, Serializable {
      * 克隆为新字段
      * 
      * @return 新字段
-     * @since 5.0
+     * @since 5.0.0
      */
     @Override
     public DbField copy() {
