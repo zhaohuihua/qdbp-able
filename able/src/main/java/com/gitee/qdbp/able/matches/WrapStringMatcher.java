@@ -132,6 +132,21 @@ public class WrapStringMatcher implements StringMatcher {
      * ant:开头的解析为AntStringMatcher<br>
      * equals:开头的解析为EqualsStringMatcher<br>
      * contains:开头的解析为ContainsStringMatcher<br>
+     * 其余的解析为EqualsStringMatcher<br>
+     * 
+     * @param pattern 匹配规则
+     * @return StringMatcher
+     */
+    public static StringMatcher parseMatcher(String pattern) {
+        return parseMatcher(pattern, true);
+    }
+
+    /**
+     * 解析StringMatcher规则<br>
+     * regexp:开头的解析为RegexpStringMatcher<br>
+     * ant:开头的解析为AntStringMatcher<br>
+     * equals:开头的解析为EqualsStringMatcher<br>
+     * contains:开头的解析为ContainsStringMatcher<br>
      * 其余的, 严格模式下解析为EqualsStringMatcher, 否则解析为ContainsStringMatcher<br>
      * 
      * @param pattern 匹配规则
