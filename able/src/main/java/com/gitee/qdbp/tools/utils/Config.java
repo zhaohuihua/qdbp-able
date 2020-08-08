@@ -130,7 +130,7 @@ public class Config implements PropertyContainer, Serializable {
 
     /**
      * 获取String类型的配置项值(已经trim过了)<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -144,12 +144,12 @@ public class Config implements PropertyContainer, Serializable {
      * 获取String类型的配置项值(已经trim过了)
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
     @Override
-    public String getString(String key, boolean warning) {
-        return PropertyTools.getString(properties, key, warning);
+    public String getString(String key, boolean throwOnNotFound) {
+        return PropertyTools.getString(properties, key, throwOnNotFound);
     }
 
     /**
@@ -192,7 +192,7 @@ public class Config implements PropertyContainer, Serializable {
 
     /**
      * 获取Long类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -206,12 +206,12 @@ public class Config implements PropertyContainer, Serializable {
      * 获取Long类型的配置项值
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
     @Override
-    public Long getLong(String key, boolean warning) {
-        return PropertyTools.getLong(properties, key, warning);
+    public Long getLong(String key, boolean throwOnNotFound) {
+        return PropertyTools.getLong(properties, key, throwOnNotFound);
     }
 
     /**
@@ -229,7 +229,7 @@ public class Config implements PropertyContainer, Serializable {
 
     /**
      * 获取Integer类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -243,12 +243,12 @@ public class Config implements PropertyContainer, Serializable {
      * 获取Integer类型的配置项值
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
     @Override
-    public Integer getInteger(String key, boolean warning) {
-        return PropertyTools.getInteger(properties, key, warning);
+    public Integer getInteger(String key, boolean throwOnNotFound) {
+        return PropertyTools.getInteger(properties, key, throwOnNotFound);
     }
 
     /**
@@ -266,7 +266,7 @@ public class Config implements PropertyContainer, Serializable {
 
     /**
      * 获取Boolean类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -280,12 +280,12 @@ public class Config implements PropertyContainer, Serializable {
      * 获取Boolean类型的配置项值
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
     @Override
-    public Boolean getBoolean(String key, boolean warning) {
-        return PropertyTools.getBoolean(properties, key, warning);
+    public Boolean getBoolean(String key, boolean throwOnNotFound) {
+        return PropertyTools.getBoolean(properties, key, throwOnNotFound);
     }
 
     /**
@@ -303,7 +303,7 @@ public class Config implements PropertyContainer, Serializable {
 
     /**
      * 获取数组类型的配置项值, 以竖杠分隔的字符串拆分为数组<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -318,12 +318,12 @@ public class Config implements PropertyContainer, Serializable {
      * 每一个子字符串都已经trim()过了<br>
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
     @Override
-    public String[] getArray(String key, boolean warning) {
-        return PropertyTools.getArray(properties, key, warning);
+    public String[] getArray(String key, boolean throwOnNotFound) {
+        return PropertyTools.getArray(properties, key, throwOnNotFound);
     }
 
     /**
@@ -333,11 +333,11 @@ public class Config implements PropertyContainer, Serializable {
      * @param <S> 子类型
      * @param key KEY
      * @param type 期望返回的类型
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return 配置的实例化对象
      */
-    public <T, S extends T> S getClassInstance(String key, Class<T> type, boolean warning) {
-        String value = this.getString(key, warning);
+    public <T, S extends T> S getClassInstance(String key, Class<T> type, boolean throwOnNotFound) {
+        String value = this.getString(key, throwOnNotFound);
         if (VerifyTools.isBlank(value)) {
             return null;
         } else {

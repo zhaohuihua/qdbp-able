@@ -58,7 +58,7 @@ public abstract class PropertyTools {
      * 获取String类型的配置项值(已经trim过了)<br>
      * 支持引用其他配置项<br>
      * key.a = {property:key.b}<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param properties Properties
      * @param key KEY
@@ -174,7 +174,7 @@ public abstract class PropertyTools {
 
     /**
      * 获取Long类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param properties Properties
      * @param key KEY
@@ -200,7 +200,7 @@ public abstract class PropertyTools {
 
     /**
      * 获取Integer类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param properties Properties
      * @param key KEY
@@ -239,7 +239,7 @@ public abstract class PropertyTools {
 
     /**
      * 获取Boolean类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param properties Properties
      * @param key KEY
@@ -278,7 +278,7 @@ public abstract class PropertyTools {
 
     /**
      * 获取数组类型的配置项值, 以竖杠分隔的字符串拆分为数组<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param properties Properties
      * @param key KEY
@@ -345,7 +345,7 @@ public abstract class PropertyTools {
      * 根据前缀查找, 得到一个子集
      * 
      * @param original 原集合
-     * @param prefixes 前缀, 带分隔符(如prefix.)
+     * @param prefixes 前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
      * @return 子集
      */
     public static Properties filter(Properties original, String... prefixes) {
@@ -369,7 +369,7 @@ public abstract class PropertyTools {
             return p;
         }
         if (prefixes.length == 1) {
-            String prefix = prefixes[0];
+            String prefix = prefixes[0].endsWith(".") ? prefixes[0] : prefixes[0] + '.';
             for (String key : original.stringPropertyNames()) {
                 if (key.startsWith(prefix)) {
                     p.setProperty(cutPrefix ? key.substring(prefix.length()) : key, original.getProperty(key));
@@ -377,7 +377,8 @@ public abstract class PropertyTools {
             }
         } else {
             for (String key : original.stringPropertyNames()) {
-                for (String prefix : prefixes) {
+                for (String item : prefixes) {
+                    String prefix = item.endsWith(".") ? item : item + '.';
                     if (key.startsWith(prefix)) {
                         p.setProperty(cutPrefix ? key.substring(prefix.length()) : key, original.getProperty(key));
                     }

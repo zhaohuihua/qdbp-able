@@ -26,7 +26,7 @@ public interface PropertyContainer {
      * 获取String类型的配置项值(已经trim过了)<br>
      * 支持引用其他配置项<br>
      * key.a = {property:key.b}<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -39,10 +39,10 @@ public interface PropertyContainer {
      * key.a = {property:key.b}<br>
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    String getString(String key, boolean warning);
+    String getString(String key, boolean throwOnNotFound);
 
     /**
      * 获取String类型的配置项值, 如果配置项值为null则返回默认值
@@ -75,7 +75,7 @@ public interface PropertyContainer {
 
     /**
      * 获取Integer类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -86,10 +86,10 @@ public interface PropertyContainer {
      * 获取Long类型的配置项值
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    Long getLong(String key, boolean warning);
+    Long getLong(String key, boolean throwOnNotFound);
 
     /**
      * 获取Long类型的配置项值<br>
@@ -103,7 +103,7 @@ public interface PropertyContainer {
 
     /**
      * 获取Integer类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -114,10 +114,10 @@ public interface PropertyContainer {
      * 获取Integer类型的配置项值
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    Integer getInteger(String key, boolean warning);
+    Integer getInteger(String key, boolean throwOnNotFound);
 
     /**
      * 获取Integer类型的配置项值<br>
@@ -131,7 +131,7 @@ public interface PropertyContainer {
 
     /**
      * 获取Boolean类型的配置项值<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -142,10 +142,10 @@ public interface PropertyContainer {
      * 获取Boolean类型的配置项值
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    Boolean getBoolean(String key, boolean warning);
+    Boolean getBoolean(String key, boolean throwOnNotFound);
 
     /**
      * 获取Boolean类型的配置项值<br>
@@ -159,7 +159,7 @@ public interface PropertyContainer {
 
     /**
      * 获取数组类型的配置项值, 以竖杠分隔的字符串拆分为数组<br>
-     * 如果值不存在, 将输出警告日志
+     * 如果值不存在, 将会抛出异常
      *
      * @param key KEY
      * @return VALUE
@@ -171,10 +171,10 @@ public interface PropertyContainer {
      * 每一个子字符串都已经trim()过了<br>
      *
      * @param key KEY
-     * @param warning 值不存在时,是否输出警告日志
+     * @param throwOnNotFound 值不存在时,是否抛出异常
      * @return VALUE
      */
-    String[] getArray(String key, boolean warning);
+    String[] getArray(String key, boolean throwOnNotFound);
 
     /**
      * 返回所有配置项条目
