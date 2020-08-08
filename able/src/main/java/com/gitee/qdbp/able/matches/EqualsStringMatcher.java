@@ -28,6 +28,21 @@ public class EqualsStringMatcher implements StringMatcher {
      * 构造函数
      * 
      * @param pattern 匹配规则
+     * @param reverse 是否反转判断结果<br>
+     *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     * @deprecated 改为 {@link #EqualsStringMatcher(String, Matches)}<br>
+     *            因为reverse写在构造函数中恰好与习惯思维相反<br>
+     *            new EqualsStringMatcher(pattern, false)容易理解为期望不相等, 实际上是期望相等(不反转判断结果)
+     */
+    @Deprecated
+    public EqualsStringMatcher(String pattern, boolean reverse) {
+        this(pattern, reverse ? Matches.Negative : Matches.Positive);
+    }
+
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
      * @param mode 匹配模式: Positive=肯定模式, 符合条件为匹配; Negative=否定模式, 不符合条件为匹配
      */
     public EqualsStringMatcher(String pattern, Matches mode) {

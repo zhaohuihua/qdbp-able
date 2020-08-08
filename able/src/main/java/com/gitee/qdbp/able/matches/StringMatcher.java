@@ -29,7 +29,7 @@ package com.gitee.qdbp.able.matches;
  * @since 0.9 RC2
  */
 public interface StringMatcher {
-    
+
     /** 匹配模式 **/
     enum Matches {
         /** 肯定模式, 符合条件为匹配 **/

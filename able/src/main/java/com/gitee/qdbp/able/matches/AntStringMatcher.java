@@ -88,7 +88,23 @@ public class AntStringMatcher implements StringMatcher {
     public AntStringMatcher(String pattern, boolean fullMatch) {
         this(pattern, fullMatch, Matches.Positive);
     }
-    
+
+    /**
+     * 构造函数
+     * 
+     * @param pattern 匹配规则
+     * @param fullMatch 是否开启全部匹配模式
+     * @param reverse 是否反转判断结果<br>
+     *            如果reverse=false, 符合时返回true; 如果reverse=true, 不符合时返回true
+     * @deprecated 改为 {@link #AntStringMatcher(String, boolean, Matches)}<br>
+     *             因为reverse写在构造函数中恰好与习惯思维相反<br>
+     *             new AntStringMatcher(pattern, true, false)容易理解为期望不匹配, 实际上是期望匹配(不反转判断结果)
+     */
+    @Deprecated
+    public AntStringMatcher(String pattern, boolean fullMatch, boolean reverse) {
+        this(pattern, fullMatch, reverse ? Matches.Negative : Matches.Positive);
+    }
+
     /**
      * 构造函数
      * 
