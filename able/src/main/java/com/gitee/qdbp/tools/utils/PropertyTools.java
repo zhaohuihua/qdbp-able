@@ -388,6 +388,86 @@ public abstract class PropertyTools {
         return p;
     }
 
+    /**
+     * 根据前缀查找所有配置项列表<br>
+     * 只有后缀是数字的才会获取, 返回值会根据数字排序<br>
+     * 如果值不存在, 将会抛出异常<br>
+     * test.items.1 = xxx<br>
+     * test.items.2 = yyy<br>
+     * test.items.3 = zzz<br>
+     * test.items.a = aaa (不会返回)<br>
+     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * 
+     * @param properties Properties
+     * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
+     * @return 配置值列表
+     */
+    public static List<String> findValueList(Properties properties, String keyPrefix) {
+        return findValueList(properties, keyPrefix, true);
+    }
+
+    /**
+     * 根据前缀查找所有配置项列表<br>
+     * 只有后缀是数字的才会获取, 返回值会根据数字排序<br>
+     * test.items.1 = xxx<br>
+     * test.items.2 = yyy<br>
+     * test.items.3 = zzz<br>
+     * test.items.a = aaa (不会返回)<br>
+     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * 
+     * @param properties Properties
+     * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
+     * @param throwOnNotFound 值不存在时,是否抛出异常
+     * @return 配置值列表
+     */
+    public static List<String> findValueList(Properties properties, String keyPrefix, boolean throwOnNotFound) {
+        // 按前缀筛选
+        Properties filtered = filter(properties, true, keyPrefix);
+        // 再按后缀是不是数字筛选
+        List<ListItem> list = new ArrayList<>();
+        for (Map.Entry<?, ?> entry : filtered.entrySet()) {
+            Object key = entry.getKey();
+            Object value = entry.getValue();
+            if (key instanceof String && value instanceof String) {
+                String skey = (String) key;
+                String svalue = (String) value;
+                if (StringTools.isDigit(skey)) {
+                    list.add(new ListItem(Integer.valueOf(skey), svalue));
+                }
+            }
+        }
+        if (list.isEmpty()) {
+            if (throwOnNotFound) {
+                throw new IllegalArgumentException("Property of starts with '" + keyPrefix + "' not found.");
+            }
+            return null;
+        }
+
+        // 排序后返回
+        Collections.sort(list);
+        List<String> values = new ArrayList<>();
+        for (ListItem item : list) {
+            values.add(item.value);
+        }
+        return values;
+    }
+
+    private static class ListItem implements Comparable<ListItem> {
+
+        int index;
+        String value;
+
+        public ListItem(int index, String value) {
+            this.index = index;
+            this.value = value;
+        }
+
+        @Override
+        public int compareTo(ListItem o) {
+            return this.index - o.index;
+        }
+    }
+
     private static String getRealValue(Properties properties, String key, boolean throwOnNotFound) {
         Object value = properties.get(key);
         if (value == null) {

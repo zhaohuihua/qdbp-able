@@ -177,6 +177,35 @@ public interface PropertyContainer {
     String[] getArray(String key, boolean throwOnNotFound);
 
     /**
+     * 根据前缀查找所有配置项列表<br>
+     * 只有后缀是数字的才会获取, 返回值会根据数字排序<br>
+     * test.items.1 = xxx<br>
+     * test.items.2 = yyy<br>
+     * test.items.3 = zzz<br>
+     * test.items.a = aaa (不会返回)<br>
+     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * 
+     * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
+     * @return 配置值列表
+     */
+    List<String> findValueList(String keyPrefix);
+
+    /**
+     * 根据前缀查找所有配置项列表<br>
+     * 只有后缀是数字的才会获取, 返回值会根据数字排序<br>
+     * test.items.1 = xxx<br>
+     * test.items.2 = yyy<br>
+     * test.items.3 = zzz<br>
+     * test.items.a = aaa (不会返回)<br>
+     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * 
+     * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
+     * @param throwOnNotFound 值不存在时,是否抛出异常
+     * @return 配置值列表
+     */
+    List<String> findValueList(String keyPrefix, boolean throwOnNotFound);
+
+    /**
      * 返回所有配置项条目
      *
      * @return 所有配置项条目

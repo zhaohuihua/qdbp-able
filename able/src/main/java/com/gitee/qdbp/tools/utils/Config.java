@@ -327,6 +327,42 @@ public class Config implements PropertyContainer, Serializable {
     }
 
     /**
+     * 根据前缀查找所有配置项列表<br>
+     * 只有后缀是数字的才会获取, 返回值会根据数字排序<br>
+     * 如果值不存在, 将会抛出异常<br>
+     * test.items.1 = xxx<br>
+     * test.items.2 = yyy<br>
+     * test.items.3 = zzz<br>
+     * test.items.a = aaa (不会返回)<br>
+     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * 
+     * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
+     * @return 配置值列表
+     */
+    @Override
+    public List<String> findValueList(String keyPrefix) {
+        return PropertyTools.findValueList(properties, keyPrefix, true);
+    }
+
+    /**
+     * 根据前缀查找所有配置项列表<br>
+     * 只有后缀是数字的才会获取, 返回值会根据数字排序<br>
+     * test.items.1 = xxx<br>
+     * test.items.2 = yyy<br>
+     * test.items.3 = zzz<br>
+     * test.items.a = aaa (不会返回)<br>
+     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * 
+     * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
+     * @param throwOnNotFound 值不存在时,是否抛出异常
+     * @return 配置值列表
+     */
+    @Override
+    public List<String> findValueList(String keyPrefix, boolean throwOnNotFound) {
+        return PropertyTools.findValueList(properties, keyPrefix, throwOnNotFound);
+    }
+
+    /**
      * 获取Class类型的配置值并返回实例化对象
      * 
      * @param <T> 类型
