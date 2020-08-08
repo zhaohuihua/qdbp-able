@@ -364,8 +364,9 @@ public abstract class DateTools {
      */
     private static Date parseYyyyMMdd(String date, char separator) {
         String[] array = StringTools.split(date, separator);
+        String desc = "Date format is not supported [" + date + "].";
         if (array.length != 3) { // 不是三个数字
-            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+            throw new IllegalArgumentException(desc);
         }
         int longCount = 0;
         for (int i = 0; i < array.length; i++) {
@@ -374,7 +375,7 @@ public abstract class DateTools {
             }
         }
         if (longCount > 1) { // 不只一个三位以上数字, 例如: 2018/8/100
-            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+            throw new IllegalArgumentException(desc);
         }
         int first = parseInt(array[0], "Date", date);
         int second = parseInt(array[1], "Date", date);
@@ -387,7 +388,7 @@ public abstract class DateTools {
             month = second;
             day = third;
         } else if (array[1].length() > 2 || second > 31) { // 年份出现在中间, 例如: 7/2018/8
-            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+            throw new IllegalArgumentException(desc);
         } else if (array[2].length() > 2 || third > 31) { // 月/日/年;日/月/年
             year = array[2].length() > 2 ? third : parseYear(third);
             if (first > 12) { // 日/月/年, 例如: 20/8/2018
@@ -403,8 +404,14 @@ public abstract class DateTools {
             month = second;
             day = third;
         }
-        if (year > 9999 || month > 12 || day > 31) { // 2018/20/20, 2018/20/8, 2018/8/32, 20/20/2018
-            throw new IllegalArgumentException("Date format is not supported [" + date + "].");
+        if (year > 9999) {
+            throw new IllegalArgumentException(desc + " The year range is 0-9999.");
+        }
+        if (month < 0 || month > 12) { // 2018/20/20, 2018/20/8
+            throw new IllegalArgumentException(desc + " The month range is 1-12.");
+        }
+        if (day < 0 || day > 31) { // 2018/8/32
+            throw new IllegalArgumentException(desc + " The day range is 1-31.");
         }
         return DateTools.of(year, month - 1, day);
     }
@@ -427,42 +434,53 @@ public abstract class DateTools {
         if (string == null || string.trim().length() == 0) {
             return 0;
         }
+        String desc = "Time format is not supported [" + string + "].";
         String[] parts = StringTools.split(string.trim(), '.', ',');
         if (parts.length != 1 && parts.length != 2) {
-            throw new IllegalArgumentException("Time format is not supported [" + string + "].");
+            throw new IllegalArgumentException(desc);
         }
         String time = parts[0];
         if (VerifyTools.isBlank(time)) {
-            throw new IllegalArgumentException("Time format is not supported [" + string + "].");
+            throw new IllegalArgumentException(desc);
         }
         // 解析毫秒数
         int millis = 0;
         if (parts.length == 2) {
             String millisString = parts[1];
             if (VerifyTools.isAnyBlank(millisString)) {
-                throw new IllegalArgumentException("Time format is not supported [" + string + "].");
+                throw new IllegalArgumentException(desc);
             }
             // 毫秒如果超过三位只截止前三位, 10:20:30.999999=10:20:30.999
             if (millisString.length() > 3) {
                 millisString = millisString.substring(0, 3);
+            } else if (millisString.length() < 3) {
+                // 如果位数不足3位, 应在后面补0
+                // 因为10:20:30.9=10:20:30.900, 而不是10:20:30.009
+                millisString = StringTools.pad(millisString, '0', false, 3);
             }
             millis = parseInt(millisString, "Time", string);
         }
         // 解析时分秒
         String[] array = StringTools.split(time, ':');
         if (array.length != 3) { // 不是三个数字
-            throw new IllegalArgumentException("Time format is not supported [" + time + "].");
+            throw new IllegalArgumentException(desc);
         }
         for (int i = 0; i < array.length; i++) {
             if (array[i].length() > 2) {
-                throw new IllegalArgumentException("Time format is not supported [" + time + "].");
+                throw new IllegalArgumentException(desc);
             }
         }
         int hours = parseInt(array[0], "Time", time);
         int minutes = parseInt(array[1], "Time", time);
         int seconds = parseInt(array[2], "Time", time);
-        if (hours > 23 || minutes > 59 || seconds > 59) {
-            throw new IllegalArgumentException("Time format is not supported [" + time + "].");
+        if (hours < 0 || hours > 23) {
+            throw new IllegalArgumentException(desc + " The hours range is 0-23.");
+        }
+        if (minutes < 0 || minutes > 59) {
+            throw new IllegalArgumentException(desc + " The minutes range is 0-59.");
+        }
+        if (seconds < 0 || seconds > 59) {
+            throw new IllegalArgumentException(desc + " The seconds range is 0-59.");
         }
         return hours * RATE_HOUR + minutes * RATE_MINUTE + seconds * RATE_SECOND + millis;
     }
@@ -482,6 +500,10 @@ public abstract class DateTools {
     }
 
     private static int parseInt(String value, String type, String original) {
+        if (!StringTools.isDigit(value)) {
+            String fmt = "%s format is not supported [%s], number format error [%s].";
+            throw new IllegalArgumentException(String.format(fmt, type, original, value));
+        }
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
