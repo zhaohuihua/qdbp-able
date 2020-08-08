@@ -400,7 +400,10 @@ public abstract class ReflectTools {
                 if (Modifier.isStatic(method.getModifiers())) {
                     continue; // 去掉静态方法
                 }
-                if (method.getTypeParameters().length != 1) {
+                if (!Modifier.isPublic(method.getModifiers())) {
+                    continue; // 去掉非公开的方法
+                }
+                if (method.getParameterTypes().length != 1) {
                     continue; // Setter方法只能有一个参数
                 }
                 // 判断方法名是否符合setter特征
@@ -440,7 +443,10 @@ public abstract class ReflectTools {
                 if (Modifier.isStatic(method.getModifiers())) {
                     continue; // 去掉静态方法
                 }
-                if (method.getTypeParameters().length > 0) {
+                if (!Modifier.isPublic(method.getModifiers())) {
+                    continue; // 去掉非公开的方法
+                }
+                if (method.getParameterTypes().length > 0) {
                     continue; // Getter方法不能有参数
                 }
                 Class<?> returnType = method.getReturnType();
