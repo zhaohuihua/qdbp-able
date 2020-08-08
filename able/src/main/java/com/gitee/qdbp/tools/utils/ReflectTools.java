@@ -382,6 +382,97 @@ public abstract class ReflectTools {
     }
 
     /**
+     * 获取所有setter方法
+     * 
+     * @param clazz 目标类
+     * @return 方法列表
+     * @since 5.0.0
+     */
+    public static Method[] getAllSetter(Class<?> clazz) {
+        VerifyTools.requireNonNull(clazz, "clazz");
+
+        List<Method> allSetters = new ArrayList<>();
+        Class<?> temp = clazz;
+        while (temp != null && temp != Object.class) {
+            Method[] declaredMethods = temp.getDeclaredMethods();
+            List<Method> methods = new ArrayList<>();
+            for (Method method : declaredMethods) {
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue; // 去掉静态方法
+                }
+                if (method.getTypeParameters().length != 1) {
+                    continue; // Setter方法只能有一个参数
+                }
+                // 判断方法名是否符合setter特征
+                String name = method.getName();
+                if (name.startsWith("set") && name.length() > 3) {
+                    char c = name.charAt(3);
+                    if (Character.isUpperCase(c) || c == '_' || c == '$') {
+                        methods.add(method);
+                    }
+                }
+            }
+            if (!methods.isEmpty()) {
+                // 父类字段放在前面
+                allSetters.addAll(0, methods);
+            }
+            temp = temp.getSuperclass();
+        }
+        return ConvertTools.toArray(allSetters, Method.class);
+    }
+
+    /**
+     * 获取所有getter方法
+     * 
+     * @param clazz 目标类
+     * @return 方法列表
+     * @since 5.0.0
+     */
+    public static Method[] getAllGetter(Class<?> clazz) {
+        VerifyTools.requireNonNull(clazz, "clazz");
+
+        List<Method> allSetters = new ArrayList<>();
+        Class<?> temp = clazz;
+        while (temp != null && temp != Object.class) {
+            Method[] declaredMethods = temp.getDeclaredMethods();
+            List<Method> methods = new ArrayList<>();
+            for (Method method : declaredMethods) {
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue; // 去掉静态方法
+                }
+                if (method.getTypeParameters().length > 0) {
+                    continue; // Getter方法不能有参数
+                }
+                Class<?> returnType = method.getReturnType();
+                if (returnType == void.class) {
+                    continue; // Getter方法必须有返回值
+                }
+                // 判断方法名是否符合getter特征
+                String name = method.getName();
+                if (name.startsWith("is") && name.length() > 2) {
+                    char c = name.charAt(2);
+                    if (Character.isUpperCase(c) || c == '_' || c == '$') {
+                        if (returnType == boolean.class || returnType == Boolean.class) {
+                            methods.add(method);
+                        }
+                    }
+                } else if (name.startsWith("get") && name.length() > 3) {
+                    char c = name.charAt(3);
+                    if (Character.isUpperCase(c) || c == '_' || c == '$') {
+                        methods.add(method);
+                    }
+                }
+            }
+            if (!methods.isEmpty()) {
+                // 父类字段放在前面
+                allSetters.addAll(0, methods);
+            }
+            temp = temp.getSuperclass();
+        }
+        return ConvertTools.toArray(allSetters, Method.class);
+    }
+
+    /**
      * 获取方法签名的简要描述
      * 
      * @param clazz 类名
