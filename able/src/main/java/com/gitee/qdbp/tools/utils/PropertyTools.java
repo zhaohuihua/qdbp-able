@@ -440,7 +440,7 @@ public abstract class PropertyTools {
             if (throwOnNotFound) {
                 throw new IllegalArgumentException("Property of starts with '" + keyPrefix + "' not found.");
             }
-            return null;
+            return new ArrayList<String>();
         }
 
         // 排序后返回
