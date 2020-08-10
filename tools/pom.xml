@@ -10,6 +10,7 @@
 
 	<artifactId>qdbp-tools</artifactId>
 	<packaging>jar</packaging>
+	<version>5.0.1-SNAPSHOT</version>
 	<url>https://gitee.com/qdbp/qdbp-able/</url>
 	<description>qdbp tools library</description>
 
@@ -23,7 +24,7 @@
 		<dependency>
 			<groupId>com.gitee.qdbp</groupId>
 			<artifactId>qdbp-able</artifactId>
-			<version>5.0.0</version>
+			<version>5.0.1-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 
