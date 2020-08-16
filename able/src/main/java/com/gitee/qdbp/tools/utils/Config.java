@@ -334,7 +334,7 @@ public class Config implements PropertyContainer, Serializable {
      * test.items.2 = yyy<br>
      * test.items.3 = zzz<br>
      * test.items.a = aaa (不会返回)<br>
-     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * findValueList("test.items") = [xxx,yyy,zzz]
      * 
      * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
      * @return 配置值列表
@@ -351,7 +351,7 @@ public class Config implements PropertyContainer, Serializable {
      * test.items.2 = yyy<br>
      * test.items.3 = zzz<br>
      * test.items.a = aaa (不会返回)<br>
-     * findValuesByPrefix("test.items") = [xxx,yyy,zzz]
+     * findValueList("test.items") = [xxx,yyy,zzz]
      * 
      * @param keyPrefix KEY前缀, 如果不带分隔符, 会自动加上点(如prefix=prefix.)
      * @param throwOnNotFound 值不存在时,是否抛出异常
