@@ -8,18 +8,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import com.gitee.qdbp.able.exception.ResourceNotFoundException;
+import com.gitee.qdbp.able.matches.AntFileMatcher;
+import com.gitee.qdbp.able.matches.FileMatcher;
+import com.gitee.qdbp.able.matches.FileMatcher.Target;
+import com.gitee.qdbp.tools.utils.StringTools;
 import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
@@ -345,6 +355,87 @@ public abstract class PathTools {
             String desc = "Resource location [" + toUriPath(url) + "]";
             throw new ResourceNotFoundException(desc + " connection failed", e);
         }
+    }
+
+    /**
+     * 查找所有classpath或jar包中, 指定文件夹下的资源
+     * 
+     * @param folder 文件夹
+     * @param filter 匹配规则
+     * @return 资源列表
+     * @throws ResourceNotFoundException 资源查找失败, 资源不存在
+     */
+    public static List<URL> scanResources(String folder, String filter) throws ResourceNotFoundException {
+        FileMatcher matcher = new AntFileMatcher(filter, Target.FileName);
+        return scanResources(folder, matcher);
+    }
+
+    /**
+     * 查找所有classpath或jar包中, 指定文件夹下的资源
+     * 
+     * @param folder 文件夹
+     * @param matcher 匹配规则
+     * @return 资源列表
+     * @throws ResourceNotFoundException 资源查找失败, 资源不存在
+     */
+    public static List<URL> scanResources(String folder, FileMatcher matcher) throws ResourceNotFoundException {
+        Enumeration<URL> roots;
+        try {
+            roots = ClassLoader.getSystemClassLoader().getResources(folder);
+        } catch (IOException e) {
+            String desc = "Failed to scan resource in [" + folder + "], " + matcher.toString();
+            throw new ResourceNotFoundException(desc + ", " + e.getMessage(), e);
+        }
+        List<URL> urls = new ArrayList<>();
+        while (roots.hasMoreElements()) {
+            URL url = roots.nextElement();
+            if ("file".equalsIgnoreCase(url.getProtocol())) {
+                String rootFolder = toUriPath(url);
+                List<File> files = FileTools.treelist(rootFolder, matcher);
+                for (File file : files) {
+                    try {
+                        urls.add(file.toURI().toURL());
+                    } catch (MalformedURLException e) {
+                        String desc = "Resource location [" + formatPath(file.getAbsolutePath()) + "]";
+                        throw new ResourceNotFoundException(desc + " is not a well-formed path");
+                    }
+                }
+            } else if ("jar".equalsIgnoreCase(url.getProtocol())) {
+                // jar:file:/E:/repository/qdbp-jdbc-core-3.0.0.jar!/settings/
+                JarFile jar;
+                try {
+                    jar = ((JarURLConnection) url.openConnection()).getJarFile();
+                } catch (IOException e) {
+                    throw new ResourceNotFoundException("Failed to open resource [" + url + "]", e);
+                }
+                String folderPath = PathTools.concat(true, "/", folder, "/");
+                String rootPrefix = StringTools.removeSuffix(url.toString(), folderPath);
+                Enumeration<JarEntry> entries = jar.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    if (entry.isDirectory()) {
+                        continue;
+                    }
+                    // entry.getName()是相对路径, 如: settings/spring/qdbc.xml
+                    String entryPath = entry.getName();
+                    String filePath = PathTools.concat("/", entryPath);
+                    if (!filePath.startsWith(folderPath)) {
+                        continue;
+                    }
+                    File file = new File(filePath);
+                    if (matcher.matches(file)) {
+                        try {
+                            // jar:file:/E:/repository/qdbp-jdbc-core-3.0.0.jar!/settings/spring/qdbc.xml
+                            urls.add(new URL(PathTools.concat(rootPrefix, entryPath)));
+                        } catch (MalformedURLException e) {
+                            String desc = "Resource location [" + formatPath(file.getAbsolutePath()) + "]";
+                            throw new ResourceNotFoundException(desc + " is not a well-formed path");
+                        }
+                    }
+                }
+            }
+        }
+        return urls;
     }
 
     /**
