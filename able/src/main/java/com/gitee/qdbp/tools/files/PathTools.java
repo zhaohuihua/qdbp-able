@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -1071,7 +1072,8 @@ public abstract class PathTools {
     }
 
     /**
-     * 通过网络下载文件
+     * 通过网络下载文件<br>
+     * 将会自动识别文本编码格式
      *
      * @param url URL
      * @return 文件内容
@@ -1082,19 +1084,21 @@ public abstract class PathTools {
     }
 
     /**
-     * 通过网络下载文件
+     * 通过网络下载文件<br>
+     * 将会自动识别文本编码格式
      *
      * @param url URL
-     * @param charset 字符编码格式
+     * @param defaultCharset 默认的字符编码格式(识别失败时使用)
      * @return 文件内容
      * @throws IOException 失败
      */
-    public static String downloadString(String url, String charset) throws IOException {
-        return new String(download(url), charset);
+    public static String downloadString(String url, String defaultCharset) throws IOException {
+        return downloadString(new URL(url), defaultCharset);
     }
 
     /**
-     * 通过网络下载文件
+     * 通过网络下载文件<br>
+     * 将会自动识别文本编码格式
      *
      * @param url URL
      * @return 文件内容
@@ -1105,15 +1109,16 @@ public abstract class PathTools {
     }
 
     /**
-     * 通过网络下载文件
+     * 通过网络下载文件<br>
+     * 将会自动识别文本编码格式
      *
      * @param url URL
-     * @param charset 字符编码格式
+     * @param defaultCharset 默认的字符编码格式(识别失败时使用)
      * @return 文件内容
      * @throws IOException 失败
      */
-    public static String downloadString(URL url, String charset) throws IOException {
-        return new String(download(url), charset);
+    public static String downloadString(URL url, String defaultCharset) throws IOException {
+        return FileTools.bytesToString(download(url), Charset.forName(defaultCharset));
     }
 
     /**

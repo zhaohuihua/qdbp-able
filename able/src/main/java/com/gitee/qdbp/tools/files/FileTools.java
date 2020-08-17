@@ -59,7 +59,7 @@ public abstract class FileTools {
             bytes = bos.toByteArray();
         }
 
-        return bytesToString(bytes);
+        return bytesToString(bytes, CHARSET);
     }
 
     /**
@@ -77,13 +77,13 @@ public abstract class FileTools {
             bytes = bos.toByteArray();
         }
 
-        return bytesToString(bytes);
+        return bytesToString(bytes, CHARSET);
     }
 
-    private static String bytesToString(byte[] bytes) throws IOException {
+    static String bytesToString(byte[] bytes, Charset defaultCharset) throws IOException {
         try (InputStream input = new ByteArrayInputStream(bytes)) {
             // 解析内容的字符集
-            CharsetAndBomIndex result = parseEncoding(input);
+            CharsetAndBomIndex result = parseEncoding(input, defaultCharset);
             int bomLength = result.getBomLength();
             byte[] readyBytes = bytes;
             if (bomLength > 0) { // 清除前置的bom字符
@@ -91,9 +91,9 @@ public abstract class FileTools {
                 System.arraycopy(bytes, bomLength, temp, 0, temp.length);
                 readyBytes = temp;
             }
-            return new String(readyBytes, result.getCharset());
+            return new String(readyBytes, VerifyTools.nvl(result.getCharset(), defaultCharset));
         } catch (UnsupportedEncodingException e) {
-            return new String(bytes, CHARSET);
+            return new String(bytes, defaultCharset);
         }
     }
 
@@ -892,7 +892,7 @@ public abstract class FileTools {
      */
     public static String getEncoding(File file) {
         try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(file))) {
-            CharsetAndBomIndex result = parseEncoding(input);
+            CharsetAndBomIndex result = parseEncoding(input, CHARSET);
             return result.getCharset().displayName();
         } catch (Exception e) {
             return CHARSET.displayName();
@@ -909,11 +909,11 @@ public abstract class FileTools {
      * @version 2010-10-05
      */
     public static String getEncoding(InputStream input) {
-        CharsetAndBomIndex result = parseEncoding(input);
+        CharsetAndBomIndex result = parseEncoding(input, CHARSET);
         return result.getCharset().displayName();
     }
 
-    private static CharsetAndBomIndex parseEncoding(InputStream input) {
+    static CharsetAndBomIndex parseEncoding(InputStream input, Charset defaultCharset) {
         try {
             input.mark(0);
 
@@ -921,7 +921,7 @@ public abstract class FileTools {
             byte[] bytes = new byte[4];
             int read = input.read(bytes, 0, bytes.length);
             if (read == -1) {
-                return new CharsetAndBomIndex(CHARSET, 0);
+                return new CharsetAndBomIndex(defaultCharset, 0);
             }
             // http://www.unicode.org/faq/utf_bom.html#bom4
             // Bytes       Encoding Form
@@ -983,7 +983,7 @@ public abstract class FileTools {
             }
             return new CharsetAndBomIndex(encoding, 0);
         } catch (Exception e) {
-            return new CharsetAndBomIndex(CHARSET, 0);
+            return new CharsetAndBomIndex(defaultCharset, 0);
         }
     }
 
