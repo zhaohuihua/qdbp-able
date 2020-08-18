@@ -311,7 +311,7 @@ public abstract class StringTools {
      * 
      * @param parts 字符串片断
      * @return 完整字符串
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static String concat(String... parts) {
         if (parts == null) {
@@ -405,7 +405,7 @@ public abstract class StringTools {
      * 
      * @param string 指定字符串
      * @return 是不是以空白字符开头
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static boolean startsWithAsciiWhitespace(CharSequence string) {
         if (string == null || string.length() == 0) {
@@ -419,7 +419,7 @@ public abstract class StringTools {
      * 
      * @param string 指定字符串
      * @return 是不是以空白字符结尾
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static boolean endsWithAsciiWhitespace(CharSequence string) {
         if (string == null || string.length() == 0) {
@@ -434,7 +434,7 @@ public abstract class StringTools {
      * 
      * @param c 指定字符
      * @return 是不是空白字符
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static boolean isAsciiWhitespace(char c) {
         // \r=CARRIAGE RETURN,回到行首; \n=LINE FEED,换行; \t=HORIZONTAL TABULATION,水平制表位
@@ -725,7 +725,7 @@ public abstract class StringTools {
      * @param string 源字符串
      * @param patterns 替换规则
      * @return 替换后的字符串
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static String replace(String string, String... patterns) {
         if (string == null || patterns == null || patterns.length == 0) {
@@ -749,7 +749,7 @@ public abstract class StringTools {
      * 
      * @param string 源字符串
      * @param patterns 替换规则
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static void replace(StringBuilder string, String... patterns) {
         if (string == null || patterns == null || patterns.length == 0) {
@@ -770,7 +770,7 @@ public abstract class StringTools {
      * 
      * @param string 源字符串
      * @param patterns 替换规则
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static void replace(StringBuffer string, String... patterns) {
         if (string == null || patterns == null || patterns.length == 0) {
@@ -788,7 +788,7 @@ public abstract class StringTools {
      * 
      * @param string 源字符串
      * @param patterns 替换规则
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static String replace(String string, List<KeyString> patterns) {
         if (string == null || string.length() == 0) {
@@ -808,7 +808,7 @@ public abstract class StringTools {
      * 
      * @param string 源字符串
      * @param patterns 替换规则
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static void replace(StringBuilder string, List<KeyString> patterns) {
         if (string == null || string.length() == 0) {
@@ -832,7 +832,7 @@ public abstract class StringTools {
      * 
      * @param string 源字符串
      * @param patterns 替换规则
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static void replace(StringBuffer string, List<KeyString> patterns) {
         if (string == null || string.length() == 0) {
@@ -857,7 +857,7 @@ public abstract class StringTools {
      * @param string 源字符串
      * @param pattern 替换规则
      * @param replacement 替换目标
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static void replace(StringBuilder string, String pattern, String replacement) {
         if (string == null || string.length() == 0) {
@@ -893,7 +893,7 @@ public abstract class StringTools {
      * @param string 源字符串
      * @param pattern 替换规则
      * @param replacement 替换目标
-	 * @since 5.0.0
+     * @since 5.0.0
      */
     public static void replace(StringBuffer string, String pattern, String replacement) {
         if (string == null || string.length() == 0) {
