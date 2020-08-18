@@ -695,6 +695,29 @@ public abstract class StringTools {
     }
 
     /**
+     * 获取成对符号之间的内容<br>
+     * 如: getSubstringInPairedSymbol("111<!--xxx-->222<!--xxx-->333", "<!--", "-->") 输出 222<br>
+     * 如: getSubstringInPairedSymbol("111/&#42;xxx&#42;/222/&#42;xxx&#42;/333", "/&#42;", "&#42;/") 输出 222<br>
+     * 
+     * @param string 源字符串
+     * @param leftSymbol 左侧的符号
+     * @param rightSymbol 右侧的符号
+     * @return 子字符串, 未找到符号时返回null
+     */
+    public static String getSubstringInPairedSymbol(String string, String leftSymbol, String rightSymbol) {
+        int startIndex = string.indexOf(leftSymbol);
+        if (startIndex < 0) {
+            return null;
+        }
+        startIndex += leftSymbol.length();
+        int endIndex = string.indexOf(rightSymbol, startIndex);
+        if (endIndex < 0) {
+            return null;
+        }
+        return string.substring(startIndex, endIndex);
+    }
+
+    /**
      * 字符串替换(非正则)<br>
      * 例如: \t替换为空格, \r\n替换为\n<br>
      * StringTools.replace("abc\tdef\r\nxyz", "\t", " ", "\r\n", "\n");
