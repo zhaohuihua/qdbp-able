@@ -558,7 +558,15 @@ public abstract class StringTools {
         return buffer.toString();
     }
 
-    /** 删除前缀(删除到指定字符为止), removePrefixAt("userName$Equals", '$') = "Equals" **/
+    /**
+     * 删除前缀(删除到最后一个指定字符为止)<br>
+     * removePrefixAt("userName$Equals", '$') = "Equals"<br>
+     * removePrefixAt("user$Name$Equals", '$') = "Equals"<br>
+     * 
+     * @param string 待处理的字符串
+     * @param c 指定字符
+     * @return 处理后的字符串
+     */
     public static String removePrefixAt(String string, char c) {
         if (string == null) {
             return null;
@@ -567,7 +575,15 @@ public abstract class StringTools {
         return index < 0 ? string : string.substring(index + 1);
     }
 
-    /** 删除后缀(从指定字符开始删除), removeSuffixAt("userName$Equals", '$') = "userName" **/
+    /**
+     * 删除后缀(从第一个指定字符开始删除)<br>
+     * removeSuffixAt("userName$Equals", '$') = "userName"<br>
+     * removeSuffixAt("user$Name$Equals", '$') = "user"<br>
+     * 
+     * @param string 待处理的字符串
+     * @param c 指定字符
+     * @return 处理后的字符串
+     */
     public static String removeSuffixAt(String string, char c) {
         if (string == null) {
             return null;
@@ -576,7 +592,14 @@ public abstract class StringTools {
         return index < 0 ? string : string.substring(0, index);
     }
 
-    /** 删除前缀, removePrefix("userNameEquals", "userName") = "Equals" **/
+    /**
+     * 删除前缀, 如果没有指定的前缀就返回原字符串<br>
+     * removePrefix("userNameEquals", "userName") = "Equals"
+     * 
+     * @param string 待处理的字符串
+     * @param prefix 指定前缀
+     * @return 处理后的字符串
+     */
     public static String removePrefix(String string, String prefix) {
         if (string == null || prefix == null || !string.startsWith(prefix)) {
             return string;
@@ -587,7 +610,14 @@ public abstract class StringTools {
         return string.substring(prefix.length());
     }
 
-    /** 删除后缀, removeSuffix("userNameEquals", "Equals") = "userName" **/
+    /**
+     * 删除后缀, 如果没有指定的后缀就返回原字符串<br>
+     * removeSuffix("userNameEquals", "userName") = "userName"
+     * 
+     * @param string 待处理的字符串
+     * @param suffix 指定后缀
+     * @return 处理后的字符串
+     */
     public static String removeSuffix(String string, String suffix) {
         if (string == null || suffix == null || !string.endsWith(suffix)) {
             return string;
@@ -696,8 +726,8 @@ public abstract class StringTools {
 
     /**
      * 获取成对符号之间的内容<br>
-     * 如: getSubstringInPairedSymbol("111<!--xxx-->222<!--xxx-->333", "<!--", "-->") 输出 222<br>
-     * 如: getSubstringInPairedSymbol("111/&#42;xxx&#42;/222/&#42;xxx&#42;/333", "/&#42;", "&#42;/") 输出 222<br>
+     * 如: getSubstringInPairedSymbol("111<!--222-->333", "<!--", "-->") 输出 222<br>
+     * 如: getSubstringInPairedSymbol("111/&#42;222&#42;/333", "/&#42;", "&#42;/") 输出 222<br>
      * 
      * @param string 源字符串
      * @param leftSymbol 左侧的符号
