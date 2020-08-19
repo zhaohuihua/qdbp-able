@@ -559,40 +559,6 @@ public abstract class StringTools {
     }
 
     /**
-     * 删除前缀(删除到最后一个指定字符为止)<br>
-     * removePrefixAt("userName$Equals", '$') = "Equals"<br>
-     * removePrefixAt("user$Name$Equals", '$') = "Equals"<br>
-     * 
-     * @param string 待处理的字符串
-     * @param c 指定字符
-     * @return 处理后的字符串
-     */
-    public static String removePrefixAt(String string, char c) {
-        if (string == null) {
-            return null;
-        }
-        int index = string.lastIndexOf(c);
-        return index < 0 ? string : string.substring(index + 1);
-    }
-
-    /**
-     * 删除后缀(从第一个指定字符开始删除)<br>
-     * removeSuffixAt("userName$Equals", '$') = "userName"<br>
-     * removeSuffixAt("user$Name$Equals", '$') = "user"<br>
-     * 
-     * @param string 待处理的字符串
-     * @param c 指定字符
-     * @return 处理后的字符串
-     */
-    public static String removeSuffixAt(String string, char c) {
-        if (string == null) {
-            return null;
-        }
-        int index = string.indexOf(c);
-        return index < 0 ? string : string.substring(0, index);
-    }
-
-    /**
      * 删除前缀, 如果没有指定的前缀就返回原字符串<br>
      * removePrefix("userNameEquals", "userName") = "Equals"
      * 
@@ -627,6 +593,76 @@ public abstract class StringTools {
             return "";
         }
         return string.substring(0, end);
+    }
+
+    /**
+     * 删除前缀(删除到最后一个指定字符为止)<br>
+     * removePrefixAt("userName$Equals", '$') = "Equals"<br>
+     * removePrefixAt("user$Name$Equals", '$') = "Equals"<br>
+     * 
+     * @param string 待处理的字符串
+     * @param c 指定字符
+     * @return 处理后的字符串
+     */
+    public static String removePrefixAt(String string, char c) {
+        if (string == null) {
+            return null;
+        }
+        int index = string.lastIndexOf(c);
+        return index < 0 ? string : string.substring(index + 1);
+    }
+
+    /**
+     * 删除前缀(删除到最后一个指定字符串为止)<br>
+     * removePrefixAt("userName$$Equals", "$$") = "Equals"<br>
+     * removePrefixAt("user$$Name$$Equals","$$") = "Equals"<br>
+     * 
+     * @param string 待处理的字符串
+     * @param c 指定字符串
+     * @return 处理后的字符串
+     * @since 5.1.0
+     */
+    public static String removePrefixAt(String string, String c) {
+        if (string == null) {
+            return null;
+        }
+        int index = string.lastIndexOf(c);
+        return index < 0 ? string : string.substring(index + 1);
+    }
+
+    /**
+     * 删除后缀(从第一个指定字符开始删除)<br>
+     * removeSuffixAt("userName$Equals", '$') = "userName"<br>
+     * removeSuffixAt("user$Name$Equals", '$') = "user"<br>
+     * 
+     * @param string 待处理的字符串
+     * @param c 指定字符
+     * @return 处理后的字符串
+     */
+    public static String removeSuffixAt(String string, char c) {
+        if (string == null) {
+            return null;
+        }
+        int index = string.indexOf(c);
+        return index < 0 ? string : string.substring(0, index);
+    }
+
+    /**
+     * 删除后缀(从第一个指定字符串开始删除)<br>
+     * removeSuffixAt("userName$$Equals", "$$") = "userName"<br>
+     * removeSuffixAt("user$$Name$$Equals", "$$") = "user"<br>
+     * 
+     * @param string 待处理的字符串
+     * @param c 指定字符串
+     * @return 处理后的字符串
+     * @since 5.1.0
+     */
+    public static String removeSuffixAt(String string, String c) {
+        if (string == null) {
+            return null;
+        }
+        int index = string.indexOf(c);
+        return index < 0 ? string : string.substring(0, index);
     }
 
     /**
@@ -733,6 +769,7 @@ public abstract class StringTools {
      * @param leftSymbol 左侧的符号
      * @param rightSymbol 右侧的符号
      * @return 子字符串, 未找到符号时返回null
+     * @since 5.0.0
      */
     public static String getSubstringInPairedSymbol(String string, String leftSymbol, String rightSymbol) {
         int startIndex = string.indexOf(leftSymbol);
