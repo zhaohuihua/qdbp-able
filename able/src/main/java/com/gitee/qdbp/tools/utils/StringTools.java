@@ -627,7 +627,7 @@ public abstract class StringTools {
             return null;
         }
         int index = string.lastIndexOf(c);
-        return index < 0 ? string : string.substring(index + 1);
+        return index < 0 ? string : string.substring(index + c.length());
     }
 
     /**
