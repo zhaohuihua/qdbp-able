@@ -600,9 +600,9 @@ public abstract class StringTools {
      * removePrefixAt("userName$Equals", '$') = "Equals"<br>
      * removePrefixAt("user$Name$Equals", '$') = "Equals"<br>
      * 
-     * @param string 待处理的字符串
+     * @param string 源字符串
      * @param c 指定字符
-     * @return 处理后的字符串
+     * @return 处理后的字符串, 如果没有指定字符就返回源字符串
      */
     public static String removePrefixAt(String string, char c) {
         if (string == null) {
@@ -617,9 +617,9 @@ public abstract class StringTools {
      * removePrefixAt("userName$$Equals", "$$") = "Equals"<br>
      * removePrefixAt("user$$Name$$Equals","$$") = "Equals"<br>
      * 
-     * @param string 待处理的字符串
+     * @param string 源字符串
      * @param c 指定字符串
-     * @return 处理后的字符串
+     * @return 处理后的字符串, 如果没有指定字符串就返回源字符串
      * @since 5.1.0
      */
     public static String removePrefixAt(String string, String c) {
@@ -635,9 +635,9 @@ public abstract class StringTools {
      * removeSuffixAt("userName$Equals", '$') = "userName"<br>
      * removeSuffixAt("user$Name$Equals", '$') = "user"<br>
      * 
-     * @param string 待处理的字符串
+     * @param string 源字符串
      * @param c 指定字符
-     * @return 处理后的字符串
+     * @return 处理后的字符串, 如果没有指定字符就返回源字符串
      */
     public static String removeSuffixAt(String string, char c) {
         if (string == null) {
@@ -652,9 +652,9 @@ public abstract class StringTools {
      * removeSuffixAt("userName$$Equals", "$$") = "userName"<br>
      * removeSuffixAt("user$$Name$$Equals", "$$") = "user"<br>
      * 
-     * @param string 待处理的字符串
+     * @param string 源字符串
      * @param c 指定字符串
-     * @return 处理后的字符串
+     * @return 处理后的字符串, 如果没有指定字符串就返回源字符串
      * @since 5.1.0
      */
     public static String removeSuffixAt(String string, String c) {
