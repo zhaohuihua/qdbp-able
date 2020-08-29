@@ -488,6 +488,7 @@ public abstract class ReflectTools {
      * 
      * @param field the field to make accessible
      * @see java.lang.reflect.Field#setAccessible
+     * @since 5.1.0
      */
     public static void makeAccessible(Field field) {
         if (!field.isAccessible() && (!Modifier.isPublic(field.getModifiers())
@@ -505,6 +506,7 @@ public abstract class ReflectTools {
      * 
      * @param method the method to make accessible
      * @see java.lang.reflect.Method#setAccessible
+     * @since 5.1.0
      */
     public static void makeAccessible(Method method) {
         if (!method.isAccessible() && (!Modifier.isPublic(method.getModifiers())
@@ -521,6 +523,7 @@ public abstract class ReflectTools {
      * 
      * @param ctor the constructor to make accessible
      * @see java.lang.reflect.Constructor#setAccessible
+     * @since 5.1.0
      */
     public static void makeAccessible(Constructor<?> ctor) {
         if (!ctor.isAccessible() && (!Modifier.isPublic(ctor.getModifiers())

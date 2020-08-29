@@ -7,6 +7,7 @@ import com.gitee.qdbp.able.matches.StringMatcher.Matches;
  *
  * @author zhaohuihua
  * @version 190601
+ * @since 5.1.0
  */
 public class EqualsFileMatcher extends BaseFileMatcher {
 

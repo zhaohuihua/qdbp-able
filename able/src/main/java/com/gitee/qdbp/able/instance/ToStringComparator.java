@@ -8,7 +8,7 @@ import java.util.Comparator;
  *
  * @author zhaohuihua
  * @version 20200823
- * @since V5.1.0
+ * @since 5.1.0
  */
 public class ToStringComparator implements Comparator<Object>, Serializable {
 

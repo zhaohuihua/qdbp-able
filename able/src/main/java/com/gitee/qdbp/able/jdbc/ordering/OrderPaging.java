@@ -82,7 +82,7 @@ public class OrderPaging extends Paging {
      * @param pageIndex 当前页数
      * @param pageSize 每页行数
      * @return 查询条件
-     * @since V5.0.1
+     * @since 5.1.0
      */
     public static OrderPaging of(int pageIndex, int pageSize) {
         return of(new Paging(pageIndex, pageSize), Orderings.NONE);
@@ -95,7 +95,7 @@ public class OrderPaging extends Paging {
      * @param pageSize 每页行数
      * @param orderings 排序规则
      * @return 查询条件
-     * @since V5.0.1
+     * @since 5.1.0
      */
     public static OrderPaging of(int pageIndex, int pageSize, String orderings) {
         return of(new Paging(pageIndex, pageSize), Orderings.of(orderings));
