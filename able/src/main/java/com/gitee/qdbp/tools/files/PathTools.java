@@ -643,7 +643,8 @@ public abstract class PathTools {
     }
 
     private static URL getClassPathUrl() {
-        return ClassLoader.getSystemResource("");
+        ClassLoader cl = getDefaultClassLoader();
+        return cl != null ? cl.getResource("") : ClassLoader.getSystemResource("");
     }
 
     /**

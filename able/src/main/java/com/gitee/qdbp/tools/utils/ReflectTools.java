@@ -162,7 +162,12 @@ public abstract class ReflectTools {
     public static void setFieldValue(Object target, Field field, Object value) {
         VerifyTools.requireNonNull(target, "target");
         VerifyTools.requireNonNull(field, "field");
+        doSetFieldValue(target, field, value);
+    }
+
+    private static void doSetFieldValue(Object target, Field field, Object value) {
         try {
+            field.setAccessible(true);
             field.set(target, value);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not access field '" + field.getName() + "': " + e.getMessage());
@@ -184,9 +189,9 @@ public abstract class ReflectTools {
             return;
         }
 
-        Object original = ReflectTools.getFieldValue(target, field);
+        Object original = getFieldValue(target, field);
         if (VerifyTools.isBlank(original)) {
-            ReflectTools.setFieldValue(target, field, value);
+            setFieldValue(target, field, value);
         }
     }
 
@@ -198,14 +203,20 @@ public abstract class ReflectTools {
      * @param field 字段对象
      * @return 字段值
      */
-    @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, Field field) {
         VerifyTools.requireNonNull(field, "field");
         if (target == null) {
             return null;
         }
+        return doGetFieldValue(target, field);
+    }
+
+    private static <T> T doGetFieldValue(Object target, Field field) {
         try {
-            return (T) field.get(target);
+            field.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            T value = (T) field.get(target);
+            return value;
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not access field '" + field.getName() + "': " + e.getMessage());
         }
@@ -240,11 +251,7 @@ public abstract class ReflectTools {
             return;
         }
 
-        try {
-            field.set(target, value);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Could not access field '" + fieldName + "': " + e.getMessage());
-        }
+        doSetFieldValue(target, field, value);
     }
 
     /**
@@ -281,9 +288,9 @@ public abstract class ReflectTools {
             return;
         }
 
-        Object original = ReflectTools.getFieldValue(target, field);
+        Object original = getFieldValue(target, field);
         if (VerifyTools.isBlank(original)) {
-            ReflectTools.setFieldValue(target, field, value);
+            setFieldValue(target, field, value);
         }
     }
 
@@ -308,7 +315,6 @@ public abstract class ReflectTools {
      * @return 字段值
      * @param throwOnFieldNotFound 如果字段不存在是否抛出异常
      */
-    @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, String fieldName, boolean throwOnFieldNotFound) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
@@ -318,12 +324,7 @@ public abstract class ReflectTools {
             return null;
         }
 
-        try {
-            field.setAccessible(true);
-            return (T) field.get(target);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Could not access field '" + fieldName + "': " + e.getMessage());
-        }
+        return doGetFieldValue(target, field);
     }
 
     /**
