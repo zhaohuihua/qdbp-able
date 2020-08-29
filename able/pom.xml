@@ -9,6 +9,7 @@
 	</parent>
 
 	<artifactId>qdbp-able</artifactId>
+	<version>5.0.1</version>
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
 	<url>https://gitee.com/qdbp/qdbp-able/</url>
