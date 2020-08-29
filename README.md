@@ -10,11 +10,11 @@ MAVEN仓库地址
     <dependency>
         <groupId>com.gitee.qdbp</groupId>
         <artifactId>qdbp-able</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </dependency>
     <dependency>
         <groupId>com.gitee.qdbp</groupId>
         <artifactId>qdbp-tools</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </dependency>
 ```
