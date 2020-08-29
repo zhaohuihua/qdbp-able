@@ -1,5 +1,6 @@
 package com.gitee.qdbp.tools.utils;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -162,7 +163,12 @@ public abstract class ReflectTools {
     public static void setFieldValue(Object target, Field field, Object value) {
         VerifyTools.requireNonNull(target, "target");
         VerifyTools.requireNonNull(field, "field");
+        doSetFieldValue(target, field, value);
+    }
+
+    private static void doSetFieldValue(Object target, Field field, Object value) {
         try {
+            makeAccessible(field);
             field.set(target, value);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not access field '" + field.getName() + "': " + e.getMessage());
@@ -184,9 +190,9 @@ public abstract class ReflectTools {
             return;
         }
 
-        Object original = ReflectTools.getFieldValue(target, field);
+        Object original = getFieldValue(target, field);
         if (VerifyTools.isBlank(original)) {
-            ReflectTools.setFieldValue(target, field, value);
+            setFieldValue(target, field, value);
         }
     }
 
@@ -198,14 +204,20 @@ public abstract class ReflectTools {
      * @param field 字段对象
      * @return 字段值
      */
-    @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, Field field) {
         VerifyTools.requireNonNull(field, "field");
         if (target == null) {
             return null;
         }
+        return doGetFieldValue(target, field);
+    }
+
+    private static <T> T doGetFieldValue(Object target, Field field) {
         try {
-            return (T) field.get(target);
+            makeAccessible(field);
+            @SuppressWarnings("unchecked")
+            T value = (T) field.get(target);
+            return value;
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Could not access field '" + field.getName() + "': " + e.getMessage());
         }
@@ -240,11 +252,7 @@ public abstract class ReflectTools {
             return;
         }
 
-        try {
-            field.set(target, value);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Could not access field '" + fieldName + "': " + e.getMessage());
-        }
+        doSetFieldValue(target, field, value);
     }
 
     /**
@@ -281,9 +289,9 @@ public abstract class ReflectTools {
             return;
         }
 
-        Object original = ReflectTools.getFieldValue(target, field);
+        Object original = getFieldValue(target, field);
         if (VerifyTools.isBlank(original)) {
-            ReflectTools.setFieldValue(target, field, value);
+            setFieldValue(target, field, value);
         }
     }
 
@@ -308,7 +316,6 @@ public abstract class ReflectTools {
      * @return 字段值
      * @param throwOnFieldNotFound 如果字段不存在是否抛出异常
      */
-    @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, String fieldName, boolean throwOnFieldNotFound) {
         VerifyTools.requireNotBlank(fieldName, "fieldName");
 
@@ -318,12 +325,7 @@ public abstract class ReflectTools {
             return null;
         }
 
-        try {
-            field.setAccessible(true);
-            return (T) field.get(target);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Could not access field '" + fieldName + "': " + e.getMessage());
-        }
+        return doGetFieldValue(target, field);
     }
 
     /**
@@ -476,6 +478,55 @@ public abstract class ReflectTools {
             temp = temp.getSuperclass();
         }
         return ConvertTools.toArray(allSetters, Method.class);
+    }
+
+    /**
+     * Copy from spring ReflectionUtils<br>
+     * Make the given field accessible, explicitly setting it accessible if necessary.<br>
+     * The {@code setAccessible(true)} method is only called when actually necessary, <br>
+     * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
+     * 
+     * @param field the field to make accessible
+     * @see java.lang.reflect.Field#setAccessible
+     */
+    public static void makeAccessible(Field field) {
+        if (!field.isAccessible() && (!Modifier.isPublic(field.getModifiers())
+                || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
+                || Modifier.isFinal(field.getModifiers()))) {
+            field.setAccessible(true);
+        }
+    }
+
+    /**
+     * Copy from spring ReflectionUtils<br>
+     * Make the given method accessible, explicitly setting it accessible if necessary.<br>
+     * The {@code setAccessible(true)} method is only called when actually necessary, <br>
+     * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
+     * 
+     * @param method the method to make accessible
+     * @see java.lang.reflect.Method#setAccessible
+     */
+    public static void makeAccessible(Method method) {
+        if (!method.isAccessible() && (!Modifier.isPublic(method.getModifiers())
+                || !Modifier.isPublic(method.getDeclaringClass().getModifiers()))) {
+            method.setAccessible(true);
+        }
+    }
+
+    /**
+     * Copy from spring ReflectionUtils<br>
+     * Make the given constructor accessible, explicitly setting it accessible if necessary.<br>
+     * The {@code setAccessible(true)} method is only called when actually necessary, <br>
+     * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
+     * 
+     * @param ctor the constructor to make accessible
+     * @see java.lang.reflect.Constructor#setAccessible
+     */
+    public static void makeAccessible(Constructor<?> ctor) {
+        if (!ctor.isAccessible() && (!Modifier.isPublic(ctor.getModifiers())
+                || !Modifier.isPublic(ctor.getDeclaringClass().getModifiers()))) {
+            ctor.setAccessible(true);
+        }
     }
 
     /**
