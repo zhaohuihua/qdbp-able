@@ -37,7 +37,7 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
     // 这里不关注SysUserRole
     // 因此innerJoin(SysUserRole.class, "ur")未指定第3个参数resultField
     // 不会出现在SELECT后面的字段列表中, 也就不会保存查询结果
-    JoyinQueryer&lt;UserRole&gt; query = qdbcBoot.buildJoinQuery(tables, UserRole.class);
+    JoinQueryer&lt;UserRole&gt; query = qdbcBoot.buildJoinQuery(tables, UserRole.class);
     DbWhere where = new DbWhere();
     where.on("u.userCode", "in", userCodes);
     PageList&lt;UserRole&gt; userRoles = query.list(where, OrderPaging.NONE);
@@ -57,7 +57,7 @@ import com.gitee.qdbp.tools.utils.VerifyTools;
     // @formatter:on
     DbWhere where = new DbWhere();
     where.on("u.userId", "=", userId);
-    JoyinQueryer&lt;SysRole&gt; query = qdbcBoot.buildJoinQuery(tables, SysRole.class);
+    JoinQueryer&lt;SysRole&gt; query = qdbcBoot.buildJoinQuery(tables, SysRole.class);
     PageList&lt;SysRole&gt; roles = query.list(where, OrderPaging.NONE);
     log.debug("RolesQueryByUser: {}", JsonTools.toLogString(roles));
  * </pre>
