@@ -1,6 +1,6 @@
 package com.gitee.qdbp.able.matches;
 
-import com.gitee.qdbp.able.matches.WrapStringMatcher.LogicType;
+import com.gitee.qdbp.able.matches.StringMatcher.LogicType;
 import com.gitee.qdbp.tools.utils.StringTools;
 
 public class WrapStringMatcherTest {

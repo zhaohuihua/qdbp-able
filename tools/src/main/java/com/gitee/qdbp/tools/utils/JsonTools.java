@@ -110,6 +110,7 @@ public abstract class JsonTools {
             JSONSerializer serializer = new JSONSerializer(out, JSON_CONFIG);
             serializer.config(SerializerFeature.QuoteFieldNames, false);
             serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
+            serializer.config(SerializerFeature.DisableCircularReferenceDetect, true);
             serializer.write(object);
             return out.toString();
         }
@@ -123,6 +124,7 @@ public abstract class JsonTools {
             JSONSerializer serializer = new JSONSerializer(out, JSON_CONFIG);
             serializer.config(SerializerFeature.QuoteFieldNames, true);
             serializer.config(SerializerFeature.WriteDateUseDateFormat, true);
+            serializer.config(SerializerFeature.DisableCircularReferenceDetect, true);
             serializer.write(object);
             return out.toString();
         }

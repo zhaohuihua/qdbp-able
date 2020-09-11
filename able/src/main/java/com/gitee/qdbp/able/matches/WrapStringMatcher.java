@@ -2,7 +2,9 @@ package com.gitee.qdbp.able.matches;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.gitee.qdbp.tools.utils.ConvertTools;
 import com.gitee.qdbp.tools.utils.StringTools;
+import com.gitee.qdbp.tools.utils.VerifyTools;
 
 /**
  * StringMatcher多规则的包装类
@@ -11,11 +13,6 @@ import com.gitee.qdbp.tools.utils.StringTools;
  * @version 20200229
  */
 public class WrapStringMatcher implements StringMatcher {
-
-    /** 多个匹配规则使用and还是or关联 **/
-    public static enum LogicType {
-        AND, OR
-    }
 
     private List<StringMatcher> matchers;
     /** 多个匹配规则使用and还是or关联 **/
@@ -132,13 +129,16 @@ public class WrapStringMatcher implements StringMatcher {
      * ant:开头的解析为AntStringMatcher<br>
      * equals:开头的解析为EqualsStringMatcher<br>
      * contains:开头的解析为ContainsStringMatcher<br>
+     * starts:开头的解析为StartsStringMatcher<br>
+     * ends:开头的解析为EndsStringMatcher<br>
      * 其余的解析为EqualsStringMatcher<br>
      * 
      * @param pattern 匹配规则
      * @return StringMatcher
      */
     public static StringMatcher parseMatcher(String pattern) {
-        return parseMatcher(pattern, true);
+        VerifyTools.requireNotBlank(pattern, "pattern");
+        return parseMatcher(pattern, "equals");
     }
 
     /**
@@ -147,6 +147,8 @@ public class WrapStringMatcher implements StringMatcher {
      * ant:开头的解析为AntStringMatcher<br>
      * equals:开头的解析为EqualsStringMatcher<br>
      * contains:开头的解析为ContainsStringMatcher<br>
+     * starts:开头的解析为StartsStringMatcher<br>
+     * ends:开头的解析为EndsStringMatcher<br>
      * 其余的, 严格模式下解析为EqualsStringMatcher, 否则解析为ContainsStringMatcher<br>
      * 
      * @param pattern 匹配规则
@@ -154,6 +156,27 @@ public class WrapStringMatcher implements StringMatcher {
      * @return StringMatcher
      */
     public static StringMatcher parseMatcher(String pattern, boolean strict) {
+        VerifyTools.requireNotBlank(pattern, "pattern");
+        return parseMatcher(pattern, strict ? "equals" : "contains");
+    }
+
+    /**
+     * 解析StringMatcher规则<br>
+     * regexp:开头的解析为RegexpStringMatcher<br>
+     * ant:开头的解析为AntStringMatcher<br>
+     * equals:开头的解析为EqualsStringMatcher<br>
+     * contains:开头的解析为ContainsStringMatcher<br>
+     * starts:开头的解析为StartsStringMatcher<br>
+     * ends:开头的解析为EndsStringMatcher<br>
+     * 其余的, 使用defaultMode指定的匹配方式<br>
+     * 
+     * @param pattern 匹配规则
+     * @param defaultMode 默认匹配方式
+     * @return StringMatcher
+     * @since 5.1.1
+     */
+    public static StringMatcher parseMatcher(String pattern, String defaultMode) {
+        VerifyTools.requireNotBlank(pattern, "pattern");
         if (pattern.startsWith("regexp:")) {
             String value = StringTools.removePrefix(pattern, "regexp:");
             return new RegexpStringMatcher(value, Matches.Positive);
@@ -178,12 +201,94 @@ public class WrapStringMatcher implements StringMatcher {
         } else if (pattern.startsWith("contains!:")) {
             String value = StringTools.removePrefix(pattern, "contains!:");
             return new ContainsStringMatcher(value, Matches.Negative);
+        } else if (pattern.startsWith("starts:")) {
+            String value = StringTools.removePrefix(pattern, "starts:");
+            return new StartsStringMatcher(value, Matches.Positive);
+        } else if (pattern.startsWith("starts!:")) {
+            String value = StringTools.removePrefix(pattern, "starts!:");
+            return new StartsStringMatcher(value, Matches.Negative);
+        } else if (pattern.startsWith("ends:")) {
+            String value = StringTools.removePrefix(pattern, "ends:");
+            return new EndsStringMatcher(value, Matches.Positive);
+        } else if (pattern.startsWith("ends!:")) {
+            String value = StringTools.removePrefix(pattern, "contains!:");
+            return new EndsStringMatcher(value, Matches.Negative);
         } else {
-            if (strict) {
+            if ("ant".equals(defaultMode)) {
+                return new AntStringMatcher(pattern, true, Matches.Positive);
+            } else if ("regexp".equals(defaultMode)) {
+                return new RegexpStringMatcher(pattern, Matches.Positive);
+            } else if ("equals".equals(defaultMode)) {
                 return new EqualsStringMatcher(pattern, Matches.Positive);
-            } else {
+            } else if ("contains".equals(defaultMode)) {
                 return new ContainsStringMatcher(pattern, Matches.Positive);
+            } else if ("starts".equals(defaultMode)) {
+                return new StartsStringMatcher(pattern, Matches.Positive);
+            } else if ("ends".equals(defaultMode)) {
+                return new EndsStringMatcher(pattern, Matches.Positive);
+            } else {
+                return new EqualsStringMatcher(pattern, Matches.Positive);
             }
+        }
+    }
+
+    /**
+     * 解析StringMatcher规则列表, 以逗号或换行符分隔<br>
+     * regexp:开头的解析为RegexpStringMatcher<br>
+     * ant:开头的解析为AntStringMatcher<br>
+     * equals:开头的解析为EqualsStringMatcher<br>
+     * contains:开头的解析为ContainsStringMatcher<br>
+     * starts:开头的解析为StartsStringMatcher<br>
+     * ends:开头的解析为EndsStringMatcher<br>
+     * 其余的解析为EqualsStringMatcher<br>
+     * 
+     * @param patterns 匹配规则列表
+     * @param logicType 多个匹配规则使用and还是or关联
+     * @return StringMatcher
+     * @see WrapStringMatcher#parseMatcher(String, String)
+     * @since 5.1.1
+     */
+    public static StringMatcher parseMatchers(String patterns, LogicType logicType) {
+        VerifyTools.requireNotBlank(patterns, "patterns");
+        return parseMatchers(patterns, logicType, "equals", ',', '\n');
+    }
+
+    /**
+     * 解析StringMatcher规则列表<br>
+     * 如: parseMatchers(pattern, Logic.OR, "ant", ',', '\n'); // 默认以ant规则匹配<br>
+     * regexp:开头的解析为RegexpStringMatcher<br>
+     * ant:开头的解析为AntStringMatcher<br>
+     * equals:开头的解析为EqualsStringMatcher<br>
+     * contains:开头的解析为ContainsStringMatcher<br>
+     * starts:开头的解析为StartsStringMatcher<br>
+     * ends:开头的解析为EndsStringMatcher<br>
+     * 其余的, 使用defaultMode指定的匹配方式<br>
+     * 
+     * @param patterns 匹配规则列表
+     * @param defaultMode 默认匹配方式
+     * @param chars 分隔符
+     * @return StringMatcher
+     * @see WrapStringMatcher#parseMatcher(String, String)
+     * @since 5.1.1
+     */
+    public static StringMatcher parseMatchers(String patterns, LogicType logicType, String defaultMode, char... chars) {
+        VerifyTools.requireNotBlank(patterns, "patterns");
+        if (chars == null || chars.length == 0) {
+            chars = new char[] { ',', '\n' };
+        }
+        String[] array = StringTools.split(patterns, chars);
+        List<StringMatcher> matchers = new ArrayList<>();
+        for (String pattern : array) {
+            if (VerifyTools.isNotBlank(pattern)) {
+                matchers.add(parseMatcher(pattern, defaultMode));
+            }
+        }
+        if (matchers.size() == 0) {
+            return null;
+        } else if (matchers.size() == 1) {
+            return matchers.get(0);
+        } else {
+            return new WrapStringMatcher(logicType, ConvertTools.toArray(matchers, StringMatcher.class));
         }
     }
 

@@ -37,6 +37,11 @@ public interface StringMatcher {
         /** 否定模式, 不符合条件为匹配 **/
         Negative
     }
+    
+    /** 逻辑类型: 多个匹配规则使用and还是or关联 **/
+    enum LogicType {
+        AND, OR
+    }
 
     /**
      * Returns <code>true</code> if the given <code>source</code> matches the specified <code>pattern</code>,
