@@ -315,17 +315,16 @@ public abstract class PathTools {
         }
 
         Set<String> locations = new LinkedHashSet<>();
-        ClassLoader cl = getDefaultClassLoader();
         String temp = path;
         if (path.startsWith("/") || path.startsWith("\\")) {
             temp = "." + path; // 通过ClassLoader获取, 如果路径是/开头的, 会获取失败
         }
-        URL resource = cl != null ? cl.getResource(temp) : ClassLoader.getSystemResource(temp);
+        URL resource = getClassLoaderResource(temp);
         if (resource != null) {
             return resource;
         }
 
-        URL root = cl != null ? cl.getResource("") : ClassLoader.getSystemResource("");
+        URL root = getClassPathUrl();
         locations.add(toUriPath(resolve(root, temp)));
         for (Class<?> clazz : VerifyTools.nvl(classes, new Class<?>[0])) {
             // URL url = clazz.getResource(temp); // jar包不在classpath下时会获取失败
@@ -382,7 +381,7 @@ public abstract class PathTools {
     public static List<URL> scanResources(String folder, FileMatcher matcher) throws ResourceNotFoundException {
         Enumeration<URL> roots;
         try {
-            roots = ClassLoader.getSystemClassLoader().getResources(folder);
+            roots = getClassLoaderResources(folder);
         } catch (IOException e) {
             String desc = "Failed to scan resource in [" + folder + "], " + matcher.toString();
             throw new ResourceNotFoundException(desc + ", " + e.getMessage(), e);
@@ -734,8 +733,27 @@ public abstract class PathTools {
         }
     }
 
+    private static URL getClassLoaderResource(String path) {
+        ClassLoader cl = getDefaultClassLoader();
+        String temp = path;
+        if (path.startsWith("/") || path.startsWith("\\")) {
+            temp = "." + path; // 通过ClassLoader获取, 如果路径是/开头的, 会获取失败
+        }
+        return cl != null ? cl.getResource(temp) : ClassLoader.getSystemResource(temp);
+    }
+
+    private static Enumeration<URL> getClassLoaderResources(String path) throws IOException {
+        ClassLoader cl = getDefaultClassLoader();
+        String temp = path;
+        if (path.startsWith("/") || path.startsWith("\\")) {
+            temp = "." + path; // 通过ClassLoader获取, 如果路径是/开头的, 会获取失败
+        }
+        return cl != null ? cl.getResources(temp) : ClassLoader.getSystemResources(temp);
+    }
+
     private static URL getClassPathUrl() {
-        return ClassLoader.getSystemResource("");
+        ClassLoader cl = getDefaultClassLoader();
+        return cl != null ? cl.getResource("") : ClassLoader.getSystemResource("");
     }
 
     /**
